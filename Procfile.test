@@ -1,0 +1,1 @@
+oxigraph-test: oxigraph_server --location db/test serve --bind localhost:7879

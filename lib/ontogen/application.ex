@@ -1,20 +1,21 @@
 defmodule Ontogen.Application do
-  # See https://hexdocs.pm/elixir/Application.html
-  # for more information on OTP Applications
   @moduledoc false
 
   use Application
 
   @impl true
-  def start(_type, _args) do
+  def start(_type, args) do
     children = [
-      # Starts a worker by calling: Ontogen.Worker.start_link(arg)
-      # {Ontogen.Worker, arg}
+      {Ontogen.Local.Config, local_config_load_paths(args)}
     ]
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Ontogen.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  def local_config_load_paths(args) do
+    Keyword.get(args, :config_load_paths) ||
+      Application.get_env(:ontogen, :config_load_paths) ||
+      Ontogen.Local.Config.default_load_paths()
   end
 end

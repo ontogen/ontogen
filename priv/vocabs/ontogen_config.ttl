@@ -1,0 +1,40 @@
+@prefix : <https://w3id.org/ontogen/config#> .
+@prefix og: <https://w3id.org/ontogen#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+:Config a rdfs:Class
+    ; rdfs:label "Ontogen config"
+.
+
+    :agent a rdf:Property
+        ; rdfs:domain :Config
+        ; rdfs:range og:Agent
+    .
+
+    :store a rdf:Property
+        ; rdfs:domain :Config
+        ; rdfs:range :Store
+    .
+
+:Store a rdfs:Class
+    ; rdfs:label "Store"
+.
+
+    :queryEndpoint a rdf:Property
+        ; rdfs:domain :Store
+    .
+
+    :updateEndpoint a rdf:Property
+        ; rdfs:domain :Store
+    .
+
+    :graphStoreEndpoint a rdf:Property
+        ; rdfs:domain :Store
+    .
+
+:OxigraphStore a rdfs:Class
+    ; rdfs:subClassOf :Store
+    ; rdfs:label "Oxigraph store"
+.
+

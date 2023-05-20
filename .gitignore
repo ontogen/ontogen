@@ -25,6 +25,9 @@ ontogen-*.tar
 # Temporary files, for example, from tests.
 /tmp/
 
+# The directory to keep the dbs used during development.
+/db/
+
 # Dialyzer
 /priv/plts/*.plt
 /priv/plts/*.plt.hash

@@ -1,0 +1,11 @@
+@prefix ogc: <https://w3id.org/ontogen/config#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+_:_LocalConfig a ogc:Config
+    ; ogc:agent <http://example.com/Agent>
+.
+
+<http://example.com/Agent>
+      foaf:name "John Doe" ;
+      foaf:mbox <mailto:john.doe@example.com>
+.

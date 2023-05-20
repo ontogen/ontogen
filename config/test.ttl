@@ -1,0 +1,18 @@
+@prefix ogc: <https://w3id.org/ontogen/config#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+_:_LocalConfig a ogc:Config
+    ; ogc:agent <http://marcelotto.net/me#>
+    ; ogc:store _:LocalOxigraph
+.
+
+_:LocalOxigraph a ogc:OxigraphStore
+    ; ogc:queryEndpoint "http://localhost:7879/query"
+    ; ogc:updateEndpoint "http://localhost:7879/update"
+    ; ogc:graphStoreEndpoint "http://localhost:7879/store"
+.
+
+<http://example.com/ontogen/user#me> a ogc:Agent
+    ; foaf:name "Jane Doe"
+    ; foaf:mbox <mailto:jane.doe@example.com>
+.

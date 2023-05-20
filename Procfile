@@ -1,0 +1,1 @@
+oxigraph: oxigraph_server --location db/dev serve --bind localhost:7878

@@ -2,7 +2,9 @@
   configs: [
     %{
       name: "default",
-      checks: []
+      checks: [
+        {Credo.Check.Design.TagTODO, false}
+      ]
     }
   ]
 }

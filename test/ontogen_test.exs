@@ -1,8 +1,5 @@
 defmodule OntogenTest do
-  use ExUnit.Case
-  doctest Ontogen
+  use Ontogen.Test.Case
 
-  test "greets the world" do
-    assert Ontogen.hello() == :world
-  end
+  doctest Ontogen
 end
