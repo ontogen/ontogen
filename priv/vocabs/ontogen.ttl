@@ -7,7 +7,31 @@
 @prefix dcat: <http://www.w3.org/ns/dcat#> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 
+###############################################################################
+
 og:Agent a rdfs:Class
     ; rdfs:subClassOf prov:Agent, foaf:Agent
     ; rdfs:label "Agent"
 .
+
+###############################################################################
+
+og:Repository a rdfs:Class
+    ; rdfs:label "Ontogen repository"
+.
+
+    og:dataset a rdf:Property
+            ; rdfs:domain og:Repository
+            ; rdfs:range  dcat:Dataset
+    .
+
+    og:provGraph a rdf:Property
+            ; rdfs:domain og:Repository
+            ; rdfs:range  og:ProvGraph
+    .
+
+og:ProvGraph a rdfs:Class
+    ; rdfs:subClassOf prov:Bundle
+    ; rdfs:label "Ontogen provenance graph"
+.
+

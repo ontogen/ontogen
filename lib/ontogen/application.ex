@@ -3,19 +3,33 @@ defmodule Ontogen.Application do
 
   use Application
 
+  alias Ontogen.Local
+
+  @mix_env Mix.env()
+
   @impl true
   def start(_type, args) do
-    children = [
-      {Ontogen.Local.Config, local_config_load_paths(args)}
-    ]
-
-    opts = [strategy: :one_for_one, name: Ontogen.Supervisor]
-    Supervisor.start_link(children, opts)
+    @mix_env
+    |> children(args)
+    |> Supervisor.start_link(strategy: :one_for_one, name: Ontogen.Supervisor)
   end
 
-  def local_config_load_paths(args) do
+  defp children(:test, args) do
+    [
+      {Local.Config, local_config_load_paths(args)}
+    ]
+  end
+
+  defp children(_, args) do
+    [
+      {Local.Config, local_config_load_paths(args)},
+      {Local.Repo, Keyword.get(args, :repo_args, [])}
+    ]
+  end
+
+  defp local_config_load_paths(args) do
     Keyword.get(args, :config_load_paths) ||
       Application.get_env(:ontogen, :config_load_paths) ||
-      Ontogen.Local.Config.default_load_paths()
+      Local.Config.default_load_paths()
   end
 end

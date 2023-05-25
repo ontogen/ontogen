@@ -33,3 +33,5 @@ ontogen-*.tar
 /priv/plts/*.plt.hash
 
 .tool-versions*
+
+/.ontogen_repo_dev

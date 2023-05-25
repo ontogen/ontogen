@@ -1,7 +1,7 @@
 defmodule Ontogen.Local.Config.Loader do
   @moduledoc false
 
-  alias Ontogen.Local.Config
+  alias Ontogen.Local.{Config, ConfigError}
   alias RDF.Graph
 
   @node RDF.bnode("_LocalConfig")
@@ -9,13 +9,16 @@ defmodule Ontogen.Local.Config.Loader do
 
   def load_config(load_paths) do
     with {:ok, graph} <- load_config_graphs(load_paths) do
-      Config.load(graph, @node)
+      case Config.load(graph, @node) do
+        {:ok, _} = ok -> ok
+        {:error, error} -> {:error, ConfigError.exception(reason: error)}
+      end
     end
   end
 
   defp load_config_graphs(load_paths) do
     case do_load_config_graphs(List.wrap(load_paths), nil) do
-      nil -> {:error, "no config files found"}
+      nil -> {:error, ConfigError.exception(reason: :missing)}
       %Graph{} = graph -> {:ok, graph}
       error -> error
     end
@@ -28,7 +31,7 @@ defmodule Ontogen.Local.Config.Loader do
       case RDF.read_file(path) do
         {:ok, graph} when is_nil(acc) -> do_load_config_graphs(rest, graph)
         {:ok, graph} -> do_load_config_graphs(rest, Graph.put_properties(acc, graph))
-        {:error, error} -> {:error, "error reading config file #{path}: #{error}"}
+        {:error, error} -> {:error, ConfigError.exception(file: path, reason: error)}
       end
     else
       do_load_config_graphs(rest, acc)
