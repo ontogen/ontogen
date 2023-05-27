@@ -5,8 +5,11 @@ defmodule Ontogen.TestFactories do
 
   use RDF
 
-  alias Ontogen.{Agent, Store}
+  alias Ontogen.{Agent, Store, Expression, Utterance}
   alias Ontogen.Local.Config
+
+  alias Ontogen.TestNamespaces.EX
+  @compile {:no_warn_undefined, Ontogen.TestNamespaces.EX}
 
   def id(resource) when is_rdf_resource(resource), do: resource
   def id(iri) when is_binary(iri), do: RDF.iri(iri)
@@ -17,6 +20,10 @@ defmodule Ontogen.TestFactories do
   def id(:dataset), do: ~I<http://example.com/test/dataset>
   def id(:prov_graph), do: ~I<http://example.com/test/prov_graph>
   def id(:store), do: ~I<http://example.com/Store>
+  def id(:expression), do: expression().__id__
+  def id(:utterance), do: ~I<urn:uuid:633ae13d-b157-42bf-b8df-4d5276c77bef>
+
+  def datetime, do: ~U[2023-05-26 13:02:02.255559Z]
 
   def local_config(id \\ :config, attrs \\ [])
 
@@ -108,6 +115,46 @@ defmodule Ontogen.TestFactories do
       query_endpoint: "http://localhost:1234/query",
       update_endpoint: "http://localhost:1234/update",
       graph_store_endpoint: "http://localhost:1234/store"
+    ]
+    |> Keyword.merge(attrs)
+  end
+
+  @graph [
+           EX.S1 |> EX.p1(EX.O1),
+           EX.S2 |> EX.p2(EX.O2)
+         ]
+         |> RDF.graph()
+  def graph, do: @graph
+
+  def expression do
+    Expression.new!(graph())
+  end
+
+  def utterance(id \\ :utterance, attrs \\ [])
+
+  def utterance(:auto, attrs) do
+    attrs
+    |> utterance_attrs()
+    |> Utterance.new!()
+  end
+
+  def utterance(id, attrs) when is_atom(id) do
+    id |> id() |> utterance(attrs)
+  end
+
+  def utterance(id, attrs) do
+    attrs
+    |> utterance_attrs()
+    |> Keyword.put_new(:id, id)
+    |> Utterance.new!()
+  end
+
+  def utterance_attrs(attrs \\ []) do
+    [
+      insertion: graph(),
+      was_associated_with: agent(),
+      data_source: dataset(),
+      ended_at: datetime()
     ]
     |> Keyword.merge(attrs)
   end

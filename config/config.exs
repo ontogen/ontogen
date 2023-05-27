@@ -1,5 +1,8 @@
 import Config
 
+config :ontogen,
+  grax_id_spec: Ontogen.IdSpec
+
 config :tesla, adapter: Tesla.Adapter.Hackney
 
 config :sparql_client,
