@@ -3,6 +3,7 @@ defmodule Ontogen.Commands.CreateRepoTest do
 
   doctest Ontogen.Commands.CreateRepo
 
+  alias Ontogen.{Dataset, ProvGraph}
   alias Ontogen.Commands.{CreateRepo, RepoInfo}
 
   test "creates graphs for the given repo" do
@@ -22,8 +23,8 @@ defmodule Ontogen.Commands.CreateRepoTest do
 
     expected_repo =
       Ontogen.Repository.build!(repo_id,
-        dataset: DCAT.Dataset.build!(base_uri <> "/custom_dataset_id"),
-        prov_graph: Ontogen.ProvGraph.build!(base_uri <> "/custom_prov_graph_id")
+        dataset: Dataset.build!(base_uri <> "/custom_dataset_id"),
+        prov_graph: ProvGraph.build!(base_uri <> "/custom_prov_graph_id")
       )
 
     assert CreateRepo.call(Local.store(),

@@ -5,7 +5,7 @@ defmodule Ontogen.TestFactories do
 
   use RDF
 
-  alias Ontogen.{Agent, Store, Expression, Utterance}
+  alias Ontogen.{Repository, Dataset, ProvGraph, Agent, Store, Expression, Utterance}
   alias Ontogen.Local.Config
 
   alias Ontogen.TestNamespaces.EX
@@ -62,7 +62,7 @@ defmodule Ontogen.TestFactories do
   def repository(id \\ :repository, attrs \\ []) do
     id
     |> id()
-    |> Ontogen.Repository.build!(repository_attrs(attrs))
+    |> Repository.build!(repository_attrs(attrs))
   end
 
   def repository_attrs(attrs \\ []) do
@@ -76,7 +76,7 @@ defmodule Ontogen.TestFactories do
   def dataset(id \\ :dataset, attrs \\ []) do
     id
     |> id()
-    |> DCAT.Dataset.build!(dataset_attrs(attrs))
+    |> Dataset.build!(dataset_attrs(attrs))
   end
 
   def dataset_attrs(attrs \\ []) do
@@ -89,7 +89,7 @@ defmodule Ontogen.TestFactories do
   def prov_graph(id \\ :prov_graph, attrs \\ []) do
     id
     |> id()
-    |> Ontogen.ProvGraph.build!(prov_graph_attrs(attrs))
+    |> ProvGraph.build!(prov_graph_attrs(attrs))
   end
 
   def prov_graph_attrs(attrs \\ []) do

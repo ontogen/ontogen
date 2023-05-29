@@ -1,5 +1,5 @@
 defmodule Ontogen.Commands.CreateRepo do
-  alias Ontogen.{Repository, ProvGraph, Store, InvalidRepoSpecError}
+  alias Ontogen.{Repository, Dataset, ProvGraph, Store, InvalidRepoSpecError}
   alias RDF.IRI
 
   def call(store, %Repository{} = repository) do
@@ -19,7 +19,7 @@ defmodule Ontogen.Commands.CreateRepo do
 
   defp dataset(repo_spec) do
     case Keyword.get(repo_spec, :dataset) do
-      %DCAT.Dataset{} = dataset -> Grax.validate(dataset)
+      %Dataset{} = dataset -> Grax.validate(dataset)
       nil -> {:error, InvalidRepoSpecError.exception(reason: "missing dataset spec")}
       spec -> build_dataset(spec)
     end
@@ -31,8 +31,8 @@ defmodule Ontogen.Commands.CreateRepo do
 
   defp build_dataset(spec) when is_list(spec) do
     case Keyword.pop(spec, :id) do
-      {nil, spec} -> DCAT.Dataset.build(spec)
-      {id, spec} -> DCAT.Dataset.build(id, spec)
+      {nil, spec} -> Dataset.build(spec)
+      {id, spec} -> Dataset.build(id, spec)
     end
   end
 
