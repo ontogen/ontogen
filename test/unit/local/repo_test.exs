@@ -2,9 +2,10 @@ defmodule Ontogen.Local.RepoTest do
   use Ontogen.Store.Test.Case
 
   doctest Ontogen.Local.Repo
-  alias Ontogen.Local.Repo
-  alias Ontogen.Commands.CreateRepo
 
+  alias Ontogen.Local.Repo
+  alias Ontogen.Local.Repo.NotReadyError
+  alias Ontogen.Commands.CreateRepo
   import ExUnit.CaptureIO
 
   describe "init" do
@@ -13,9 +14,9 @@ defmodule Ontogen.Local.RepoTest do
                "Repo not specified"
 
       assert Repo.status() == :no_repo
-      assert Repo.repository() == nil
-      assert Repo.dataset() == nil
-      assert Repo.prov_graph() == nil
+      assert Repo.repository() == {:error, %NotReadyError{operation: :repository}}
+      assert Repo.dataset_info() == {:error, %NotReadyError{operation: :dataset_info}}
+      assert Repo.prov_graph_info() == {:error, %NotReadyError{operation: :prov_graph_info}}
     end
 
     test "when the repo does not exist" do
@@ -23,9 +24,9 @@ defmodule Ontogen.Local.RepoTest do
                "Repo not found"
 
       assert Repo.status() == :no_repo
-      assert Repo.repository() == nil
-      assert Repo.dataset() == nil
-      assert Repo.prov_graph() == nil
+      assert Repo.repository() == {:error, %NotReadyError{operation: :repository}}
+      assert Repo.dataset_info() == {:error, %NotReadyError{operation: :dataset_info}}
+      assert Repo.prov_graph_info() == {:error, %NotReadyError{operation: :prov_graph_info}}
     end
 
     test "when the repo does exist" do
@@ -36,8 +37,8 @@ defmodule Ontogen.Local.RepoTest do
 
       assert Repo.status() == :ready
       assert Repo.repository() == repository
-      assert Repo.dataset() == repository.dataset
-      assert Repo.prov_graph() == repository.prov_graph
+      assert Repo.dataset_info() == repository.dataset
+      assert Repo.prov_graph_info() == repository.prov_graph
     end
   end
 
@@ -51,8 +52,8 @@ defmodule Ontogen.Local.RepoTest do
 
       assert Repo.status() == :ready
       assert Repo.repository() == repository
-      assert Repo.dataset() == repository.dataset
-      assert Repo.prov_graph() == repository.prov_graph
+      assert Repo.dataset_info() == repository.dataset
+      assert Repo.prov_graph_info() == repository.prov_graph
     end
 
     test "when the repo already exists" do

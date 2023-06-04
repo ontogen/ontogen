@@ -12,7 +12,7 @@ defmodule Ontogen.Local.Repo.Initializer do
 
   def repository(opts) do
     with {:ok, repo_id} <- repo_id(opts) do
-      Commands.RepoInfo.call(store(opts), repo_id)
+      Commands.RepoInfo.call(store(opts), repo_id, depth: 1)
     end
   end
 

@@ -5,16 +5,25 @@ defmodule Ontogen.TestFactories do
 
   use RDF
 
-  alias Ontogen.{Repository, Dataset, ProvGraph, Agent, Store, Expression, Utterance}
+  alias Ontogen.{
+    Repository,
+    Dataset,
+    ProvGraph,
+    Agent,
+    Store,
+    Expression,
+    Utterance
+  }
+
   alias Ontogen.Local.Config
 
   alias Ontogen.TestNamespaces.EX
   @compile {:no_warn_undefined, Ontogen.TestNamespaces.EX}
 
-  def id(resource) when is_rdf_resource(resource), do: resource
-  def id(iri) when is_binary(iri), do: RDF.iri(iri)
   def id(:config), do: RDF.bnode("_LocalConfig")
   def id(:agent), do: ~I<http://example.com/Agent>
+  def id(:agent_john), do: ~I<http://example.com/Agent/john_doe>
+  def id(:agent_jane), do: ~I<http://example.com/Agent/jane_doe>
   def id(:repository), do: ~I<http://example.com/test/repo>
   def id(:repo), do: id(:repository)
   def id(:dataset), do: ~I<http://example.com/test/dataset>
@@ -22,6 +31,8 @@ defmodule Ontogen.TestFactories do
   def id(:store), do: ~I<http://example.com/Store>
   def id(:expression), do: expression().__id__
   def id(:utterance), do: ~I<urn:uuid:633ae13d-b157-42bf-b8df-4d5276c77bef>
+  def id(resource) when is_rdf_resource(resource), do: resource
+  def id(iri) when is_binary(iri), do: RDF.iri(iri)
 
   def datetime, do: ~U[2023-05-26 13:02:02.255559Z]
 
@@ -45,13 +56,23 @@ defmodule Ontogen.TestFactories do
     |> Keyword.merge(attrs)
   end
 
-  def agent(id \\ :agent, attrs \\ []) do
+  def agent(id \\ :agent_john, attrs \\ []) do
     id
     |> id()
-    |> Agent.build!(agent_attrs(attrs))
+    |> Agent.build!(agent_attrs(id, attrs))
   end
 
-  def agent_attrs(attrs \\ []) do
+  def agent_attrs(agent, attrs \\ [])
+
+  def agent_attrs(:agent_jane, attrs) do
+    [
+      name: "Jane Doe",
+      mbox: ~I<mailto:jane.doe@example.com>
+    ]
+    |> Keyword.merge(attrs)
+  end
+
+  def agent_attrs(_, attrs) do
     [
       name: "John Doe",
       mbox: ~I<mailto:john.doe@example.com>

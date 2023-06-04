@@ -16,6 +16,7 @@ defmodule Ontogen.Test.Case do
       import unquote(__MODULE__)
       import RDF, only: [iri: 1, literal: 1, bnode: 1]
       import Ontogen.TestFactories
+      import Ontogen.TestUtils
 
       alias Ontogen.TestNamespaces.EX
       @compile {:no_warn_undefined, Ontogen.TestNamespaces.EX}

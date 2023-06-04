@@ -6,29 +6,60 @@ defmodule Ontogen.Local.Repo do
   use GenServer
 
   alias Ontogen.Local.Repo.{Initializer, NotReadyError}
+  alias Ontogen.Commands.{RepoInfo, Commit, FetchDataset, FetchProvGraph}
 
   def start_link(args) do
     GenServer.start_link(__MODULE__, args, name: __MODULE__)
-  end
-
-  def create(repo_spec, opts \\ []) do
-    GenServer.call(__MODULE__, {:create, repo_spec, opts})
   end
 
   def status do
     GenServer.call(__MODULE__, :status)
   end
 
+  def store do
+    GenServer.call(__MODULE__, :store)
+  end
+
   def repository do
     GenServer.call(__MODULE__, :repository)
   end
 
-  def dataset do
-    GenServer.call(__MODULE__, :dataset)
+  def dataset_info do
+    GenServer.call(__MODULE__, :dataset_info)
   end
 
-  def prov_graph do
-    GenServer.call(__MODULE__, :prov_graph)
+  def prov_graph_info do
+    GenServer.call(__MODULE__, :prov_graph_info)
+  end
+
+  def fetch_dataset do
+    # We're not performing the store access inside of the GenServer,
+    # because we don't wont to block it for this potentially large read access.
+    # Also, we don't to pass the potentially large data structure between processes.
+    FetchDataset.call(store(), repository())
+  end
+
+  def fetch_prov_graph do
+    # We're not performing the store access inside of the GenServer,
+    # because we don't wont to block it for this potentially large read access.
+    # Also, we don't to pass the potentially large data structure between processes.
+    FetchProvGraph.call(store(), repository())
+  end
+
+  def reload do
+    GenServer.call(__MODULE__, :reload)
+  end
+
+  def create(repo_spec, opts \\ []) do
+    GenServer.call(__MODULE__, {:create, repo_spec, opts})
+  end
+
+  def commit(args) do
+    GenServer.call(__MODULE__, {:commit, args})
+  end
+
+  def head do
+    GenServer.call(__MODULE__, :head)
   end
 
   # Server (callbacks)
@@ -60,25 +91,14 @@ defmodule Ontogen.Local.Repo do
     {:reply, status, state}
   end
 
-  def handle_call(:repository, _from, %{repository: repository} = state) do
-    {:reply, repository, state}
-  end
-
-  def handle_call(:dataset, _from, %{repository: repository} = state) do
-    {:reply, repository && repository.dataset, state}
-  end
-
-  def handle_call(:prov_graph, _from, %{repository: repository} = state) do
-    {:reply, repository && repository.prov_graph, state}
+  def handle_call(:store, _from, %{store: store} = state) do
+    {:reply, store, state}
   end
 
   def handle_call({:create, repo_spec, opts}, _from, %{store: store, status: :no_repo} = state) do
     case Initializer.create_repo(store, repo_spec, opts) do
-      {:ok, repository} ->
-        {:reply, {:ok, repository}, %{state | repository: repository, status: :ready}}
-
-      error ->
-        {:reply, error, state}
+      {:ok, repo} -> {:reply, {:ok, repo}, %{state | repository: repo, status: :ready}}
+      error -> {:reply, error, state}
     end
   end
 
@@ -88,5 +108,35 @@ defmodule Ontogen.Local.Repo do
 
   def handle_call(operation, _from, %{status: :no_repo} = state) do
     {:reply, {:error, NotReadyError.exception(operation: operation)}, state}
+  end
+
+  def handle_call(:reload, _from, %{store: store, repository: repository} = state) do
+    case RepoInfo.call(store, repository.__id__) do
+      {:ok, repo} -> {:reply, {:ok, repo}, %{state | repository: repo}}
+      error -> {:reply, error, state}
+    end
+  end
+
+  def handle_call(:repository, _from, %{repository: repo} = state) do
+    {:reply, repo, state}
+  end
+
+  def handle_call(:dataset_info, _from, %{repository: repo} = state) do
+    {:reply, repo && repo.dataset, state}
+  end
+
+  def handle_call(:prov_graph_info, _from, %{repository: repo} = state) do
+    {:reply, repo && repo.prov_graph, state}
+  end
+
+  def handle_call(:head, _from, %{repository: repo} = state) do
+    {:reply, repo && repo.dataset.head, state}
+  end
+
+  def handle_call({:commit, args}, _from, %{repository: repo, store: store} = state) do
+    case Commit.call(store, repo, args) do
+      {:ok, repo, commit} -> {:reply, {:ok, commit}, %{state | repository: repo}}
+      error -> {:reply, error, state}
+    end
   end
 end

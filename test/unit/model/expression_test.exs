@@ -8,7 +8,7 @@ defmodule Ontogen.ExpressionTest do
   describe "new/1" do
     test "with a graph of statements" do
       assert {:ok, %Expression{} = expression} = Expression.new(graph())
-      assert expression.__id__ == Expression.hash_iri!(graph())
+      assert expression.__id__ == Ontogen.IdUtils.dataset_hash_iri(graph())
     end
 
     test "without statements" do

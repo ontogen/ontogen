@@ -43,6 +43,11 @@ og:Dataset a rdfs:Class
         ; skos:scopeNote "This property MAY be used only in addition to its inverse, and it MUST NOT be used to replace it."@en ;
     .
 
+    og:head a rdf:Property
+        ; rdfs:domain og:Dataset
+        ; rdfs:range  og:Commit
+    .
+
 og:ProvGraph a rdfs:Class
     ; rdfs:subClassOf prov:Bundle
     ; rdfs:label "Ontogen provenance graph"
@@ -60,12 +65,12 @@ og:Utterance a rdfs:Class
         ; rdfs:range  dcat:Dataset
     .
 
-    og:insertion a rdf:Property
+    og:insertion a rdf:Property, owl:FunctionalProperty
         ; rdfs:domain og:Utterance
         ; rdfs:range  og:Expression
     .
 
-    og:deletion a rdf:Property
+    og:deletion a rdf:Property, owl:FunctionalProperty
         ; rdfs:domain og:Utterance
         ; rdfs:range  og:Expression
     .
@@ -76,3 +81,38 @@ og:Expression a rdfs:Class
     ; rdfs:label "Ontogen expression"
     ; rdfs:comment "A set of RDF statements independent of an occurrence in a utterance."
 .
+
+og:Commit a rdfs:Class
+    ; rdfs:subClassOf prov:Activity
+    ; rdfs:label "Ontogen commit"
+.
+
+    og:committedInsertion a rdf:Property,
+                            owl:FunctionalProperty
+        ; rdfs:subPropertyOf prov:used
+        ; rdfs:domain og:Commit
+        ; rdfs:range  og:Expression
+    .
+
+    og:committedDeletion a rdf:Property,
+                           owl:FunctionalProperty
+        ; rdfs:subPropertyOf prov:used
+        ; rdfs:domain og:Commit
+        ; rdfs:range  og:Expression
+    .
+
+    og:parentCommit a rdf:Property
+        ; rdfs:domain og:Commit
+        ; rdfs:range  og:Commit
+    .
+
+    og:committer a rdf:Property
+        ; rdfs:subPropertyOf prov:wasAssociatedWith
+        ; rdfs:domain og:Commit
+        ; rdfs:range  og:Agent
+    .
+
+    og:commitMessage a rdf:Property
+        ; rdfs:domain og:Commit
+        ; rdfs:range  rdfs:Literal
+    .

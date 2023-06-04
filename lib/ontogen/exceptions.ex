@@ -29,6 +29,17 @@ defmodule Ontogen.InvalidRepoSpecError do
   end
 end
 
+defmodule Ontogen.InvalidCommitError do
+  @moduledoc """
+  Raised on invalid `Ontogen.Commit` args
+  """
+  defexception [:reason]
+
+  def message(%{reason: reason}) do
+    "Invalid commit: #{reason}"
+  end
+end
+
 defmodule Ontogen.Local.Repo.NotReadyError do
   @moduledoc """
   Raised when trying to perform an operation on a repo when it is not ready,

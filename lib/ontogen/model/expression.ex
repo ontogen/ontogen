@@ -1,17 +1,18 @@
 defmodule Ontogen.Expression do
   use Grax.Schema
-  use RDF
 
   alias Ontogen.NS.Og
   alias RTC.Compound
   alias RDF.Graph
+
+  import Ontogen.IdUtils
 
   schema Og.Expression do
     field :statements
   end
 
   def new(statements) do
-    with {:ok, id} <- hash_iri(statements) do
+    if id = dataset_hash_iri(statements) do
       build(id,
         statements:
           Compound.new(statements, id,
@@ -19,6 +20,8 @@ defmodule Ontogen.Expression do
             assertion_mode: :unasserted
           )
       )
+    else
+      {:error, :no_statements}
     end
   end
 
@@ -54,30 +57,5 @@ defmodule Ontogen.Expression do
 
   def graph(%__MODULE__{statements: compound}) do
     Compound.graph(compound)
-  end
-
-  def hash_iri(statements) do
-    with {:ok, hash} <- hash(statements) do
-      {:ok, ~i<urn:hash::sha256:#{hash}>}
-    end
-  end
-
-  def hash_iri!(statements) do
-    case hash_iri(statements) do
-      {:ok, id} -> id
-      {:error, error} -> raise error
-    end
-  end
-
-  def hash(statements) do
-    graph = RDF.graph(statements)
-
-    if Graph.empty?(graph) do
-      {:error, :no_statements}
-    else
-      {:ok,
-       :crypto.hash(:sha256, NQuads.write_string!(graph))
-       |> Base.encode16(case: :lower)}
-    end
   end
 end

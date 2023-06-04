@@ -2,22 +2,23 @@ defmodule Ontogen.Commands.RepoInfo do
   alias Ontogen.{Repository, Store}
   alias RDF.Graph
 
-  @preloading_depth 3
+  @default_preloading_depth 2
 
-  def call(store, repo_id) do
+  def call(store, repo_id, opts \\ []) do
     with {:ok, graph} <- Store.query(store, repo_id, query(repo_id)) do
       if Graph.describes?(graph, repo_id) do
-        Repository.load(graph, repo_id, depth: @preloading_depth)
+        Repository.load(graph, repo_id,
+          depth: Keyword.get(opts, :depth, @default_preloading_depth)
+        )
       else
         {:error, :repo_not_found}
       end
     end
   end
 
-  defp query(repo_id) do
+  defp query(_repo_id) do
     """
     CONSTRUCT { ?s ?p ?o }
-    FROM      <#{repo_id}>
     WHERE     { ?s ?p ?o }
     """
   end

@@ -5,12 +5,19 @@ defmodule Ontogen.Commands.CreateUtterance do
 
   alias Ontogen.{Local, Utterance}
 
+  def call(%Utterance{} = utterance) do
+    Grax.validate(utterance)
+  end
+
   def call(args) do
     args
     |> Keyword.put_new(:was_associated_with, Local.agent())
     |> Keyword.put_new(:ended_at, DateTime.utc_now())
     |> Utterance.new()
-    |> case do
+  end
+
+  def call!(args) do
+    case call(args) do
       {:ok, utterance} -> utterance
       {:error, error} -> raise error
     end

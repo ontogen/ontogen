@@ -85,6 +85,7 @@ defmodule Ontogen.Store.Oxigraph do
   defp graph_opt(:update, true), do: :using_named_graph
 
   defp set_graph(data, nil), do: data
+  defp set_graph(data, :default), do: data
 
   defp set_graph(%Graph{} = data, graph_name),
     do: data |> Graph.change_name(graph_name) |> Dataset.new()
