@@ -9,9 +9,9 @@ defmodule Ontogen.Commit.Id do
 
   def content(commit) do
     [
-      if(commit.parent, do: "parent #{to_id(commit.parent)}"),
-      if(commit.insertion, do: "insertion #{to_id(commit.insertion)}"),
-      if(commit.deletion, do: "deletion #{to_id(commit.deletion)}"),
+      if(commit.parent, do: "parent #{to_hash(commit.parent)}"),
+      if(commit.insertion, do: "insertion #{to_hash(commit.insertion)}"),
+      if(commit.deletion, do: "deletion #{to_hash(commit.deletion)}"),
       "committer <#{to_id(commit.committer)}> #{to_timestamp(commit.ended_at)}",
       "\n",
       commit.message
