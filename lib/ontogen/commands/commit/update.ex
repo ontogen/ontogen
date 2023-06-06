@@ -1,5 +1,5 @@
 defmodule Ontogen.Commands.Commit.Update do
-  alias Ontogen.Expression
+  alias Ontogen.{Expression, Repository}
   alias Ontogen.NS.Og
   alias RDF.NTriples
 
@@ -23,7 +23,7 @@ defmodule Ontogen.Commands.Commit.Update do
   defp head(_, nil), do: ""
 
   defp head(repo, head) do
-    "GRAPH <#{repo.__id__}> { <#{repo.dataset.__id__}> og:head <#{head}> }"
+    "GRAPH <#{Repository.graph_id(repo)}> { <#{Repository.dataset_graph_id(repo)}> og:head <#{head}> }"
   end
 
   defp dataset_changes(_, nil), do: ""
@@ -34,13 +34,13 @@ defmodule Ontogen.Commands.Commit.Update do
       |> Expression.graph()
       |> triples()
 
-    "GRAPH <#{repo.dataset.__id__}> { #{data} }"
+    "GRAPH <#{Repository.dataset_graph_id(repo)}> { #{data} }"
   end
 
   defp provenance(_, nil), do: ""
 
   defp provenance(repo, element) do
-    "GRAPH <#{repo.prov_graph.__id__}> { #{element |> Grax.to_rdf!() |> triples()} }"
+    "GRAPH <#{Repository.prov_graph_id(repo)}> { #{element |> Grax.to_rdf!() |> triples()} }"
   end
 
   defp triples(data), do: NTriples.write_string!(data)

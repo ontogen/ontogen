@@ -1,8 +1,8 @@
 defmodule Ontogen.Commands.FetchDataset do
-  alias Ontogen.Store
+  alias Ontogen.{Store, Repository}
 
   def call(store, repository) do
-    dataset_id = repository.dataset.__id__
+    dataset_id = Repository.dataset_graph_id(repository)
     Store.query(store, dataset_id, query(dataset_id))
   end
 

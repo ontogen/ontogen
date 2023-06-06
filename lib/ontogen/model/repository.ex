@@ -14,4 +14,8 @@ defmodule Ontogen.Repository do
       Grax.put(repo, :dataset, dataset)
     end
   end
+
+  def graph_id(%__MODULE__{} = repository), do: repository.__id__
+  def dataset_graph_id(%__MODULE__{dataset: dataset}), do: dataset.__id__
+  def prov_graph_id(%__MODULE__{prov_graph: prov_graph}), do: prov_graph.__id__
 end

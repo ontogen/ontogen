@@ -92,6 +92,6 @@ defmodule Ontogen.Commands.CreateRepo do
   end
 
   defp init_repo_store(store, repo) do
-    Store.insert_data(store, repo.__id__, Grax.to_rdf!(repo))
+    Store.insert_data(store, Repository.graph_id(repo), Grax.to_rdf!(repo))
   end
 end
