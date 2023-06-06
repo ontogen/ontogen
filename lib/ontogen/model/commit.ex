@@ -24,12 +24,12 @@ defmodule Ontogen.Commit do
       |> Keyword.update(:insertion, nil, &normalize_expression(:insertion, &1))
       |> Keyword.update(:deletion, nil, &normalize_expression(:deletion, &1))
 
-    commit = build!(RDF.bnode(:tmp), args)
-    id = Id.generate(commit)
-
-    commit
-    |> Grax.reset_id(id)
-    |> validate()
+    with {:ok, commit} <- build(RDF.bnode(:tmp), args),
+         {:ok, id} <- Id.generate(commit) do
+      commit
+      |> Grax.reset_id(id)
+      |> validate()
+    end
   end
 
   def new!(args) do
@@ -42,9 +42,11 @@ defmodule Ontogen.Commit do
   def effective(%__MODULE__{} = origin, effective_insertion, effective_deletion) do
     effective_commit = %{origin | insertion: effective_insertion, deletion: effective_deletion}
 
-    effective_commit
-    |> Grax.reset_id(Id.generate(effective_commit))
-    |> validate()
+    with {:ok, id} <- Id.generate(effective_commit) do
+      effective_commit
+      |> Grax.reset_id(id)
+      |> validate()
+    end
   end
 
   defp normalize_expression(_, nil), do: nil

@@ -128,6 +128,45 @@ defmodule Ontogen.Commands.CommitTest do
                   prefixes: ProvGraph.prefixes()
                 )}
     end
+
+    test "with utterance" do
+      refute Repo.head()
+
+      expected_insertion = utterance().insertion
+      committer = agent(:agent_jane)
+      time = datetime()
+      message = "Initial commit"
+
+      assert {:ok,
+              %Ontogen.Commit{
+                parent: nil,
+                insertion: ^expected_insertion,
+                deletion: nil,
+                committer: ^committer,
+                ended_at: ^time,
+                message: ^message
+              } = commit} =
+               Repo.commit(
+                 utter: utterance_attrs(),
+                 committer: committer,
+                 time: time,
+                 message: message
+               )
+
+      # inserts the provenance
+      assert Repo.fetch_prov_graph() ==
+               {:ok,
+                RDF.graph(
+                  [
+                    commit,
+                    expected_insertion,
+                    committer,
+                    utterance()
+                  ]
+                  |> Enum.map(&Grax.to_rdf!/1),
+                  prefixes: ProvGraph.prefixes()
+                )}
+    end
   end
 
   test "subsequent commit" do
@@ -231,6 +270,76 @@ defmodule Ontogen.Commands.CommitTest do
                     Expression.new!(graph()),
                     EffectiveExpression.new!(original_insertion, expected_insert),
                     EffectiveExpression.new!(original_deletion, expected_delete),
+                    Local.agent(),
+                    agent(:agent_jane)
+                  ]
+                  |> Enum.map(&Grax.to_rdf!/1),
+                  prefixes: ProvGraph.prefixes()
+                )}
+    end
+
+    test "with utterance" do
+      assert {:ok, first_commit} = Repo.commit(insert: graph(), message: "Initial commit")
+
+      assert Repo.head() == first_commit
+
+      insert = [
+        {EX.S3, EX.p3(), "foo"},
+        # This statement was already inserted with the first commit
+        EX.S2 |> EX.p2(EX.O2)
+      ]
+
+      delete = [
+        EX.S1 |> EX.p1(EX.O1),
+        # This statement is not present
+        EX.S3 |> EX.p3(EX.O3)
+      ]
+
+      expected_insert = RDF.graph(EX.S3 |> EX.p3("foo"))
+      expected_delete = RDF.graph(EX.S1 |> EX.p1(EX.O1))
+
+      original_insertion = Expression.new!(insert)
+      original_deletion = Expression.new!(delete)
+
+      assert {:ok, second_commit} =
+               Repo.commit(
+                 utter: [
+                   insertion: insert,
+                   deletion: delete,
+                   ended_at: datetime()
+                 ],
+                 committer: agent(:agent_jane),
+                 message: "Second commit",
+                 time: datetime()
+               )
+
+      assert second_commit.parent == first_commit.__id__
+
+      # updates the head in the dataset of the repo
+      assert Repo.head() == second_commit
+
+      # applies the changes
+      assert Repo.fetch_dataset() ==
+               {:ok,
+                graph()
+                |> Graph.add(expected_insert)
+                |> Graph.delete(expected_delete)}
+
+      # inserts the provenance
+      assert Repo.fetch_prov_graph() ==
+               {:ok,
+                RDF.graph(
+                  [
+                    first_commit,
+                    second_commit,
+                    Expression.new!(graph()),
+                    EffectiveExpression.new!(original_insertion, expected_insert),
+                    EffectiveExpression.new!(original_deletion, expected_delete),
+                    CreateUtterance.call!(
+                      insertion: insert,
+                      deletion: delete,
+                      ended_at: datetime()
+                    ),
                     Local.agent(),
                     agent(:agent_jane)
                   ]

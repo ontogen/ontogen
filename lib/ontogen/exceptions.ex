@@ -31,12 +31,38 @@ end
 
 defmodule Ontogen.InvalidCommitError do
   @moduledoc """
-  Raised on invalid `Ontogen.Commit` args
+  Raised on invalid `Ontogen.Commit` args.
   """
   defexception [:reason]
 
   def message(%{reason: reason}) do
     "Invalid commit: #{reason}"
+  end
+end
+
+defmodule Ontogen.InvalidUtteranceError do
+  @moduledoc """
+  Raised on invalid `Ontogen.Utterance` args.
+  """
+  defexception [:reason]
+
+  def message(%{reason: reason}) do
+    "Invalid utterance: #{reason}"
+  end
+end
+
+defmodule Ontogen.IdGenerationError do
+  @moduledoc """
+  Raised on failing id generations.
+  """
+  defexception [:schema, :reason]
+
+  def message(%{schema: nil, reason: reason}) do
+    "Unable to generate id: #{reason}"
+  end
+
+  def message(%{schema: schema, reason: reason}) do
+    "Unable to generate id for #{schema}: #{reason}"
   end
 end
 

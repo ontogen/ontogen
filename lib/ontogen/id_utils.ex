@@ -2,6 +2,7 @@ defmodule Ontogen.IdUtils do
   use RDF
 
   alias RDF.{Dataset, IRI}
+  alias Ontogen.IdGenerationError
 
   @sha_iri_prefix "urn:hash::sha256:"
 
@@ -21,9 +22,12 @@ defmodule Ontogen.IdUtils do
 
   def dataset_hash(%RDF.Dataset{} = dataset) do
     unless Dataset.empty?(dataset) do
-      dataset
-      |> NQuads.write_string!()
-      |> hash()
+      {:ok,
+       dataset
+       |> NQuads.write_string!()
+       |> hash()}
+    else
+      {:error, error("empty dataset")}
     end
   end
 
@@ -34,8 +38,15 @@ defmodule Ontogen.IdUtils do
   end
 
   def dataset_hash_iri(statements) do
-    if hash = dataset_hash(statements) do
-      hash_iri(hash)
+    with {:ok, hash} <- dataset_hash(statements) do
+      {:ok, hash_iri(hash)}
+    end
+  end
+
+  def dataset_hash_iri!(statements) do
+    case dataset_hash_iri(statements) do
+      {:ok, dataset_hash_iri} -> dataset_hash_iri
+      {:error, error} -> raise error
     end
   end
 
@@ -53,5 +64,9 @@ defmodule Ontogen.IdUtils do
 
   def to_timestamp(datetime) do
     "#{DateTime.to_unix(datetime)} #{Calendar.strftime(datetime, "%z")}"
+  end
+
+  def error(reason, schema \\ nil) do
+    IdGenerationError.exception(schema: schema, reason: reason)
   end
 end

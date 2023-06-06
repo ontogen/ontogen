@@ -11,7 +11,7 @@ defmodule Ontogen.Commands.CreateUtterance do
 
   def call(args) do
     args
-    |> Keyword.put_new(:was_associated_with, Local.agent())
+    |> Keyword.put_new(:speaker, Local.agent())
     |> Keyword.put_new(:ended_at, DateTime.utc_now())
     |> Utterance.new()
   end

@@ -2,8 +2,8 @@ defmodule Ontogen.EffectiveExpression.Id do
   import Ontogen.IdUtils
 
   def generate(origin, statements) do
-    if dataset_hash = dataset_hash(statements) do
-      content_hash_iri(:effective_expression, &content/2, [origin, dataset_hash])
+    with {:ok, dataset_hash} <- dataset_hash(statements) do
+      {:ok, content_hash_iri(:effective_expression, &content/2, [origin, dataset_hash])}
     end
   end
 

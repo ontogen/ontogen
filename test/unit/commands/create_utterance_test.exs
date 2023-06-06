@@ -9,6 +9,6 @@ defmodule Ontogen.Commands.CreateUtteranceTest do
 
     assert utterance.insertion == expression()
     assert DateTime.diff(DateTime.utc_now(), utterance.ended_at, :second) <= 1
-    assert utterance.was_associated_with == [Local.agent()]
+    assert utterance.speaker == Local.agent()
   end
 end

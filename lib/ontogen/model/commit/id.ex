@@ -4,7 +4,7 @@ defmodule Ontogen.Commit.Id do
   alias Ontogen.Commit
 
   def generate(%Commit{} = commit) do
-    content_hash_iri(:commit, &content/1, [commit])
+    {:ok, content_hash_iri(:commit, &content/1, [commit])}
   end
 
   def content(commit) do

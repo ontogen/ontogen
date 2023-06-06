@@ -23,17 +23,16 @@ defmodule Ontogen.EffectiveExpression do
       not Graph.include?(origin_graph, graph) ->
         {:error, :no_subset_of_origin}
 
-      id = Id.generate(origin, graph) ->
-        compound =
-          Compound.new(graph, id,
-            name: nil,
-            assertion_mode: :unasserted
-          )
-
-        build(id, origin: origin, statements: compound)
-
       true ->
-        {:error, :no_statements}
+        with {:ok, id} <- Id.generate(origin, graph) do
+          compound =
+            Compound.new(graph, id,
+              name: nil,
+              assertion_mode: :unasserted
+            )
+
+          build(id, origin: origin, statements: compound)
+        end
     end
   end
 

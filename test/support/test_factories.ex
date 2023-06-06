@@ -32,7 +32,7 @@ defmodule Ontogen.TestFactories do
   def id(:store), do: ~I<http://example.com/Store>
   def id(:expression), do: expression().__id__
   def id(:effective_expression), do: effective_expression().__id__
-  def id(:utterance), do: ~I<urn:uuid:633ae13d-b157-42bf-b8df-4d5276c77bef>
+  def id(:utterance), do: utterance().__id__
   def id(resource) when is_rdf_resource(resource), do: resource
   def id(iri) when is_binary(iri), do: RDF.iri(iri)
 
@@ -165,29 +165,16 @@ defmodule Ontogen.TestFactories do
     EffectiveExpression.new!(expression(), subgraph())
   end
 
-  def utterance(id \\ :utterance, attrs \\ [])
-
-  def utterance(:auto, attrs) do
+  def utterance(attrs \\ []) do
     attrs
     |> utterance_attrs()
-    |> Utterance.new!()
-  end
-
-  def utterance(id, attrs) when is_atom(id) do
-    id |> id() |> utterance(attrs)
-  end
-
-  def utterance(id, attrs) do
-    attrs
-    |> utterance_attrs()
-    |> Keyword.put_new(:id, id)
     |> Utterance.new!()
   end
 
   def utterance_attrs(attrs \\ []) do
     [
       insertion: graph(),
-      was_associated_with: agent(),
+      speaker: agent(),
       data_source: dataset(),
       ended_at: datetime()
     ]

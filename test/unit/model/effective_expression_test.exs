@@ -3,7 +3,7 @@ defmodule Ontogen.EffectiveExpressionTest do
 
   doctest Ontogen.EffectiveExpression
 
-  alias Ontogen.EffectiveExpression
+  alias Ontogen.{EffectiveExpression, IdGenerationError}
   alias RTC.Compound
 
   describe "new/1" do
@@ -18,7 +18,7 @@ defmodule Ontogen.EffectiveExpressionTest do
 
     test "without statements" do
       assert EffectiveExpression.new(expression(), RDF.graph()) ==
-               {:error, :no_statements}
+               {:error, IdGenerationError.exception(reason: "empty dataset")}
     end
 
     test "with statements not part of the origin expression" do

@@ -3,22 +3,33 @@ defmodule Ontogen.UtteranceTest do
 
   doctest Ontogen.Utterance
 
-  alias Ontogen.Utterance
+  alias Ontogen.{Utterance, InvalidUtteranceError}
 
   describe "new/1" do
     test "with all required attributes" do
       assert {:ok, %Utterance{} = utterance} =
                Utterance.new(
                  insertion: graph(),
-                 was_associated_with: agent(),
+                 speaker: agent(),
                  data_source: dataset(),
                  ended_at: datetime()
                )
 
+      assert %IRI{value: "urn:hash::sha256:" <> _} = utterance.__id__
+
       assert utterance.insertion == expression()
       assert utterance.ended_at == datetime()
-      assert utterance.was_associated_with == [agent()]
+      assert utterance.speaker == agent()
       assert utterance.data_source == dataset()
+    end
+
+    test "without statements" do
+      assert Utterance.new(
+               speaker: agent(),
+               data_source: dataset(),
+               ended_at: datetime()
+             ) ==
+               {:error, InvalidUtteranceError.exception(reason: "no statements")}
     end
   end
 
@@ -31,7 +42,7 @@ defmodule Ontogen.UtteranceTest do
   end
 
   test "RDF roundtrip" do
-    utterance = utterance(:auto)
+    utterance = utterance()
     assert {:ok, %Graph{} = graph} = Grax.to_rdf(utterance)
 
     assert Utterance.load(graph, utterance.__id__, depth: 1) ==

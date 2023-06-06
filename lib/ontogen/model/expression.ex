@@ -12,7 +12,7 @@ defmodule Ontogen.Expression do
   end
 
   def new(statements) do
-    if id = dataset_hash_iri(statements) do
+    with {:ok, id} <- dataset_hash_iri(statements) do
       build(id,
         statements:
           Compound.new(statements, id,
@@ -20,8 +20,6 @@ defmodule Ontogen.Expression do
             assertion_mode: :unasserted
           )
       )
-    else
-      {:error, :no_statements}
     end
   end
 

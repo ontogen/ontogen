@@ -3,18 +3,19 @@ defmodule Ontogen.ExpressionTest do
 
   doctest Ontogen.Expression
 
-  alias Ontogen.Expression
+  alias Ontogen.{Expression, IdGenerationError}
   alias RTC.Compound
 
   describe "new/1" do
     test "with a graph of statements" do
       assert {:ok, %Expression{} = expression} = Expression.new(graph())
-      assert expression.__id__ == Ontogen.IdUtils.dataset_hash_iri(graph())
+      assert expression.__id__ == Ontogen.IdUtils.dataset_hash_iri!(graph())
       assert Compound.graph(expression.statements) == graph()
     end
 
     test "without statements" do
-      assert Expression.new(RDF.graph()) == {:error, :no_statements}
+      assert Expression.new(RDF.graph()) ==
+               {:error, IdGenerationError.exception(reason: "empty dataset")}
     end
   end
 
