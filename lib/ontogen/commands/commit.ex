@@ -1,16 +1,17 @@
 defmodule Ontogen.Commands.Commit do
   alias Ontogen.{Local, Store, Repository, Dataset, Commit, InvalidCommitError}
   alias Ontogen.Commands.CreateUtterance
-  alias Ontogen.Commands.Commit.Update
+  alias Ontogen.Commands.Commit.{Update, EffectiveChange}
   alias RDF.IRI
 
   def call(store, %Repository{} = repo, args) do
     parent_commit = parent_commit(repo.dataset)
 
     with {:ok, commit, utterance} <- build_commit(parent_commit, args),
+         {:ok, commit} <- EffectiveChange.commit(store, repo, commit),
          {:ok, update} <- Update.build(repo, commit, utterance),
-         {:ok, new_repo} <- Repository.set_head(repo, commit),
-         :ok <- Store.update(store, nil, update) do
+         :ok <- Store.update(store, nil, update),
+         {:ok, new_repo} <- Repository.set_head(repo, commit) do
       {:ok, new_repo, commit}
     end
   end

@@ -32,13 +32,14 @@ defmodule Ontogen.Expression do
     end
   end
 
-  def on_load(%__MODULE__{} = expression, graph, _opts) do
+  def on_load(%{} = expression, graph, _opts) do
     {
       :ok,
-      %__MODULE__{
+      %{
         expression
         | statements:
             graph
+            |> Graph.take([expression.__id__], [RTC.elements()])
             |> Compound.from_rdf(expression.__id__)
             |> Compound.change_graph_name(nil)
       }
@@ -46,7 +47,7 @@ defmodule Ontogen.Expression do
     }
   end
 
-  def on_to_rdf(%__MODULE__{__id__: id, statements: compound}, graph, _opts) do
+  def on_to_rdf(%{__id__: id, statements: compound}, graph, _opts) do
     {
       :ok,
       graph
@@ -57,7 +58,7 @@ defmodule Ontogen.Expression do
 
   def graph(nil), do: nil
 
-  def graph(%__MODULE__{statements: compound}) do
+  def graph(%{statements: compound}) do
     Compound.graph(compound)
   end
 end

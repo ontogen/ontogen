@@ -3,10 +3,12 @@ defmodule Ontogen.IdUtils do
 
   alias RDF.{Dataset, IRI}
 
-  @sha_urn_prefix "urn:hash::sha256:"
+  @sha_iri_prefix "urn:hash::sha256:"
+
+  def sha_iri_prefix, do: @sha_iri_prefix
 
   def hash_iri(value) do
-    ~i<#{@sha_urn_prefix}#{hash(value)}>
+    ~i<#{@sha_iri_prefix}#{hash(value)}>
   end
 
   def hash(value) do
@@ -14,7 +16,7 @@ defmodule Ontogen.IdUtils do
     |> Base.encode16(case: :lower)
   end
 
-  def hash_from_iri(%IRI{value: @sha_urn_prefix <> hash}), do: hash
+  def hash_from_iri(%IRI{value: @sha_iri_prefix <> hash}), do: hash
   def hash_from_iri(_), do: nil
 
   def dataset_hash(%RDF.Dataset{} = dataset) do

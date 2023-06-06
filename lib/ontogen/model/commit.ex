@@ -2,7 +2,7 @@ defmodule Ontogen.Commit do
   use Grax.Schema
 
   alias Ontogen.NS.Og
-  alias Ontogen.{Expression, Utterance, InvalidCommitError}
+  alias Ontogen.{Expression, EffectiveExpression, Utterance, InvalidCommitError}
   alias Ontogen.Commit.Id
   alias RDF.Graph
 
@@ -39,8 +39,17 @@ defmodule Ontogen.Commit do
     end
   end
 
+  def effective(%__MODULE__{} = origin, effective_insertion, effective_deletion) do
+    effective_commit = %{origin | insertion: effective_insertion, deletion: effective_deletion}
+
+    effective_commit
+    |> Grax.reset_id(Id.generate(effective_commit))
+    |> validate()
+  end
+
   defp normalize_expression(_, nil), do: nil
   defp normalize_expression(_, %Expression{} = expression), do: expression
+  defp normalize_expression(_, %EffectiveExpression{} = expression), do: expression
   defp normalize_expression(:insertion, %Utterance{insertion: expression}), do: expression
   defp normalize_expression(:deletion, %Utterance{deletion: expression}), do: expression
   defp normalize_expression(_, statements), do: Expression.new!(statements)

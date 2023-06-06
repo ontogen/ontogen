@@ -82,6 +82,18 @@ og:Expression a rdfs:Class
     ; rdfs:comment "A set of RDF statements independent of an occurrence in a utterance."
 .
 
+og:EffectiveExpression a rdfs:Class
+    ; rdfs:subClassOf og:Expression
+    ; rdfs:label "Ontogen effective expression"
+    ; rdfs:comment "A subset of an og:Expression, which actually has an effect when applied as an insertion or deletion, i.e. without already present statements in case of an insertion or which are not present in case of a deletion."
+.
+
+    og:originExpression a rdf:Property
+        ; rdfs:domain og:Expression
+        ; rdfs:range  og:Expression
+    .
+
+
 og:Commit a rdfs:Class
     ; rdfs:subClassOf prov:Activity
     ; rdfs:label "Ontogen commit"
