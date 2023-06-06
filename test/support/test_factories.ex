@@ -147,8 +147,10 @@ defmodule Ontogen.TestFactories do
          |> RDF.graph()
   def graph, do: @graph
 
-  def expression do
-    Expression.new!(graph())
+  def expression(graph \\ graph()) do
+    graph
+    |> RDF.graph()
+    |> Expression.new!()
   end
 
   def utterance(id \\ :utterance, attrs \\ [])

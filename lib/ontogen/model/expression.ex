@@ -55,6 +55,8 @@ defmodule Ontogen.Expression do
     }
   end
 
+  def graph(nil), do: nil
+
   def graph(%__MODULE__{statements: compound}) do
     Compound.graph(compound)
   end

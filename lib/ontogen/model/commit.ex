@@ -2,7 +2,7 @@ defmodule Ontogen.Commit do
   use Grax.Schema
 
   alias Ontogen.NS.Og
-  alias Ontogen.{Expression, Utterance}
+  alias Ontogen.{Expression, Utterance, InvalidCommitError}
   alias Ontogen.Commit.Id
   alias RDF.Graph
 
@@ -29,7 +29,7 @@ defmodule Ontogen.Commit do
 
     commit
     |> Grax.reset_id(id)
-    |> Grax.validate()
+    |> validate()
   end
 
   def new!(args) do
@@ -44,6 +44,37 @@ defmodule Ontogen.Commit do
   defp normalize_expression(:insertion, %Utterance{insertion: expression}), do: expression
   defp normalize_expression(:deletion, %Utterance{deletion: expression}), do: expression
   defp normalize_expression(_, statements), do: Expression.new!(statements)
+
+  def validate(commit) do
+    with {:ok, commit} <- check_statement_uniqueness(commit) do
+      Grax.validate(commit)
+    end
+  end
+
+  defp check_statement_uniqueness(commit) do
+    shared_statements =
+      shared_statements(
+        Expression.graph(commit.insertion),
+        Expression.graph(commit.deletion)
+      )
+
+    if Enum.empty?(shared_statements) do
+      {:ok, commit}
+    else
+      {:error,
+       InvalidCommitError.exception(
+         reason:
+           "the following statements are in both insertion and deletions: #{inspect(shared_statements)}"
+       )}
+    end
+  end
+
+  defp shared_statements(nil, _), do: []
+  defp shared_statements(_, nil), do: []
+
+  defp shared_statements(inserts, deletes) do
+    Enum.filter(deletes, &Graph.include?(inserts, &1))
+  end
 
   def root?(%__MODULE__{parent: nil}), do: true
   def root?(%__MODULE__{}), do: false
