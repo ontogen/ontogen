@@ -57,5 +57,14 @@ defmodule Ontogen.CommitTest do
                     "the following statements are in both insertion and deletions: #{inspect(shared_statements)}"
                 )}
     end
+
+    test "without statements" do
+      assert Commit.new(
+               committer: agent(),
+               message: "without inserted and deleted statements",
+               ended_at: datetime()
+             ) ==
+               {:error, InvalidCommitError.exception(reason: "no statements")}
+    end
   end
 end

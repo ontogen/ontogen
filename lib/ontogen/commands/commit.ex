@@ -12,7 +12,7 @@ defmodule Ontogen.Commands.Commit do
          {:ok, update} <- Update.build(repo, commit, utterance),
          :ok <- Store.update(store, nil, update),
          {:ok, new_repo} <- Repository.set_head(repo, commit) do
-      {:ok, new_repo, commit}
+      {:ok, new_repo, commit, utterance}
     end
   end
 

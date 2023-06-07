@@ -9,6 +9,8 @@ defmodule Ontogen.Repository do
     link prov_graph: Og.provGraph(), type: ProvGraph, required: true
   end
 
+  def set_head(%__MODULE__{} = repo, :no_effective_changes), do: {:ok, repo}
+
   def set_head(%__MODULE__{} = repo, commit) do
     with {:ok, dataset} <- Dataset.set_head(repo.dataset, commit) do
       Grax.put(repo, :dataset, dataset)

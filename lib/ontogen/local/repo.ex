@@ -135,8 +135,11 @@ defmodule Ontogen.Local.Repo do
 
   def handle_call({:commit, args}, _from, %{repository: repo, store: store} = state) do
     case Commit.call(store, repo, args) do
-      {:ok, repo, commit} -> {:reply, {:ok, commit}, %{state | repository: repo}}
-      error -> {:reply, error, state}
+      {:ok, repo, commit, utterance} ->
+        {:reply, {:ok, commit, utterance}, %{state | repository: repo}}
+
+      error ->
+        {:reply, error, state}
     end
   end
 end

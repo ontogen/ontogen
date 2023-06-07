@@ -39,6 +39,8 @@ defmodule Ontogen.Commit do
     end
   end
 
+  def effective(%__MODULE__{}, nil, nil), do: {:ok, :no_effective_changes}
+
   def effective(%__MODULE__{} = origin, effective_insertion, effective_deletion) do
     effective_commit = %{origin | insertion: effective_insertion, deletion: effective_deletion}
 
@@ -57,10 +59,16 @@ defmodule Ontogen.Commit do
   defp normalize_expression(_, statements), do: Expression.new!(statements)
 
   def validate(commit) do
-    with {:ok, commit} <- check_statement_uniqueness(commit) do
+    with :ok <- check_statements_present(commit.insertion, commit.deletion),
+         {:ok, commit} <- check_statement_uniqueness(commit) do
       Grax.validate(commit)
     end
   end
+
+  defp check_statements_present(nil, nil),
+    do: {:error, InvalidCommitError.exception(reason: "no statements")}
+
+  defp check_statements_present(_, _), do: :ok
 
   defp check_statement_uniqueness(commit) do
     shared_statements =

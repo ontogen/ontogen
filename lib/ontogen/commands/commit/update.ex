@@ -3,6 +3,20 @@ defmodule Ontogen.Commands.Commit.Update do
   alias Ontogen.NS.Og
   alias RDF.NTriples
 
+  def build(_, :no_effective_changes, nil) do
+    {:error, :no_effective_changes}
+  end
+
+  def build(repo, :no_effective_changes, utterance) do
+    {:ok,
+     """
+     PREFIX og: <#{Og.__base_iri__()}>
+     INSERT DATA {
+       #{provenance(repo, utterance)}
+     }
+     """}
+  end
+
   def build(repo, commit, utterance) do
     {:ok,
      """
