@@ -10,18 +10,23 @@ defmodule Ontogen.Commands.ClearRepo do
 
   """
 
-  alias Ontogen.{Local, Store}
+  alias Ontogen.{Local, Store, Repository}
   alias Ontogen.Commands.CreateRepo
 
   def call(store) do
     :ready = Local.Repo.status()
 
     call(store, Local.Repo.repository())
+
+    Local.Repo.reload()
   end
 
   def call(store, repository) do
     delete_repo(store, repository)
-    CreateRepo.call(store, repository)
+
+    with {:ok, repository} <- Repository.set_head(repository, nil) do
+      CreateRepo.call(store, repository)
+    end
   end
 
   def delete_repo(store, _repository) do
