@@ -13,6 +13,9 @@ defmodule Ontogen.Dataset do
     link head: Og.head(), type: Commit
   end
 
+  def head_id(%__MODULE__{head: %Commit{__id__: id}}), do: id
+  def head_id(%__MODULE__{head: head}), do: head
+
   def set_head(%__MODULE__{} = dataset, commit) do
     Grax.put(dataset, :head, commit)
   end

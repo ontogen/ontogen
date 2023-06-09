@@ -7,7 +7,7 @@ defmodule Ontogen.Commit do
   alias RDF.Graph
 
   schema Og.Commit < PROV.Activity do
-    link parent: Og.parentCommit(), type: Ontogen.Commit
+    link parent: Og.parentCommit(), type: Ontogen.Commit, depth: 0
 
     link insertion: Og.committedInsertion(), type: Expression
     link deletion: Og.committedDeletion(), type: Expression

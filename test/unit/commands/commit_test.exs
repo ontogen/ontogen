@@ -2,6 +2,7 @@ defmodule Ontogen.Commands.CommitTest do
   use Ontogen.Local.Repo.Test.Case, async: false
 
   doctest Ontogen.Commands.Commit
+
   alias Ontogen.{Local, ProvGraph, Expression, EffectiveExpression}
   alias Ontogen.Commands.CreateUtterance
 
@@ -175,7 +176,7 @@ defmodule Ontogen.Commands.CommitTest do
   end
 
   test "subsequent commit" do
-    first_commit = init_commit_history()
+    [first_commit] = init_commit_history()
 
     insert = RDF.graph({EX.S3, EX.p3(), "foo"})
     delete = RDF.graph(EX.S1 |> EX.p1(EX.O1))
@@ -223,7 +224,7 @@ defmodule Ontogen.Commands.CommitTest do
 
   describe "handling of changes that already apply" do
     test "only the real changes are committed" do
-      last_commit = init_commit_history()
+      [last_commit] = init_commit_history()
 
       insert = [
         {EX.S3, EX.p3(), "foo"},
@@ -285,7 +286,7 @@ defmodule Ontogen.Commands.CommitTest do
     end
 
     test "with utterance" do
-      last_commit = init_commit_history()
+      [last_commit] = init_commit_history()
 
       insert = [
         {EX.S3, EX.p3(), "foo"},
@@ -360,7 +361,7 @@ defmodule Ontogen.Commands.CommitTest do
     end
 
     test "when there are no remaining changes; without an utterance" do
-      last_commit = init_commit_history()
+      [last_commit] = init_commit_history()
       {:ok, last_dataset} = Repo.fetch_dataset()
       {:ok, last_prov_graph} = Repo.fetch_prov_graph()
 
@@ -383,7 +384,7 @@ defmodule Ontogen.Commands.CommitTest do
     end
 
     test "when there are no remaining changes; with a new utterance" do
-      last_commit = init_commit_history()
+      [last_commit] = init_commit_history()
       {:ok, last_dataset} = Repo.fetch_dataset()
       {:ok, last_prov_graph} = Repo.fetch_prov_graph()
 
@@ -414,18 +415,5 @@ defmodule Ontogen.Commands.CommitTest do
       assert Repo.fetch_prov_graph() ==
                {:ok, last_prov_graph |> Graph.add(Grax.to_rdf!(utterance))}
     end
-  end
-
-  def init_commit_history do
-    assert {:ok, first_commit, nil} =
-             Repo.commit(
-               insert: graph(),
-               message: "Initial commit",
-               time: datetime() |> DateTime.add(-1, :hour)
-             )
-
-    assert Repo.head() == first_commit
-
-    first_commit
   end
 end
