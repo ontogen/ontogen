@@ -2,6 +2,8 @@ defmodule Ontogen.Commands.Commit.EffectiveChange do
   alias Ontogen.{Commit, Expression, EffectiveExpression, Store, Repository}
   alias RDF.Graph
 
+  import Ontogen.QueryUtils
+
   def commit(store, repo, commit) do
     with {:ok, effective_insertion, effective_deletion} <-
            determine(store, repo, commit.insertion, commit.deletion) do
@@ -79,6 +81,8 @@ defmodule Ontogen.Commands.Commit.EffectiveChange do
   defp triples(nil), do: ""
 
   defp triples(graph) do
-    Enum.map_join(graph, "\n", fn {s, p, o} -> "(<#{s}> <#{p}> <#{o}>)" end)
+    Enum.map_join(graph, "\n", fn {s, p, o} ->
+      "(#{to_term(s)} #{to_term(p)} #{to_term(o)})"
+    end)
   end
 end

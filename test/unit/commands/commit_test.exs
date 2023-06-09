@@ -190,6 +190,8 @@ defmodule Ontogen.Commands.CommitTest do
              )
 
     assert second_commit.parent == first_commit.__id__
+    assert second_commit.insertion == Expression.new!(insert)
+    assert second_commit.deletion == Expression.new!(delete)
 
     # updates the head in the dataset of the repo
     assert Repo.head() == second_commit
@@ -199,7 +201,7 @@ defmodule Ontogen.Commands.CommitTest do
 
     # applies the changes
     assert Repo.fetch_dataset() ==
-             {:ok, RDF.graph([EX.S2 |> EX.p2(EX.O2), {EX.S3, EX.p3(), "foo"}])}
+             {:ok, graph() |> Graph.add(insert) |> Graph.delete(delete)}
 
     # inserts the provenance
     assert Repo.fetch_prov_graph() ==
@@ -226,17 +228,17 @@ defmodule Ontogen.Commands.CommitTest do
       insert = [
         {EX.S3, EX.p3(), "foo"},
         # This statement was already inserted with the first commit
-        EX.S2 |> EX.p2(EX.O2)
+        EX.S1 |> EX.p1(EX.O1)
       ]
 
       delete = [
-        EX.S1 |> EX.p1(EX.O1),
+        EX.S2 |> EX.p2(42),
         # This statement is not present
         EX.S3 |> EX.p3(EX.O3)
       ]
 
       expected_insert = RDF.graph(EX.S3 |> EX.p3("foo"))
-      expected_delete = RDF.graph(EX.S1 |> EX.p1(EX.O1))
+      expected_delete = RDF.graph(EX.S2 |> EX.p2(42))
 
       original_insertion = Expression.new!(insert)
       original_deletion = Expression.new!(delete)
@@ -251,6 +253,8 @@ defmodule Ontogen.Commands.CommitTest do
                )
 
       assert new_commit.parent == last_commit.__id__
+      assert new_commit.insertion == EffectiveExpression.new!(original_insertion, expected_insert)
+      assert new_commit.deletion == EffectiveExpression.new!(original_deletion, expected_delete)
 
       # updates the head in the dataset of the repo
       assert Repo.head() == new_commit
@@ -286,7 +290,7 @@ defmodule Ontogen.Commands.CommitTest do
       insert = [
         {EX.S3, EX.p3(), "foo"},
         # This statement was already inserted with the first commit
-        EX.S2 |> EX.p2(EX.O2)
+        EX.S2 |> EX.p2("Foo")
       ]
 
       delete = [

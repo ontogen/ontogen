@@ -144,7 +144,7 @@ defmodule Ontogen.TestFactories do
 
   @graph [
            EX.S1 |> EX.p1(EX.O1),
-           EX.S2 |> EX.p2(EX.O2)
+           EX.S2 |> EX.p2(42, "Foo")
          ]
          |> RDF.graph()
   def graph, do: @graph
