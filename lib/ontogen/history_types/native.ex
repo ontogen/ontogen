@@ -1,5 +1,5 @@
-defmodule Ontogen.LogType.Native do
-  @behaviour Ontogen.LogType
+defmodule Ontogen.HistoryType.Native do
+  @behaviour Ontogen.HistoryType
 
   alias Ontogen.NS.Og
   alias Ontogen.Commit
@@ -8,7 +8,7 @@ defmodule Ontogen.LogType.Native do
   import RDF.Utils, only: [map_while_ok: 2]
 
   @impl true
-  def log(history_graph, _, _opts \\ []) do
+  def history(history_graph, _, _opts \\ []) do
     with {:ok, commits} <-
            history_graph
            |> Graph.descriptions()

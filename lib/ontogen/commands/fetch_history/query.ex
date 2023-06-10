@@ -1,4 +1,4 @@
-defmodule Ontogen.Commands.Log.Query do
+defmodule Ontogen.Commands.FetchHistory.Query do
   alias Ontogen.Repository
   alias Ontogen.NS.Og
 

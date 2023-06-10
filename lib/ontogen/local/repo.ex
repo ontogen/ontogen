@@ -6,7 +6,7 @@ defmodule Ontogen.Local.Repo do
   use GenServer
 
   alias Ontogen.Local.Repo.{Initializer, NotReadyError}
-  alias Ontogen.Commands.{RepoInfo, Commit, Log, FetchDataset, FetchProvGraph}
+  alias Ontogen.Commands.{RepoInfo, Commit, FetchHistory, FetchDataset, FetchProvGraph}
 
   def start_link(args) do
     GenServer.start_link(__MODULE__, args, name: __MODULE__)
@@ -58,8 +58,12 @@ defmodule Ontogen.Local.Repo do
     GenServer.call(__MODULE__, {:commit, args})
   end
 
-  def dataset_log(args \\ []) do
-    GenServer.call(__MODULE__, {:dataset_log, args})
+  def dataset_history(args \\ []) do
+    GenServer.call(__MODULE__, {:dataset_history, args})
+  end
+
+  def resource_history(resource, args \\ []) do
+    GenServer.call(__MODULE__, {:resource_history, resource, args})
   end
 
   def head do
@@ -147,20 +151,20 @@ defmodule Ontogen.Local.Repo do
     end
   end
 
-  def handle_call({:dataset_log, args}, _from, %{repository: repo, store: store} = state) do
-    case Log.dataset(store, repo, args) do
-      {:ok, log} -> {:reply, {:ok, log}, state}
+  def handle_call({:dataset_history, args}, _from, %{repository: repo, store: store} = state) do
+    case FetchHistory.dataset(store, repo, args) do
+      {:ok, history} -> {:reply, {:ok, history}, state}
       error -> {:reply, error, state}
     end
   end
 
   def handle_call(
-        {:resource_log, resource, args},
+        {:resource_history, resource, args},
         _from,
         %{repository: repo, store: store} = state
       ) do
-    case Log.resource(store, repo, resource, args) do
-      {:ok, log} -> {:reply, {:ok, log}, state}
+    case FetchHistory.resource(store, repo, resource, args) do
+      {:ok, history} -> {:reply, {:ok, history}, state}
       error -> {:reply, error, state}
     end
   end

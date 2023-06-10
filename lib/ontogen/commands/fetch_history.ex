@@ -1,6 +1,6 @@
-defmodule Ontogen.Commands.Log do
-  alias Ontogen.{Store, Repository, LogType}
-  alias Ontogen.Commands.Log.Query
+defmodule Ontogen.Commands.FetchHistory do
+  alias Ontogen.{Store, Repository, HistoryType}
+  alias Ontogen.Commands.FetchHistory.Query
 
   import RDF.Guards
 
@@ -16,7 +16,7 @@ defmodule Ontogen.Commands.Log do
     with {:ok, query} <- Query.build(repository, subject, opts),
          {:ok, history_graph} <-
            Store.construct(store, Repository.prov_graph_id(repository), query, raw_mode: true) do
-      LogType.log(history_graph, subject, opts)
+      HistoryType.history(history_graph, subject, opts)
     end
   end
 

@@ -1,5 +1,5 @@
-defmodule Ontogen.LogType.Raw do
-  @behaviour Ontogen.LogType
+defmodule Ontogen.HistoryType.Raw do
+  @behaviour Ontogen.HistoryType
 
   alias Ontogen.NS.Og
   alias RDF.{Graph, PrefixMap}
@@ -8,7 +8,7 @@ defmodule Ontogen.LogType.Raw do
             |> PrefixMap.merge!(RDF.standard_prefixes())
 
   @impl true
-  def log(history_graph, _, _opts \\ []) do
+  def history(history_graph, _, _opts \\ []) do
     {:ok, Graph.add_prefixes(history_graph, @prefixes)}
   end
 end
