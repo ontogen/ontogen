@@ -8,7 +8,7 @@ defmodule Ontogen.LogType.Native do
   import RDF.Utils, only: [map_while_ok: 2]
 
   @impl true
-  def log(history_graph, {:dataset, _}, _opts \\ []) do
+  def log(history_graph, _, _opts \\ []) do
     with {:ok, commits} <-
            history_graph
            |> Graph.descriptions()

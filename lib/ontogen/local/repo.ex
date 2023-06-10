@@ -153,4 +153,15 @@ defmodule Ontogen.Local.Repo do
       error -> {:reply, error, state}
     end
   end
+
+  def handle_call(
+        {:resource_log, resource, args},
+        _from,
+        %{repository: repo, store: store} = state
+      ) do
+    case Log.resource(store, repo, resource, args) do
+      {:ok, log} -> {:reply, {:ok, log}, state}
+      error -> {:reply, error, state}
+    end
+  end
 end
