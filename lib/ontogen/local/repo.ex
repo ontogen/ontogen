@@ -66,6 +66,10 @@ defmodule Ontogen.Local.Repo do
     GenServer.call(__MODULE__, {:resource_history, resource, args})
   end
 
+  def statement_history(statement, args \\ []) do
+    GenServer.call(__MODULE__, {:statement_history, statement, args})
+  end
+
   def head do
     GenServer.call(__MODULE__, :head)
   end
@@ -164,6 +168,17 @@ defmodule Ontogen.Local.Repo do
         %{repository: repo, store: store} = state
       ) do
     case FetchHistory.resource(store, repo, resource, args) do
+      {:ok, history} -> {:reply, {:ok, history}, state}
+      error -> {:reply, error, state}
+    end
+  end
+
+  def handle_call(
+        {:statement_history, statement, args},
+        _from,
+        %{repository: repo, store: store} = state
+      ) do
+    case FetchHistory.statement(store, repo, statement, args) do
       {:ok, history} -> {:reply, {:ok, history}, state}
       error -> {:reply, error, state}
     end

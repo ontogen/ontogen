@@ -7,14 +7,20 @@ defmodule Ontogen.Commands.FetchHistory.Query do
   def build(repository, subject, opts \\ [])
 
   def build(repository, {:dataset, _dataset_id}, opts) do
-    with {:ok, from_commit} <- from_commit(repository, opts) do
-      {:ok, query(nil, from_commit, to_commit(opts))}
-    end
+    do_build(repository, nil, opts)
   end
 
   def build(repository, {:resource, resource}, opts) do
+    do_build(repository, resource, opts)
+  end
+
+  def build(repository, {:statement, statement}, opts) do
+    do_build(repository, statement, opts)
+  end
+
+  defp do_build(repository, subject, opts) do
     with {:ok, from_commit} <- from_commit(repository, opts) do
-      {:ok, query(resource, from_commit, to_commit(opts))}
+      {:ok, query(subject, from_commit, to_commit(opts))}
     end
   end
 
@@ -30,7 +36,7 @@ defmodule Ontogen.Commands.FetchHistory.Query do
     Keyword.get(opts, :to_commit)
   end
 
-  defp query(resource, from_commit, to_commit) do
+  defp query(subject, from_commit, to_commit) do
     """
     PREFIX og: <#{Og.__base_iri__()}>
     PREFIX rtc: <#{RTC.__base_iri__()}>
@@ -38,7 +44,7 @@ defmodule Ontogen.Commands.FetchHistory.Query do
     WHERE {
       <#{from_commit}> og:parentCommit* ?commit .
       #{filter_commits(to_commit)}
-      #{commit_statements_query_pattern(resource)}
+      #{commit_statements_query_pattern(subject)}
     }
     """
   end
@@ -58,7 +64,7 @@ defmodule Ontogen.Commands.FetchHistory.Query do
     """
   end
 
-  defp commit_statements_query_pattern(resource) do
+  defp commit_statements_query_pattern(subject) do
     """
     ?commit ?commit_p ?commit_o .
 
@@ -67,12 +73,12 @@ defmodule Ontogen.Commands.FetchHistory.Query do
       {
         {
           ?commit og:committedInsertion ?insertion .
-          #{resource_filter("?insertion", resource)}
+          #{statement_filter("?insertion", subject)}
         }
         UNION
         {
           ?commit og:committedDeletion ?deletion .
-          #{resource_filter("?deletion", resource)}
+          #{statement_filter("?deletion", subject)}
         }
       }
 
@@ -87,9 +93,17 @@ defmodule Ontogen.Commands.FetchHistory.Query do
     """
   end
 
-  defp resource_filter(_, nil), do: ""
+  defp statement_filter(_, nil), do: ""
 
-  defp resource_filter(expression, resource) do
+  defp statement_filter(expression, {s, p, o}) do
+    "#{expression} rtc:elements << #{to_term(s)} #{to_term(p)} #{to_term(o)} >> ."
+  end
+
+  defp statement_filter(expression, {s, p}) do
+    "#{expression} rtc:elements << #{to_term(s)} #{to_term(p)} ?resource_o >> ."
+  end
+
+  defp statement_filter(expression, resource) do
     "#{expression} rtc:elements << #{to_term(resource)} ?resource_p ?resource_o >> ."
   end
 end
