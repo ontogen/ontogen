@@ -1,3 +1,4 @@
+@prefix og: <https://w3id.org/ontogen#> .
 @prefix ogc: <https://w3id.org/ontogen/config#> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 
@@ -14,5 +15,5 @@ _:LocalOxigraph a ogc:OxigraphStore
 
 <http://example.com/Agent/john_doe>
       foaf:name "John Doe" ;
-      foaf:mbox <mailto:john.doe@example.com>
+      og:email <mailto:john.doe@example.com>
 .

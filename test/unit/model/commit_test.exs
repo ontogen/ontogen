@@ -14,7 +14,7 @@ defmodule Ontogen.CommitTest do
                  insertion: expression(),
                  committer: agent(),
                  message: message,
-                 ended_at: datetime()
+                 time: datetime()
                )
 
       assert %IRI{value: "urn:hash::sha256:" <> _} = commit.__id__
@@ -22,7 +22,7 @@ defmodule Ontogen.CommitTest do
       assert commit.insertion == expression()
       assert commit.committer == agent()
       assert commit.message == message
-      assert commit.ended_at == datetime()
+      assert commit.time == datetime()
       refute commit.parent
       assert Commit.root?(commit)
     end
@@ -34,7 +34,7 @@ defmodule Ontogen.CommitTest do
                  deletion: {EX.S2, EX.P2, EX.O2},
                  committer: agent(),
                  message: "Some commit",
-                 ended_at: datetime()
+                 time: datetime()
                )
 
       assert commit.insertion == expression(EX.S1 |> EX.p1(EX.O1))
@@ -49,7 +49,7 @@ defmodule Ontogen.CommitTest do
                deletion: shared_statements,
                committer: agent(),
                message: "Inserted and deleted statement",
-               ended_at: datetime()
+               time: datetime()
              ) ==
                {:error,
                 InvalidCommitError.exception(
@@ -62,7 +62,7 @@ defmodule Ontogen.CommitTest do
       assert Commit.new(
                committer: agent(),
                message: "without inserted and deleted statements",
-               ended_at: datetime()
+               time: datetime()
              ) ==
                {:error, InvalidCommitError.exception(reason: "no statements")}
     end

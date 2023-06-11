@@ -12,13 +12,13 @@ defmodule Ontogen.UtteranceTest do
                  insertion: graph(),
                  speaker: agent(),
                  data_source: dataset(),
-                 ended_at: datetime()
+                 time: datetime()
                )
 
       assert %IRI{value: "urn:hash::sha256:" <> _} = utterance.__id__
 
       assert utterance.insertion == expression()
-      assert utterance.ended_at == datetime()
+      assert utterance.time == datetime()
       assert utterance.speaker == agent()
       assert utterance.data_source == dataset()
     end
@@ -27,7 +27,7 @@ defmodule Ontogen.UtteranceTest do
       assert Utterance.new(
                speaker: agent(),
                data_source: dataset(),
-               ended_at: datetime()
+               time: datetime()
              ) ==
                {:error, InvalidUtteranceError.exception(reason: "no statements")}
     end

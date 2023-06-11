@@ -16,19 +16,23 @@ og:Agent a rdfs:Class
     ; rdfs:label "Agent"
 .
 
+    og:email a rdf:Property
+        ; rdfs:subPropertyOf foaf:mbox
+        ; rdfs:domain og:Agent
+    .
 
 og:Repository a rdfs:Class
     ; rdfs:label "Ontogen repository"
 .
 
     og:dataset a rdf:Property
-            ; rdfs:domain og:Repository
-            ; rdfs:range  og:Dataset
+        ; rdfs:domain og:Repository
+        ; rdfs:range  og:Dataset
     .
 
     og:provGraph a rdf:Property
-            ; rdfs:domain og:Repository
-            ; rdfs:range  og:ProvGraph
+        ; rdfs:domain og:Repository
+        ; rdfs:range  og:ProvGraph
     .
 
 og:Dataset a rdfs:Class

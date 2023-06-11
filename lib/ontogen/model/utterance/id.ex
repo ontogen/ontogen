@@ -10,7 +10,7 @@ defmodule Ontogen.Utterance.Id do
          utterance.insertion,
          utterance.deletion,
          origin,
-         utterance.ended_at
+         utterance.time
        ])}
     else
       {:error, error("origin missing", Utterance)}

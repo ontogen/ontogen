@@ -21,13 +21,11 @@ defmodule Ontogen.Commands.Commit do
   defp parent_commit(%Dataset{head: head}), do: head.__id__
 
   defp build_commit(parent_commit, args) do
-    {time, args} = Keyword.pop(args, :time, DateTime.utc_now())
-
     with {:ok, args, utterance} <- build_changes(args) do
       args
       |> Keyword.put(:parent, parent_commit)
       |> Keyword.put_new(:committer, Local.agent())
-      |> Keyword.put_new(:ended_at, time)
+      |> Keyword.put_new(:time, DateTime.utc_now())
       |> Commit.new()
       |> case do
         {:ok, commit} -> {:ok, commit, utterance}

@@ -14,7 +14,7 @@ defmodule Ontogen.HistoryType.Native do
            |> Graph.descriptions()
            |> Enum.filter(&commit?/1)
            |> map_while_ok(&Commit.load(history_graph, &1.subject)) do
-      {:ok, Enum.sort_by(commits, & &1.ended_at, {:desc, DateTime})}
+      {:ok, Enum.sort_by(commits, & &1.time, {:desc, DateTime})}
     end
   end
 

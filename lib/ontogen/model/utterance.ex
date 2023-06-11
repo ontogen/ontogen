@@ -6,11 +6,11 @@ defmodule Ontogen.Utterance do
   alias Ontogen.Utterance.Id
   alias RDF.{IRI, Graph}
 
-  schema Og.Utterance < PROV.Activity do
+  schema Og.Utterance do
     link insertion: Og.insertion(), type: Expression
     link deletion: Og.deletion(), type: Expression
 
-    property ended_at: PROV.endedAtTime(), type: :date_time, required: true
+    property time: PROV.endedAtTime(), type: :date_time, required: true
     link speaker: Og.speaker(), type: Ontogen.Agent
     link data_source: Og.dataSource(), type: DCAT.Dataset, depth: 0
   end

@@ -69,7 +69,7 @@ defmodule Ontogen.TestFactories do
   def agent_attrs(:agent_jane, attrs) do
     [
       name: "Jane Doe",
-      mbox: ~I<mailto:jane.doe@example.com>
+      email: ~I<mailto:jane.doe@example.com>
     ]
     |> Keyword.merge(attrs)
   end
@@ -77,7 +77,7 @@ defmodule Ontogen.TestFactories do
   def agent_attrs(_, attrs) do
     [
       name: "John Doe",
-      mbox: ~I<mailto:john.doe@example.com>
+      email: ~I<mailto:john.doe@example.com>
     ]
     |> Keyword.merge(attrs)
   end
@@ -176,7 +176,7 @@ defmodule Ontogen.TestFactories do
       insertion: graph(),
       speaker: agent(),
       data_source: dataset(),
-      ended_at: datetime()
+      time: datetime()
     ]
     |> Keyword.merge(attrs)
   end

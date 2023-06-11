@@ -20,7 +20,7 @@ defmodule Ontogen.Commands.CommitTest do
               insertion: ^expected_insertion,
               deletion: nil,
               committer: ^committer,
-              ended_at: ^time,
+              time: ^time,
               message: ^message
             } = commit,
             nil} =
@@ -71,7 +71,7 @@ defmodule Ontogen.Commands.CommitTest do
               insertion: ^expected_insertion,
               deletion: nil,
               committer: ^committer,
-              ended_at: ^time,
+              time: ^time,
               message: ^message
             } = commit,
             ^utterance} =
@@ -116,7 +116,7 @@ defmodule Ontogen.Commands.CommitTest do
 
       assert commit.insertion == expected_insertion
       assert commit.committer == Local.agent()
-      assert DateTime.diff(DateTime.utc_now(), commit.ended_at, :second) <= 1
+      assert DateTime.diff(DateTime.utc_now(), commit.time, :second) <= 1
 
       # inserts the provenance
       assert Repo.fetch_prov_graph() ==
@@ -146,7 +146,7 @@ defmodule Ontogen.Commands.CommitTest do
                 insertion: ^expected_insertion,
                 deletion: nil,
                 committer: ^committer,
-                ended_at: ^time,
+                time: ^time,
                 message: ^message
               } = commit,
               utterance} =
@@ -311,7 +311,7 @@ defmodule Ontogen.Commands.CommitTest do
                  utter: [
                    insertion: insert,
                    deletion: delete,
-                   ended_at: datetime()
+                   time: datetime()
                  ],
                  committer: agent(:agent_jane),
                  message: "Second commit",
@@ -322,7 +322,7 @@ defmodule Ontogen.Commands.CommitTest do
                Ontogen.utterance!(
                  insertion: insert,
                  deletion: delete,
-                 ended_at: datetime()
+                 time: datetime()
                )
 
       assert new_commit.parent == last_commit.__id__
@@ -350,7 +350,7 @@ defmodule Ontogen.Commands.CommitTest do
                     CreateUtterance.call!(
                       insertion: insert,
                       deletion: delete,
-                      ended_at: datetime()
+                      time: datetime()
                     ),
                     Local.agent(),
                     agent(:agent_jane)
@@ -392,7 +392,7 @@ defmodule Ontogen.Commands.CommitTest do
                Repo.commit(
                  utter: [
                    insertion: Expression.graph(last_commit.insertion),
-                   ended_at: datetime()
+                   time: datetime()
                  ],
                  committer: agent(:agent_jane),
                  message: "Second commit",
@@ -402,7 +402,7 @@ defmodule Ontogen.Commands.CommitTest do
       assert utterance ==
                Ontogen.utterance!(
                  insertion: Expression.graph(last_commit.insertion),
-                 ended_at: datetime()
+                 time: datetime()
                )
 
       # does not change the head in the dataset of the repo

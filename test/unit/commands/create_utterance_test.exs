@@ -8,7 +8,7 @@ defmodule Ontogen.Commands.CreateUtteranceTest do
     assert {:ok, %Utterance{} = utterance} = Ontogen.utterance(insertion: graph())
 
     assert utterance.insertion == expression()
-    assert DateTime.diff(DateTime.utc_now(), utterance.ended_at, :second) <= 1
+    assert DateTime.diff(DateTime.utc_now(), utterance.time, :second) <= 1
     assert utterance.speaker == Local.agent()
   end
 end

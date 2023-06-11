@@ -12,7 +12,7 @@ defmodule Ontogen.Commit.Id do
       if(commit.parent, do: "parent #{to_hash(commit.parent)}"),
       if(commit.insertion, do: "insertion #{to_hash(commit.insertion)}"),
       if(commit.deletion, do: "deletion #{to_hash(commit.deletion)}"),
-      "committer <#{to_id(commit.committer)}> #{to_timestamp(commit.ended_at)}",
+      "committer <#{to_id(commit.committer)}> #{to_timestamp(commit.time)}",
       "\n",
       commit.message
     ]

@@ -6,7 +6,7 @@ defmodule Ontogen.Commit do
   alias Ontogen.Commit.Id
   alias RDF.Graph
 
-  schema Og.Commit < PROV.Activity do
+  schema Og.Commit do
     link parent: Og.parentCommit(), type: Ontogen.Commit, depth: 0
 
     link insertion: Og.committedInsertion(), type: Expression
@@ -15,7 +15,8 @@ defmodule Ontogen.Commit do
     link committer: Og.committer(), type: Ontogen.Agent, required: true
 
     property message: Og.commitMessage(), type: :string
-    property ended_at: PROV.endedAtTime(), type: :date_time, required: true
+
+    property time: PROV.endedAtTime(), type: :date_time, required: true
   end
 
   def new(args) do
