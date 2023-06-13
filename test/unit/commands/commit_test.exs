@@ -3,7 +3,7 @@ defmodule Ontogen.Commands.CommitTest do
 
   doctest Ontogen.Commands.Commit
 
-  alias Ontogen.{Local, ProvGraph, Expression, EffectiveExpression}
+  alias Ontogen.{Local, ProvGraph, Expression, EffectiveExpression, InvalidCommitError}
   alias Ontogen.Commands.CreateUtterance
 
   test "initial commit without utterance" do
@@ -103,6 +103,14 @@ defmodule Ontogen.Commands.CommitTest do
                 ]
                 |> Enum.map(&Grax.to_rdf!/1),
                 prefixes: ProvGraph.prefixes()
+              )}
+  end
+
+  test "when direct changes and an utterance given" do
+    assert Repo.commit(insert: graph(), utter: graph()) ==
+             {:error,
+              InvalidCommitError.exception(
+                reason: "utterances are not allowed with other changes"
               )}
   end
 
@@ -309,8 +317,8 @@ defmodule Ontogen.Commands.CommitTest do
       assert {:ok, new_commit, utterance} =
                Repo.commit(
                  utter: [
-                   insertion: insert,
-                   deletion: delete,
+                   insert: insert,
+                   delete: delete,
                    time: datetime()
                  ],
                  committer: agent(:agent_jane),
@@ -320,8 +328,8 @@ defmodule Ontogen.Commands.CommitTest do
 
       assert utterance ==
                Ontogen.utterance!(
-                 insertion: insert,
-                 deletion: delete,
+                 insert: insert,
+                 delete: delete,
                  time: datetime()
                )
 
@@ -348,8 +356,8 @@ defmodule Ontogen.Commands.CommitTest do
                     EffectiveExpression.new!(original_insertion, expected_insert),
                     EffectiveExpression.new!(original_deletion, expected_delete),
                     CreateUtterance.call!(
-                      insertion: insert,
-                      deletion: delete,
+                      insert: insert,
+                      delete: delete,
                       time: datetime()
                     ),
                     Local.agent(),
@@ -391,7 +399,7 @@ defmodule Ontogen.Commands.CommitTest do
       assert {:ok, :no_effective_changes, utterance} =
                Repo.commit(
                  utter: [
-                   insertion: Expression.graph(last_commit.insertion),
+                   insert: Expression.graph(last_commit.insertion),
                    time: datetime()
                  ],
                  committer: agent(:agent_jane),
@@ -401,7 +409,7 @@ defmodule Ontogen.Commands.CommitTest do
 
       assert utterance ==
                Ontogen.utterance!(
-                 insertion: Expression.graph(last_commit.insertion),
+                 insert: Expression.graph(last_commit.insertion),
                  time: datetime()
                )
 

@@ -3,13 +3,13 @@ defmodule Ontogen.UtteranceTest do
 
   doctest Ontogen.Utterance
 
-  alias Ontogen.{Utterance, InvalidUtteranceError}
+  alias Ontogen.{Utterance, InvalidChangesetError}
 
   describe "new/1" do
     test "with all required attributes" do
       assert {:ok, %Utterance{} = utterance} =
                Utterance.new(
-                 insertion: graph(),
+                 insert: graph(),
                  speaker: agent(),
                  data_source: dataset(),
                  time: datetime()
@@ -29,7 +29,7 @@ defmodule Ontogen.UtteranceTest do
                data_source: dataset(),
                time: datetime()
              ) ==
-               {:error, InvalidUtteranceError.exception(reason: "no statements")}
+               {:error, InvalidChangesetError.exception(reason: :empty)}
     end
   end
 

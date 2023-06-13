@@ -3,7 +3,7 @@ defmodule Ontogen.CommitTest do
 
   doctest Ontogen.Commit
 
-  alias Ontogen.{Commit, InvalidCommitError}
+  alias Ontogen.{Commit, InvalidChangesetError}
 
   describe "new/1" do
     test "with all required attributes" do
@@ -11,7 +11,7 @@ defmodule Ontogen.CommitTest do
 
       assert {:ok, %Commit{} = commit} =
                Commit.new(
-                 insertion: expression(),
+                 insert: expression(),
                  committer: agent(),
                  message: message,
                  time: datetime()
@@ -30,8 +30,8 @@ defmodule Ontogen.CommitTest do
     test "implicit expression creation" do
       assert {:ok, %Commit{} = commit} =
                Commit.new(
-                 insertion: EX.S1 |> EX.p1(EX.O1),
-                 deletion: {EX.S2, EX.P2, EX.O2},
+                 insert: EX.S1 |> EX.p1(EX.O1),
+                 delete: {EX.S2, EX.P2, EX.O2},
                  committer: agent(),
                  message: "Some commit",
                  time: datetime()
@@ -45,14 +45,14 @@ defmodule Ontogen.CommitTest do
       shared_statements = [{EX.s(), EX.p(), EX.o()}]
 
       assert Commit.new(
-               insertion: graph() |> Graph.add(shared_statements),
-               deletion: shared_statements,
+               insert: graph() |> Graph.add(shared_statements),
+               delete: shared_statements,
                committer: agent(),
                message: "Inserted and deleted statement",
                time: datetime()
              ) ==
                {:error,
-                InvalidCommitError.exception(
+                InvalidChangesetError.exception(
                   reason:
                     "the following statements are in both insertion and deletions: #{inspect(shared_statements)}"
                 )}
@@ -64,7 +64,7 @@ defmodule Ontogen.CommitTest do
                message: "without inserted and deleted statements",
                time: datetime()
              ) ==
-               {:error, InvalidCommitError.exception(reason: "no statements")}
+               {:error, InvalidChangesetError.exception(reason: :empty)}
     end
   end
 end

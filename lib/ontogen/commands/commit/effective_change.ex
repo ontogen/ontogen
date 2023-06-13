@@ -1,27 +1,24 @@
 defmodule Ontogen.Commands.Commit.EffectiveChange do
-  alias Ontogen.{Commit, Expression, EffectiveExpression, Store, Repository}
+  alias Ontogen.{Changeset, Expression, EffectiveExpression, Store, Repository}
   alias RDF.Graph
 
   import Ontogen.QueryUtils
 
-  def commit(store, repo, commit) do
-    with {:ok, effective_insertion, effective_deletion} <-
-           determine(store, repo, commit.insertion, commit.deletion) do
-      Commit.effective(commit, effective_insertion, effective_deletion)
-    end
-  end
-
-  def determine(store, repo, insertion, deletion) do
+  def call(store, repo, changeset) do
+    insertion = changeset.insertion
+    deletion = changeset.deletion
     inserts = Expression.graph(insertion)
     deletes = Expression.graph(deletion)
 
     with {:ok, change_graph} <-
            Store.construct(store, Repository.dataset_graph_id(repo), query(inserts, deletes)),
-         {:ok, effective_insertion} <-
-           effective_insertion(insertion, inserts, change_graph),
-         {:ok, effective_deletion} <-
-           effective_deletion(deletion, deletes, change_graph) do
-      {:ok, effective_insertion, effective_deletion}
+         {:ok, effective_insertion} <- effective_insertion(insertion, inserts, change_graph),
+         {:ok, effective_deletion} <- effective_deletion(deletion, deletes, change_graph) do
+      if effective_insertion || effective_deletion do
+        Changeset.new(insert: effective_insertion, delete: effective_deletion)
+      else
+        {:ok, :no_effective_changes}
+      end
     end
   end
 

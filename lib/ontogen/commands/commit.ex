@@ -1,5 +1,15 @@
 defmodule Ontogen.Commands.Commit do
-  alias Ontogen.{Local, Store, Repository, Dataset, Commit, InvalidCommitError}
+  alias Ontogen.{
+    Local,
+    Store,
+    Repository,
+    Dataset,
+    Commit,
+    Changeset,
+    InvalidChangesetError,
+    InvalidCommitError
+  }
+
   alias Ontogen.Commands.CreateUtterance
   alias Ontogen.Commands.Commit.{Update, EffectiveChange}
   alias RDF.IRI
@@ -7,12 +17,14 @@ defmodule Ontogen.Commands.Commit do
   def call(store, %Repository{} = repo, args) do
     parent_commit = parent_commit(repo.dataset)
 
-    with {:ok, commit, utterance} <- build_commit(parent_commit, args),
-         {:ok, commit} <- EffectiveChange.commit(store, repo, commit),
-         {:ok, update} <- Update.build(repo, commit, utterance),
+    with {:ok, changeset, utterance, args} <- build_changes(args),
+         {:ok, effective_changeset} <- EffectiveChange.call(store, repo, changeset),
+         {:ok, commit} <- build_commit(parent_commit, changeset, args),
+         {:ok, effective_commit} <- Commit.effective(commit, effective_changeset),
+         {:ok, update} <- Update.build(repo, effective_commit, utterance),
          :ok <- Store.update(store, nil, update),
-         {:ok, new_repo} <- Repository.set_head(repo, commit) do
-      {:ok, new_repo, commit, utterance}
+         {:ok, new_repo} <- Repository.set_head(repo, effective_commit) do
+      {:ok, new_repo, effective_commit, utterance}
     end
   end
 
@@ -20,51 +32,32 @@ defmodule Ontogen.Commands.Commit do
   defp parent_commit(%Dataset{head: %IRI{} = head}), do: head
   defp parent_commit(%Dataset{head: head}), do: head.__id__
 
-  defp build_commit(parent_commit, args) do
-    with {:ok, args, utterance} <- build_changes(args) do
-      args
-      |> Keyword.put(:parent, parent_commit)
-      |> Keyword.put_new(:committer, Local.agent())
-      |> Keyword.put_new(:time, DateTime.utc_now())
-      |> Commit.new()
-      |> case do
-        {:ok, commit} -> {:ok, commit, utterance}
-        {:error, error} -> {:error, InvalidCommitError.exception(reason: error)}
-      end
-    end
+  defp build_commit(parent_commit, changeset, args) do
+    args
+    |> Keyword.put(:changeset, changeset)
+    |> Keyword.put(:parent, parent_commit)
+    |> Keyword.put_new(:committer, Local.agent())
+    |> Keyword.put_new(:time, DateTime.utc_now())
+    |> Commit.new()
   end
 
   defp build_changes(args) do
-    {utterance, args} = Keyword.pop(args, :utter)
-    {insertion, args} = Keyword.pop(args, :insert)
-    {deletion, args} = Keyword.pop(args, :delete)
+    {utterance_args, args} = Keyword.pop(args, :utter)
 
-    do_build_changes(args, utterance, insertion, deletion)
+    do_build_changes(args, utterance_args, Changeset.extract(args))
   end
 
-  defp do_build_changes(args, nil, insertion, deletion) do
-    {
-      :ok,
-      args
-      |> Keyword.put(:insertion, insertion)
-      |> Keyword.put(:deletion, deletion),
-      nil
-    }
-  end
+  defp do_build_changes(_, nil, {:ok, changeset, args}), do: {:ok, changeset, nil, args}
+  defp do_build_changes(_, nil, error), do: error
 
-  defp do_build_changes(args, utterance_args, nil, nil) do
-    with {:ok, utterance} <- CreateUtterance.call(utterance_args) do
-      {
-        :ok,
-        args
-        |> Keyword.put(:insertion, utterance.insertion)
-        |> Keyword.put(:deletion, utterance.deletion),
-        utterance
-      }
+  defp do_build_changes(args, utterance_args, {:error, %InvalidChangesetError{reason: :empty}}) do
+    with {:ok, utterance} <- CreateUtterance.call(utterance_args),
+         {:ok, changeset} <- Changeset.new(utterance) do
+      {:ok, changeset, utterance, args}
     end
   end
 
-  defp do_build_changes(_, _, _, _) do
+  defp do_build_changes(_, _, _) do
     {:error,
      InvalidCommitError.exception(reason: "utterances are not allowed with other changes")}
   end

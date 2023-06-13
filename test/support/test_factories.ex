@@ -173,7 +173,7 @@ defmodule Ontogen.TestFactories do
 
   def utterance_attrs(attrs \\ []) do
     [
-      insertion: graph(),
+      insert: graph(),
       speaker: agent(),
       data_source: dataset(),
       time: datetime()

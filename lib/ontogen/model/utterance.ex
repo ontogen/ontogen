@@ -2,9 +2,9 @@ defmodule Ontogen.Utterance do
   use Grax.Schema
 
   alias Ontogen.NS.Og
-  alias Ontogen.{Expression, InvalidUtteranceError}
+  alias Ontogen.{Expression, Changeset}
   alias Ontogen.Utterance.Id
-  alias RDF.{IRI, Graph}
+  alias RDF.Graph
 
   schema Og.Utterance do
     link insertion: Og.insertion(), type: Expression
@@ -16,12 +16,9 @@ defmodule Ontogen.Utterance do
   end
 
   def new(args) do
-    args =
-      args
-      |> Keyword.update(:insertion, nil, &normalize_expression/1)
-      |> Keyword.update(:deletion, nil, &normalize_expression/1)
-
-    with {:ok, utterance} <- build(RDF.bnode(:tmp), args),
+    with {:ok, changeset, args} <- Changeset.extract(args),
+         {:ok, utterance} <- build(RDF.bnode(:tmp), args),
+         utterance = struct(utterance, Map.from_struct(changeset)),
          {:ok, id} <- Id.generate(utterance) do
       utterance
       |> Grax.reset_id(id)
@@ -36,21 +33,9 @@ defmodule Ontogen.Utterance do
     end
   end
 
-  defp normalize_expression(nil), do: nil
-  defp normalize_expression(%Expression{} = expression), do: expression
-  defp normalize_expression(%IRI{} = id), do: id
-  defp normalize_expression(statements), do: Expression.new!(statements)
-
   def validate(utterance) do
-    with :ok <- check_statements_present(utterance.insertion, utterance.deletion) do
-      Grax.validate(utterance)
-    end
+    Grax.validate(utterance)
   end
-
-  defp check_statements_present(nil, nil),
-    do: {:error, InvalidUtteranceError.exception(reason: "no statements")}
-
-  defp check_statements_present(_, _), do: :ok
 
   def on_to_rdf(%__MODULE__{__id__: id}, graph, _opts) do
     {
