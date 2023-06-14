@@ -1,12 +1,10 @@
-defmodule Ontogen.Commands.Commit.EffectiveChange do
+defmodule Ontogen.Commands.FetchEffectiveChangeset do
   alias Ontogen.{Changeset, Expression, EffectiveExpression, Store, Repository}
   alias RDF.Graph
 
   import Ontogen.QueryUtils
 
-  def call(store, repo, changeset) do
-    insertion = changeset.insertion
-    deletion = changeset.deletion
+  def call(store, repo, %Changeset{insertion: insertion, deletion: deletion}) do
     inserts = Expression.graph(insertion)
     deletes = Expression.graph(deletion)
 
@@ -19,6 +17,12 @@ defmodule Ontogen.Commands.Commit.EffectiveChange do
       else
         {:ok, :no_effective_changes}
       end
+    end
+  end
+
+  def call(store, repo, changeset_args) do
+    with {:ok, changeset} <- Changeset.new(changeset_args) do
+      call(store, repo, changeset)
     end
   end
 

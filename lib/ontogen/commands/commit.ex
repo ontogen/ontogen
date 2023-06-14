@@ -10,15 +10,15 @@ defmodule Ontogen.Commands.Commit do
     InvalidCommitError
   }
 
-  alias Ontogen.Commands.CreateUtterance
-  alias Ontogen.Commands.Commit.{Update, EffectiveChange}
+  alias Ontogen.Commands.{CreateUtterance, FetchEffectiveChangeset}
+  alias Ontogen.Commands.Commit.Update
   alias RDF.IRI
 
   def call(store, %Repository{} = repo, args) do
     parent_commit = parent_commit(repo.dataset)
 
-    with {:ok, changeset, utterance, args} <- build_changes(args),
-         {:ok, effective_changeset} <- EffectiveChange.call(store, repo, changeset),
+    with {:ok, changeset, utterance, args} <- extract_changes(args),
+         {:ok, effective_changeset} <- FetchEffectiveChangeset.call(store, repo, changeset),
          {:ok, commit} <- build_commit(parent_commit, changeset, args),
          {:ok, effective_commit} <- Commit.effective(commit, effective_changeset),
          {:ok, update} <- Update.build(repo, effective_commit, utterance),
@@ -41,23 +41,23 @@ defmodule Ontogen.Commands.Commit do
     |> Commit.new()
   end
 
-  defp build_changes(args) do
+  defp extract_changes(args) do
     {utterance_args, args} = Keyword.pop(args, :utter)
 
-    do_build_changes(args, utterance_args, Changeset.extract(args))
+    do_extract_changes(args, utterance_args, Changeset.extract(args))
   end
 
-  defp do_build_changes(_, nil, {:ok, changeset, args}), do: {:ok, changeset, nil, args}
-  defp do_build_changes(_, nil, error), do: error
+  defp do_extract_changes(_, nil, {:ok, changeset, args}), do: {:ok, changeset, nil, args}
+  defp do_extract_changes(_, nil, error), do: error
 
-  defp do_build_changes(args, utterance_args, {:error, %InvalidChangesetError{reason: :empty}}) do
+  defp do_extract_changes(args, utterance_args, {:error, %InvalidChangesetError{reason: :empty}}) do
     with {:ok, utterance} <- CreateUtterance.call(utterance_args),
          {:ok, changeset} <- Changeset.new(utterance) do
       {:ok, changeset, utterance, args}
     end
   end
 
-  defp do_build_changes(_, _, _) do
+  defp do_extract_changes(_, _, _) do
     {:error,
      InvalidCommitError.exception(reason: "utterances are not allowed with other changes")}
   end

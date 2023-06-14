@@ -4,6 +4,10 @@ defmodule Ontogen.Changeset do
   alias Ontogen.{Expression, Utterance, EffectiveExpression, InvalidChangesetError}
   alias RDF.Graph
 
+  def new(%__MODULE__{} = changeset) do
+    validate(changeset)
+  end
+
   def new(%Utterance{} = utterance) do
     __MODULE__
     |> struct(Map.from_struct(utterance))
@@ -14,6 +18,13 @@ defmodule Ontogen.Changeset do
     case extract(args) do
       {:ok, changeset, _} -> {:ok, changeset}
       error -> error
+    end
+  end
+
+  def new!(args) do
+    case new(args) do
+      {:ok, changeset} -> changeset
+      {:error, error} -> raise error
     end
   end
 
@@ -35,14 +46,10 @@ defmodule Ontogen.Changeset do
            reason: "a changeset can not be used with additional changes"
          )}
 
-      {%__MODULE__{} = changeset, args} ->
-        with {:ok, changeset} <- validate(changeset) do
+      {changeset, args} ->
+        with {:ok, changeset} <- new(changeset) do
           {:ok, changeset, args}
         end
-
-      {invalid, _} ->
-        {:error,
-         InvalidChangesetError.exception(reason: "invalid changeset: #{inspect(invalid)}")}
     end
   end
 

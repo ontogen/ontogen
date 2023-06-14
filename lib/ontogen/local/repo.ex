@@ -6,7 +6,15 @@ defmodule Ontogen.Local.Repo do
   use GenServer
 
   alias Ontogen.Local.Repo.{Initializer, NotReadyError}
-  alias Ontogen.Commands.{RepoInfo, Commit, FetchHistory, FetchDataset, FetchProvGraph}
+
+  alias Ontogen.Commands.{
+    RepoInfo,
+    Commit,
+    FetchEffectiveChangeset,
+    FetchHistory,
+    FetchDataset,
+    FetchProvGraph
+  }
 
   def start_link(args) do
     GenServer.start_link(__MODULE__, args, name: __MODULE__)
@@ -56,6 +64,17 @@ defmodule Ontogen.Local.Repo do
 
   def commit(args) do
     GenServer.call(__MODULE__, {:commit, args})
+  end
+
+  def effective_changeset(changeset) do
+    GenServer.call(__MODULE__, {:effective_changeset, changeset})
+  end
+
+  def effective_changeset!(changeset) do
+    case effective_changeset(changeset) do
+      {:ok, changeset} -> changeset
+      {:error, error} -> raise error
+    end
   end
 
   def dataset_history(args \\ []) do
@@ -152,6 +171,17 @@ defmodule Ontogen.Local.Repo do
 
       error ->
         {:reply, error, state}
+    end
+  end
+
+  def handle_call(
+        {:effective_changeset, changeset},
+        _from,
+        %{repository: repo, store: store} = state
+      ) do
+    case FetchEffectiveChangeset.call(store, repo, changeset) do
+      {:ok, effective_changeset} -> {:reply, {:ok, effective_changeset}, state}
+      error -> {:reply, error, state}
     end
   end
 
