@@ -18,7 +18,7 @@ defmodule Ontogen.Commands.CommitTest do
             %Ontogen.Commit{
               parent: nil,
               insertion: ^expected_insertion,
-              deletion: nil,
+              deletion: [],
               committer: ^committer,
               time: ^time,
               message: ^message
@@ -69,7 +69,7 @@ defmodule Ontogen.Commands.CommitTest do
             %Ontogen.Commit{
               parent: nil,
               insertion: ^expected_insertion,
-              deletion: nil,
+              deletion: [],
               committer: ^committer,
               time: ^time,
               message: ^message
@@ -152,7 +152,7 @@ defmodule Ontogen.Commands.CommitTest do
               %Ontogen.Commit{
                 parent: nil,
                 insertion: ^expected_insertion,
-                deletion: nil,
+                deletion: [],
                 committer: ^committer,
                 time: ^time,
                 message: ^message
@@ -200,7 +200,7 @@ defmodule Ontogen.Commands.CommitTest do
 
     assert second_commit.parent == first_commit.__id__
     assert second_commit.insertion == Expression.new!(insert)
-    assert second_commit.deletion == Expression.new!(delete)
+    assert second_commit.deletion == [Expression.new!(delete)]
 
     # updates the head in the dataset of the repo
     assert Repo.head() == second_commit
@@ -222,6 +222,128 @@ defmodule Ontogen.Commands.CommitTest do
                   Expression.new!(graph()),
                   Expression.new!(insert),
                   Expression.new!(delete),
+                  Local.agent(),
+                  agent(:agent_jane)
+                ]
+                |> Enum.map(&Grax.to_rdf!/1),
+                prefixes: ProvGraph.prefixes()
+              )}
+  end
+
+  test "update" do
+    [last_commit] = init_commit_history()
+
+    update = [
+      {EX.S3, EX.p3(), "foo"},
+      EX.S2 |> EX.p2("Foo", "Bar")
+    ]
+
+    expected_update = RDF.graph([EX.S3 |> EX.p3("foo"), EX.S2 |> EX.p2("Bar")])
+    expected_delete = RDF.graph(EX.S2 |> EX.p2(42))
+
+    original_update = Expression.new!(update)
+
+    assert {:ok, new_commit, nil} =
+             Repo.commit(
+               update: update,
+               committer: agent(:agent_jane),
+               message: "Second commit",
+               time: datetime()
+             )
+
+    assert new_commit.parent == last_commit.__id__
+    assert new_commit.update == EffectiveExpression.new!(original_update, expected_update)
+
+    assert new_commit.deletion == [
+             EffectiveExpression.new!(original_update, expected_delete, only_subset: false)
+           ]
+
+    # updates the head in the dataset of the repo
+    assert Repo.head() == new_commit
+
+    # applies the changes
+    assert Repo.fetch_dataset() ==
+             {:ok,
+              graph()
+              |> Graph.add(expected_update)
+              |> Graph.delete(expected_delete)}
+
+    # inserts the provenance
+    assert Repo.fetch_prov_graph() ==
+             {:ok,
+              RDF.graph(
+                [
+                  last_commit,
+                  new_commit,
+                  Expression.new!(graph()),
+                  EffectiveExpression.new!(original_update, expected_update),
+                  EffectiveExpression.new!(original_update, expected_delete, only_subset: false),
+                  Local.agent(),
+                  agent(:agent_jane)
+                ]
+                |> Enum.map(&Grax.to_rdf!/1),
+                prefixes: ProvGraph.prefixes()
+              )}
+  end
+
+  test "replacement (with utterance)" do
+    [last_commit] = init_commit_history()
+
+    insert = {EX.S4, EX.p4(), EX.O4}
+
+    replace = [
+      {EX.S3, EX.p3(), "foo"},
+      EX.S2 |> EX.p3("Bar")
+    ]
+
+    expected_delete = RDF.graph(EX.S2 |> EX.p2(42, "Foo"))
+
+    insert_expr = Expression.new!(insert)
+    replacement_expr = Expression.new!(replace)
+
+    utterance_args = [
+      insert: insert,
+      replace: replace,
+      time: datetime(-1, :day)
+    ]
+
+    utterance = CreateUtterance.call!(utterance_args)
+
+    assert {:ok, new_commit, ^utterance} =
+             Repo.commit(
+               utter: utterance_args,
+               committer: agent(:agent_jane),
+               message: "Second commit",
+               time: datetime()
+             )
+
+    assert new_commit.parent == last_commit.__id__
+    assert new_commit.insertion == insert_expr
+    assert new_commit.replacement == replacement_expr
+
+    # updates the head in the dataset of the repo
+    assert Repo.head() == new_commit
+
+    # applies the changes
+    assert Repo.fetch_dataset() ==
+             {:ok,
+              graph()
+              |> Graph.add(insert)
+              |> Graph.add(replace)
+              |> Graph.delete(expected_delete)}
+
+    # inserts the provenance
+    assert Repo.fetch_prov_graph() ==
+             {:ok,
+              RDF.graph(
+                [
+                  last_commit,
+                  new_commit,
+                  Expression.new!(graph()),
+                  insert_expr,
+                  replacement_expr,
+                  EffectiveExpression.new!(replacement_expr, expected_delete, only_subset: false),
+                  utterance,
                   Local.agent(),
                   agent(:agent_jane)
                 ]
@@ -263,7 +385,10 @@ defmodule Ontogen.Commands.CommitTest do
 
       assert new_commit.parent == last_commit.__id__
       assert new_commit.insertion == EffectiveExpression.new!(original_insertion, expected_insert)
-      assert new_commit.deletion == EffectiveExpression.new!(original_deletion, expected_delete)
+
+      assert new_commit.deletion == [
+               EffectiveExpression.new!(original_deletion, expected_delete)
+             ]
 
       # updates the head in the dataset of the repo
       assert Repo.head() == new_commit

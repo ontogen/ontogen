@@ -9,10 +9,10 @@ defmodule Ontogen.EffectiveExpression do
   alias RDF.Graph
 
   schema Og.EffectiveExpression < Expression do
-    link origin: Og.originExpression(), type: Expression, required: true
+    link origin: Og.originExpression(), type: Expression, required: true, depth: +1
   end
 
-  def new(%Expression{} = origin, statements) do
+  def new(%Expression{} = origin, statements, opts \\ []) do
     origin_graph = graph(origin)
     graph = RDF.graph(statements)
 
@@ -20,24 +20,21 @@ defmodule Ontogen.EffectiveExpression do
       Graph.equal?(origin_graph, graph) ->
         {:ok, origin}
 
-      not Graph.include?(origin_graph, graph) ->
+      Keyword.get(opts, :only_subset, true) and not Graph.include?(origin_graph, graph) ->
         {:error, :no_subset_of_origin}
 
       true ->
         with {:ok, id} <- Id.generate(origin, graph) do
-          compound =
-            Compound.new(graph, id,
-              name: nil,
-              assertion_mode: :unasserted
-            )
-
-          build(id, origin: origin, statements: compound)
+          build(id,
+            origin: origin,
+            statements: Compound.new(graph, id, name: nil, assertion_mode: :unasserted)
+          )
         end
     end
   end
 
-  def new!(origin, statements) do
-    case new(origin, statements) do
+  def new!(origin, statements, opts \\ []) do
+    case new(origin, statements, opts) do
       {:ok, effective_expression} -> effective_expression
       {:error, error} -> raise error
     end

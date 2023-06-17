@@ -79,7 +79,7 @@ defmodule Ontogen.Commands.FetchHistoryTest do
           message: "Third commit"
         ],
         [
-          insert: {EX.S5, EX.p5(), EX.O5},
+          update: {EX.S5, EX.p5(), EX.O5},
           message: "Fourth commit"
         ]
       ])
@@ -187,7 +187,7 @@ defmodule Ontogen.Commands.FetchHistoryTest do
             message: "Another irrelevant commit"
           ],
           [
-            insert: [{EX.S1, EX.p2(), EX.O2}, {EX.S2, EX.p2(), EX.O2}],
+            replace: [{EX.S1, EX.p2(), EX.O2}, {EX.S2, EX.p2(), EX.O2}],
             message: "Fourth relevant commit"
           ]
         ])
@@ -309,7 +309,7 @@ defmodule Ontogen.Commands.FetchHistoryTest do
             message: "Another irrelevant commit"
           ],
           [
-            insert: EX.S1 |> EX.p1(EX.O1),
+            update: EX.S1 |> EX.p1(EX.O1),
             message: "Third commit"
           ]
         ])
@@ -431,7 +431,7 @@ defmodule Ontogen.Commands.FetchHistoryTest do
             message: "Another irrelevant commit"
           ],
           [
-            insert: EX.S1 |> EX.p1(EX.O1),
+            update: EX.S1 |> EX.p1(EX.O1),
             message: "Fourth commit"
           ]
         ])

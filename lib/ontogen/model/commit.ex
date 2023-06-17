@@ -9,8 +9,10 @@ defmodule Ontogen.Commit do
   schema Og.Commit do
     link parent: Og.parentCommit(), type: Ontogen.Commit, depth: 0
 
-    link insertion: Og.committedInsertion(), type: Expression
-    link deletion: Og.committedDeletion(), type: Expression
+    link insertion: Og.committedInsertion(), type: Expression, depth: +1
+    link deletion: Og.committedDeletion(), type: list_of(Expression), depth: +1
+    link update: Og.committedUpdate(), type: Expression, depth: +1
+    link replacement: Og.committedReplacement(), type: Expression, depth: +1
 
     link committer: Og.committer(), type: Ontogen.Agent, required: true
 
@@ -49,8 +51,9 @@ defmodule Ontogen.Commit do
     end
   end
 
-  defp set_changes(commit, %Changeset{} = changeset),
-    do: struct(commit, Map.from_struct(changeset))
+  defp set_changes(commit, %Changeset{} = changeset) do
+    struct(commit, changeset |> Map.from_struct() |> Map.update!(:deletion, &List.wrap/1))
+  end
 
   def validate(commit) do
     Grax.validate(commit)

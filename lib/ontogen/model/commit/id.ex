@@ -11,7 +11,9 @@ defmodule Ontogen.Commit.Id do
     [
       if(commit.parent, do: "parent #{to_hash(commit.parent)}"),
       if(commit.insertion, do: "insertion #{to_hash(commit.insertion)}"),
-      if(commit.deletion, do: "deletion #{to_hash(commit.deletion)}"),
+      if(commit.deletion != [], do: "deletion #{to_hash(commit.deletion)}"),
+      if(commit.update, do: "update #{to_hash(commit.update)}"),
+      if(commit.replacement, do: "update #{to_hash(commit.replacement)}"),
       "committer <#{to_id(commit.committer)}> #{to_timestamp(commit.time)}",
       "\n",
       commit.message

@@ -60,6 +60,8 @@ defmodule Ontogen.Commands.FetchHistory.Query do
     ?commit ?commit_p ?commit_o .
     ?insertion ?insertion_p ?insertion_o .
     ?deletion ?deletion_p ?deletion_o .
+    ?update ?update_p ?update_o .
+    ?replacement ?replacement_p ?replacement_o .
     ?committer ?committer_p ?committer_o .
     """
   end
@@ -80,6 +82,16 @@ defmodule Ontogen.Commands.FetchHistory.Query do
           ?commit og:committedDeletion ?deletion .
           #{statement_filter("?deletion", subject)}
         }
+        UNION
+        {
+          ?commit og:committedUpdate ?update .
+          #{statement_filter("?update", subject)}
+        }
+        UNION
+        {
+          ?commit og:committedReplacement ?replacement .
+          #{statement_filter("?replacement", subject)}
+        }
       }
 
       OPTIONAL {
@@ -89,6 +101,14 @@ defmodule Ontogen.Commands.FetchHistory.Query do
       OPTIONAL {
         ?commit og:committedDeletion ?deletion .
         ?deletion ?deletion_p ?deletion_o .
+      }
+      OPTIONAL {
+        ?commit og:committedUpdate ?update .
+        ?update ?update_p ?update_o .
+      }
+      OPTIONAL {
+        ?commit og:committedReplacement ?replacement .
+        ?replacement ?replacement_p ?replacement_o .
       }
     """
   end

@@ -28,6 +28,8 @@ defmodule Ontogen.Commands.Commit.Update do
      INSERT DATA {
        #{head(repo, commit.__id__)}
        #{dataset_changes(repo, commit.insertion)}
+       #{dataset_changes(repo, commit.update)}
+       #{dataset_changes(repo, commit.replacement)}
        #{provenance(repo, commit)}
        #{provenance(repo, utterance)}
      }
@@ -41,13 +43,22 @@ defmodule Ontogen.Commands.Commit.Update do
   end
 
   defp dataset_changes(_, nil), do: ""
+  defp dataset_changes(_, []), do: ""
+
+  defp dataset_changes(repo, [expression]), do: dataset_changes(repo, expression)
+
+  defp dataset_changes(repo, expressions) when is_list(expressions) do
+    do_dataset_changes(
+      repo,
+      Enum.map_join(expressions, "\n", &triples(Expression.graph(&1)))
+    )
+  end
 
   defp dataset_changes(repo, expression) do
-    data =
-      expression
-      |> Expression.graph()
-      |> triples()
+    do_dataset_changes(repo, expression |> Expression.graph() |> triples())
+  end
 
+  defp do_dataset_changes(repo, data) do
     "GRAPH <#{Repository.dataset_graph_id(repo)}> { #{data} }"
   end
 
@@ -57,5 +68,6 @@ defmodule Ontogen.Commands.Commit.Update do
     "GRAPH <#{Repository.prov_graph_id(repo)}> { #{element |> Grax.to_rdf!() |> triples()} }"
   end
 
+  defp triples(nil), do: ""
   defp triples(data), do: NTriples.write_string!(data)
 end

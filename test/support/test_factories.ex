@@ -13,6 +13,7 @@ defmodule Ontogen.TestFactories do
     Store,
     Expression,
     EffectiveExpression,
+    Changeset,
     Utterance
   }
 
@@ -37,6 +38,9 @@ defmodule Ontogen.TestFactories do
   def id(iri) when is_binary(iri), do: RDF.iri(iri)
 
   def datetime, do: ~U[2023-05-26 13:02:02.255559Z]
+
+  def datetime(amount_to_add, unit \\ :second),
+    do: datetime() |> DateTime.add(amount_to_add, unit)
 
   def local_config(id \\ :config, attrs \\ [])
 
@@ -163,6 +167,20 @@ defmodule Ontogen.TestFactories do
 
   def effective_expression do
     EffectiveExpression.new!(expression(), subgraph())
+  end
+
+  def changeset(attrs \\ []) do
+    attrs
+    |> changeset_attrs()
+    |> Changeset.new!()
+  end
+
+  def changeset_attrs(attrs \\ []) do
+    [
+      insert: graph(),
+      delete: {EX.Foo, EX.bar(), 42}
+    ]
+    |> Keyword.merge(attrs)
   end
 
   def utterance(attrs \\ []) do

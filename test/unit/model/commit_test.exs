@@ -38,7 +38,22 @@ defmodule Ontogen.CommitTest do
                )
 
       assert commit.insertion == expression(EX.S1 |> EX.p1(EX.O1))
-      assert commit.deletion == expression({EX.S2, EX.P2, EX.O2})
+      assert commit.deletion == [expression({EX.S2, EX.P2, EX.O2})]
+    end
+
+    test "with changeset" do
+      assert {:ok, %Commit{} = commit} =
+               Commit.new(
+                 changeset: changeset(),
+                 committer: agent(),
+                 message: "Some commit",
+                 time: datetime()
+               )
+
+      assert commit.insertion == changeset().insertion
+      assert commit.deletion == [changeset().deletion]
+      assert commit.update == changeset().update
+      assert commit.replacement == changeset().replacement
     end
 
     test "shared insertion and deletion statement" do

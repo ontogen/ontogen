@@ -55,8 +55,8 @@ defmodule Ontogen.Expression do
   end
 
   def graph(nil), do: nil
-
-  def graph(%{statements: compound}) do
-    Compound.graph(compound)
-  end
+  def graph([]), do: nil
+  def graph(%Graph{} = graph), do: graph
+  def graph(list) when is_list(list), do: Enum.map(list, &graph/1)
+  def graph(%{statements: compound}), do: Compound.graph(compound)
 end

@@ -5,23 +5,19 @@ defmodule Ontogen.Utterance.Id do
 
   def generate(%Utterance{} = utterance) do
     if origin = determine_origin(utterance) do
-      {:ok,
-       content_hash_iri(:utterance, &content/4, [
-         utterance.insertion,
-         utterance.deletion,
-         origin,
-         utterance.time
-       ])}
+      {:ok, content_hash_iri(:utterance, &content/2, [utterance, origin])}
     else
       {:error, error("origin missing", Utterance)}
     end
   end
 
-  def content(insertion, deletion, origin, time) do
+  def content(utterance, origin) do
     [
-      if(insertion, do: "insertion #{to_hash(insertion)}"),
-      if(deletion, do: "deletion #{to_hash(deletion)}"),
-      "context <#{to_id(origin)}> #{to_timestamp(time)}"
+      if(utterance.insertion, do: "insertion #{to_hash(utterance.insertion)}"),
+      if(utterance.deletion, do: "deletion #{to_hash(utterance.deletion)}"),
+      if(utterance.update, do: "deletion #{to_hash(utterance.update)}"),
+      if(utterance.replacement, do: "deletion #{to_hash(utterance.replacement)}"),
+      "context <#{to_id(origin)}> #{to_timestamp(utterance.time)}"
     ]
     |> Enum.reject(&is_nil/1)
     |> Enum.join("\n")

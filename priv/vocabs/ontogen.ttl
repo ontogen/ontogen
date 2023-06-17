@@ -86,6 +86,16 @@ og:Utterance a rdfs:Class
         ; rdfs:range  og:Expression
     .
 
+    og:update a rdf:Property, owl:FunctionalProperty
+        ; rdfs:domain og:Utterance
+        ; rdfs:range  og:Expression
+    .
+
+    og:replacement a rdf:Property, owl:FunctionalProperty
+        ; rdfs:domain og:Utterance
+        ; rdfs:range  og:Expression
+    .
+
 
 og:Expression a rdfs:Class
     ; rdfs:subClassOf rtc:Compound
@@ -110,15 +120,25 @@ og:Commit a rdfs:Class
     ; rdfs:label "Ontogen commit"
 .
 
-    og:committedInsertion a rdf:Property,
-                            owl:FunctionalProperty
+    og:committedInsertion a rdf:Property, owl:FunctionalProperty
         ; rdfs:subPropertyOf prov:used
         ; rdfs:domain og:Commit
         ; rdfs:range  og:Expression
     .
 
-    og:committedDeletion a rdf:Property,
-                           owl:FunctionalProperty
+    og:committedDeletion a rdf:Property
+        ; rdfs:subPropertyOf prov:used
+        ; rdfs:domain og:Commit
+        ; rdfs:range  og:Expression
+    .
+
+    og:committedUpdate a rdf:Property, owl:FunctionalProperty
+        ; rdfs:subPropertyOf prov:used
+        ; rdfs:domain og:Commit
+        ; rdfs:range  og:Expression
+    .
+
+    og:committedReplacement a rdf:Property, owl:FunctionalProperty
         ; rdfs:subPropertyOf prov:used
         ; rdfs:domain og:Commit
         ; rdfs:range  og:Expression

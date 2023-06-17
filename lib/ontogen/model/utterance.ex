@@ -7,8 +7,10 @@ defmodule Ontogen.Utterance do
   alias RDF.Graph
 
   schema Og.Utterance do
-    link insertion: Og.insertion(), type: Expression
-    link deletion: Og.deletion(), type: Expression
+    link insertion: Og.insertion(), type: Expression, depth: +1
+    link deletion: Og.deletion(), type: Expression, depth: +1
+    link update: Og.update(), type: Expression, depth: +1
+    link replacement: Og.replacement(), type: Expression, depth: +1
 
     property time: PROV.endedAtTime(), type: :date_time, required: true
     link speaker: Og.speaker(), type: Ontogen.Agent
