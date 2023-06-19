@@ -69,17 +69,20 @@ defmodule Ontogen.Commands.FetchHistoryTest do
           message: "Initial commit"
         ],
         [
-          insert: {EX.S3, EX.p3(), "foo"},
+          # this leads to an EffectiveExpression
+          insert: [{EX.S3, EX.p3(), "foo"}],
           delete: EX.S1 |> EX.p1(EX.O1),
           committer: agent(:agent_jane),
           message: "Second commit"
         ],
         [
-          insert: {EX.S4, EX.p4(), EX.O4},
+          # this leads to an EffectiveExpression
+          insert: [{EX.S4, EX.p4(), EX.O4}, {EX.S3, EX.p3(), "foo"}],
           message: "Third commit"
         ],
         [
-          update: {EX.S5, EX.p5(), EX.O5},
+          # this leads to an EffectiveExpression
+          update: [{EX.S5, EX.p5(), EX.O5}, graph()],
           message: "Fourth commit"
         ]
       ])
@@ -169,7 +172,8 @@ defmodule Ontogen.Commands.FetchHistoryTest do
             message: "Irrelevant commit"
           ],
           [
-            insert: {EX.S3, EX.p3(), "bar"},
+            # this leads to an EffectiveExpression
+            insert: [{EX.S3, EX.p3(), "foo"}, {EX.S3, EX.p3(), "bar"}],
             delete: EX.S1 |> EX.p1(EX.O1),
             committer: agent(:agent_jane),
             message: "Second relevant commit"
@@ -309,7 +313,8 @@ defmodule Ontogen.Commands.FetchHistoryTest do
             message: "Another irrelevant commit"
           ],
           [
-            update: EX.S1 |> EX.p1(EX.O1),
+            # this leads to an EffectiveExpression
+            update: [EX.S1 |> EX.p1(EX.O1), {EX.S4, EX.p4(), EX.O4}],
             message: "Third commit"
           ]
         ])
@@ -417,7 +422,8 @@ defmodule Ontogen.Commands.FetchHistoryTest do
             message: "Irrelevant commit"
           ],
           [
-            insert: {EX.S3, EX.p3(), "foo"},
+            # this leads to an EffectiveExpression
+            insert: [{EX.S3, EX.p3(), "foo"}, {EX.S3, EX.p3(), EX.O3}],
             delete: EX.S1 |> EX.p1(EX.O1),
             committer: agent(:agent_jane),
             message: "Second relevant commit"

@@ -63,6 +63,7 @@ defmodule Ontogen.Commands.FetchHistory.Query do
     ?update ?update_p ?update_o .
     ?replacement ?replacement_p ?replacement_o .
     ?committer ?committer_p ?committer_o .
+    ?origin ?origin_p ?origin_o
     """
   end
 
@@ -97,18 +98,34 @@ defmodule Ontogen.Commands.FetchHistory.Query do
       OPTIONAL {
         ?commit og:committedInsertion ?insertion .
         ?insertion ?insertion_p ?insertion_o .
+        OPTIONAL {
+          ?insertion og:originExpression ?origin .
+          ?origin ?origin_p ?origin_o .
+        }
       }
       OPTIONAL {
         ?commit og:committedDeletion ?deletion .
         ?deletion ?deletion_p ?deletion_o .
+        OPTIONAL {
+          ?deletion og:originExpression ?origin .
+          ?origin ?origin_p ?origin_o .
+        }
       }
       OPTIONAL {
         ?commit og:committedUpdate ?update .
         ?update ?update_p ?update_o .
+        OPTIONAL {
+          ?update og:originExpression ?origin .
+          ?origin ?origin_p ?origin_o .
+        }
       }
       OPTIONAL {
         ?commit og:committedReplacement ?replacement .
         ?replacement ?replacement_p ?replacement_o .
+        OPTIONAL {
+          ?replacement og:originExpression ?origin .
+          ?origin ?origin_p ?origin_o .
+        }
       }
     """
   end
