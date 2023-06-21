@@ -6,7 +6,6 @@ defmodule Ontogen.Commands.Commit do
     Dataset,
     Commit,
     Changeset,
-    InvalidChangesetError,
     InvalidCommitError
   }
 
@@ -16,15 +15,16 @@ defmodule Ontogen.Commands.Commit do
 
   def call(store, %Repository{} = repo, args) do
     parent_commit = parent_commit(repo.dataset)
+    {no_effective_changes, args} = Keyword.pop(args, :no_effective_changes, :error)
 
-    with {:ok, changeset, utterance, args} <- extract_changes(args),
-         {:ok, effective_changeset} <- FetchEffectiveChangeset.call(store, repo, changeset),
-         {:ok, commit} <- build_commit(parent_commit, changeset, args),
-         {:ok, effective_commit} <- Commit.effective(commit, effective_changeset),
-         {:ok, update} <- Update.build(repo, effective_commit, utterance),
+    with {:ok, utterance, args} <- extract_utterance(args),
+         {:ok, effective_changeset} <- FetchEffectiveChangeset.call(store, repo, utterance),
+         {:ok, commit} <-
+           build_commit(parent_commit, utterance, effective_changeset, args, no_effective_changes),
+         {:ok, update} <- Update.build(repo, commit),
          :ok <- Store.update(store, nil, update),
-         {:ok, new_repo} <- Repository.set_head(repo, effective_commit) do
-      {:ok, new_repo, effective_commit, utterance}
+         {:ok, new_repo} <- Repository.set_head(repo, commit) do
+      {:ok, new_repo, commit}
     end
   end
 
@@ -32,8 +32,17 @@ defmodule Ontogen.Commands.Commit do
   defp parent_commit(%Dataset{head: %IRI{} = head}), do: head
   defp parent_commit(%Dataset{head: head}), do: head.__id__
 
-  defp build_commit(parent_commit, changeset, args) do
+  defp build_commit(_, _, :no_effective_changes, _, :error) do
+    {:error, :no_effective_changes}
+  end
+
+  defp build_commit(_, _, :no_effective_changes, _, unknown) do
+    raise ArgumentError, "unknown :no_effective_changes value: #{inspect(unknown)}"
+  end
+
+  defp build_commit(parent_commit, utterance, changeset, args, _) do
     args
+    |> Keyword.put(:utterance, utterance)
     |> Keyword.put(:changeset, changeset)
     |> Keyword.put(:parent, parent_commit)
     |> Keyword.put_new(:committer, Local.agent())
@@ -41,24 +50,21 @@ defmodule Ontogen.Commands.Commit do
     |> Commit.new()
   end
 
-  defp extract_changes(args) do
-    {utterance_args, args} = Keyword.pop(args, :utter)
+  defp extract_utterance(args) do
+    {utterance_args, args} = Keyword.pop(args, :utterance)
 
-    do_extract_changes(args, utterance_args, Changeset.extract(args))
-  end
+    cond do
+      utterance_args && Changeset.empty?(args) ->
+        with {:ok, utterance} <- CreateUtterance.call(utterance_args) do
+          {:ok, utterance, args}
+        end
 
-  defp do_extract_changes(_, nil, {:ok, changeset, args}), do: {:ok, changeset, nil, args}
-  defp do_extract_changes(_, nil, error), do: error
+      utterance_args ->
+        {:error,
+         InvalidCommitError.exception(reason: "utterances are not allowed with other changes")}
 
-  defp do_extract_changes(args, utterance_args, {:error, %InvalidChangesetError{reason: :empty}}) do
-    with {:ok, utterance} <- CreateUtterance.call(utterance_args),
-         {:ok, changeset} <- Changeset.new(utterance) do
-      {:ok, changeset, utterance, args}
+      true ->
+        CreateUtterance.extract(args)
     end
-  end
-
-  defp do_extract_changes(_, _, _) do
-    {:error,
-     InvalidCommitError.exception(reason: "utterances are not allowed with other changes")}
   end
 end

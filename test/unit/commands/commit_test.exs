@@ -3,10 +3,9 @@ defmodule Ontogen.Commands.CommitTest do
 
   doctest Ontogen.Commands.Commit
 
-  alias Ontogen.{Local, ProvGraph, Expression, EffectiveExpression, InvalidCommitError}
-  alias Ontogen.Commands.CreateUtterance
+  alias Ontogen.{Local, ProvGraph, Expression, InvalidCommitError}
 
-  test "initial commit without utterance" do
+  test "initial commit with implicit utterance" do
     refute Repo.head()
 
     expected_insertion = Expression.new!(graph())
@@ -14,22 +13,25 @@ defmodule Ontogen.Commands.CommitTest do
     time = datetime()
     message = "Initial commit"
 
-    assert {:ok,
-            %Ontogen.Commit{
-              parent: nil,
-              insertion: ^expected_insertion,
-              deletion: [],
-              committer: ^committer,
-              time: ^time,
-              message: ^message
-            } = commit,
-            nil} =
+    utterance = utterance(time: datetime(-1, :day))
+
+    assert {:ok, %Ontogen.Commit{} = commit} =
              Repo.commit(
                insert: graph(),
+               data_source: dataset(),
+               speaker: agent(),
                committer: committer,
                time: time,
+               utterance_time: datetime(-1, :day),
                message: message
              )
+
+    assert commit.parent == nil
+    assert commit.utterance == utterance
+    assert commit.insertion == expected_insertion
+    assert commit.committer == committer
+    assert commit.time == time
+    assert commit.message == message
 
     # updates the head in the dataset of the repo
     assert Repo.head() == commit
@@ -47,6 +49,7 @@ defmodule Ontogen.Commands.CommitTest do
                 [
                   [
                     commit,
+                    utterance,
                     expected_insertion,
                     committer
                   ]
@@ -56,10 +59,11 @@ defmodule Ontogen.Commands.CommitTest do
               )}
   end
 
-  test "initial commit with directly given utterance" do
+  test "initial commit with explicit utterance" do
     refute Repo.head()
 
     utterance = utterance()
+
     expected_insertion = utterance.insertion
     committer = agent(:agent_jane)
     time = datetime()
@@ -68,15 +72,14 @@ defmodule Ontogen.Commands.CommitTest do
     assert {:ok,
             %Ontogen.Commit{
               parent: nil,
+              utterance: ^utterance,
               insertion: ^expected_insertion,
-              deletion: [],
               committer: ^committer,
               time: ^time,
               message: ^message
-            } = commit,
-            ^utterance} =
+            } = commit} =
              Repo.commit(
-               utter: utterance,
+               utterance: utterance,
                committer: committer,
                time: time,
                message: message
@@ -107,7 +110,7 @@ defmodule Ontogen.Commands.CommitTest do
   end
 
   test "when direct changes and an utterance given" do
-    assert Repo.commit(insert: graph(), utter: graph()) ==
+    assert Repo.commit(insert: graph(), utterance: graph()) ==
              {:error,
               InvalidCommitError.exception(
                 reason: "utterances are not allowed with other changes"
@@ -115,16 +118,20 @@ defmodule Ontogen.Commands.CommitTest do
   end
 
   describe "defaults" do
-    test "without utterance" do
+    test "with implicit utterance" do
       refute Repo.head()
 
       expected_insertion = Expression.new!(graph())
 
-      assert {:ok, commit, nil} = Repo.commit(insert: graph())
+      assert {:ok, commit} = Repo.commit(insert: graph())
 
       assert commit.insertion == expected_insertion
       assert commit.committer == Local.agent()
       assert DateTime.diff(DateTime.utc_now(), commit.time, :second) <= 1
+
+      assert commit.utterance.insertion == expected_insertion
+      assert commit.utterance.speaker == Local.agent()
+      assert DateTime.diff(DateTime.utc_now(), commit.utterance.time, :second) <= 1
 
       # inserts the provenance
       assert Repo.fetch_prov_graph() ==
@@ -140,7 +147,7 @@ defmodule Ontogen.Commands.CommitTest do
                 )}
     end
 
-    test "with utterance" do
+    test "with explicit utterance" do
       refute Repo.head()
 
       expected_insertion = utterance().insertion
@@ -152,20 +159,18 @@ defmodule Ontogen.Commands.CommitTest do
               %Ontogen.Commit{
                 parent: nil,
                 insertion: ^expected_insertion,
-                deletion: [],
                 committer: ^committer,
                 time: ^time,
                 message: ^message
-              } = commit,
-              utterance} =
+              } = commit} =
                Repo.commit(
-                 utter: utterance_attrs(),
+                 utterance: utterance_attrs(),
                  committer: committer,
                  time: time,
                  message: message
                )
 
-      assert utterance == utterance()
+      assert commit.utterance == utterance()
 
       # inserts the provenance
       assert Repo.fetch_prov_graph() ==
@@ -189,7 +194,7 @@ defmodule Ontogen.Commands.CommitTest do
     insert = RDF.graph({EX.S3, EX.p3(), "foo"})
     delete = RDF.graph(EX.S1 |> EX.p1(EX.O1))
 
-    assert {:ok, second_commit, nil} =
+    assert {:ok, second_commit} =
              Repo.commit(
                insert: insert,
                delete: delete,
@@ -200,7 +205,7 @@ defmodule Ontogen.Commands.CommitTest do
 
     assert second_commit.parent == first_commit.__id__
     assert second_commit.insertion == Expression.new!(insert)
-    assert second_commit.deletion == [Expression.new!(delete)]
+    assert second_commit.deletion == Expression.new!(delete)
 
     # updates the head in the dataset of the repo
     assert Repo.head() == second_commit
@@ -243,7 +248,10 @@ defmodule Ontogen.Commands.CommitTest do
 
     original_update = Expression.new!(update)
 
-    assert {:ok, new_commit, nil} =
+    expected_update_expr = Expression.new!(expected_update)
+    expected_delete_expr = Expression.new!(expected_delete)
+
+    assert {:ok, new_commit} =
              Repo.commit(
                update: update,
                committer: agent(:agent_jane),
@@ -252,11 +260,9 @@ defmodule Ontogen.Commands.CommitTest do
              )
 
     assert new_commit.parent == last_commit.__id__
-    assert new_commit.update == EffectiveExpression.new!(original_update, expected_update)
-
-    assert new_commit.deletion == [
-             EffectiveExpression.new!(original_update, expected_delete, only_subset: false)
-           ]
+    assert new_commit.update == expected_update_expr
+    assert new_commit.overwrite == expected_delete_expr
+    assert new_commit.deletion == nil
 
     # updates the head in the dataset of the repo
     assert Repo.head() == new_commit
@@ -276,8 +282,9 @@ defmodule Ontogen.Commands.CommitTest do
                   last_commit,
                   new_commit,
                   Expression.new!(graph()),
-                  EffectiveExpression.new!(original_update, expected_update),
-                  EffectiveExpression.new!(original_update, expected_delete, only_subset: false),
+                  expected_update_expr,
+                  expected_delete_expr,
+                  original_update,
                   Local.agent(),
                   agent(:agent_jane)
                 ]
@@ -300,6 +307,7 @@ defmodule Ontogen.Commands.CommitTest do
 
     insert_expr = Expression.new!(insert)
     replacement_expr = Expression.new!(replace)
+    overwrite_expr = Expression.new!(expected_delete)
 
     utterance_args = [
       insert: insert,
@@ -307,19 +315,21 @@ defmodule Ontogen.Commands.CommitTest do
       time: datetime(-1, :day)
     ]
 
-    utterance = CreateUtterance.call!(utterance_args)
+    utterance = Ontogen.utterance!(utterance_args)
 
-    assert {:ok, new_commit, ^utterance} =
+    assert {:ok, new_commit} =
              Repo.commit(
-               utter: utterance_args,
+               utterance: utterance_args,
                committer: agent(:agent_jane),
                message: "Second commit",
                time: datetime()
              )
 
     assert new_commit.parent == last_commit.__id__
+    assert new_commit.utterance == utterance
     assert new_commit.insertion == insert_expr
     assert new_commit.replacement == replacement_expr
+    assert new_commit.overwrite == overwrite_expr
 
     # updates the head in the dataset of the repo
     assert Repo.head() == new_commit
@@ -342,7 +352,7 @@ defmodule Ontogen.Commands.CommitTest do
                   Expression.new!(graph()),
                   insert_expr,
                   replacement_expr,
-                  EffectiveExpression.new!(replacement_expr, expected_delete, only_subset: false),
+                  overwrite_expr,
                   utterance,
                   Local.agent(),
                   agent(:agent_jane)
@@ -371,10 +381,19 @@ defmodule Ontogen.Commands.CommitTest do
       expected_insert = RDF.graph(EX.S3 |> EX.p3("foo"))
       expected_delete = RDF.graph(EX.S2 |> EX.p2(42))
 
-      original_insertion = Expression.new!(insert)
-      original_deletion = Expression.new!(delete)
+      expected_insert_expr = Expression.new!(expected_insert)
+      expected_delete_expr = Expression.new!(expected_delete)
 
-      assert {:ok, new_commit, nil} =
+      utterance =
+        utterance(
+          insert: insert,
+          delete: delete,
+          speaker: agent(:agent_jane),
+          time: datetime(),
+          data_source: nil
+        )
+
+      assert {:ok, new_commit} =
                Repo.commit(
                  insert: insert,
                  delete: delete,
@@ -384,11 +403,9 @@ defmodule Ontogen.Commands.CommitTest do
                )
 
       assert new_commit.parent == last_commit.__id__
-      assert new_commit.insertion == EffectiveExpression.new!(original_insertion, expected_insert)
-
-      assert new_commit.deletion == [
-               EffectiveExpression.new!(original_deletion, expected_delete)
-             ]
+      assert new_commit.insertion == expected_insert_expr
+      assert new_commit.deletion == expected_delete_expr
+      assert new_commit.utterance == utterance
 
       # updates the head in the dataset of the repo
       assert Repo.head() == new_commit
@@ -407,9 +424,10 @@ defmodule Ontogen.Commands.CommitTest do
                   [
                     last_commit,
                     new_commit,
+                    utterance,
                     Expression.new!(graph()),
-                    EffectiveExpression.new!(original_insertion, expected_insert),
-                    EffectiveExpression.new!(original_deletion, expected_delete),
+                    expected_insert_expr,
+                    expected_delete_expr,
                     Local.agent(),
                     agent(:agent_jane)
                   ]
@@ -436,12 +454,12 @@ defmodule Ontogen.Commands.CommitTest do
       expected_insert = RDF.graph(EX.S3 |> EX.p3("foo"))
       expected_delete = RDF.graph(EX.S1 |> EX.p1(EX.O1))
 
-      original_insertion = Expression.new!(insert)
-      original_deletion = Expression.new!(delete)
+      expected_insertion_expr = Expression.new!(expected_insert)
+      expected_deletion_expr = Expression.new!(expected_delete)
 
-      assert {:ok, new_commit, utterance} =
+      assert {:ok, new_commit} =
                Repo.commit(
-                 utter: [
+                 utterance: [
                    insert: insert,
                    delete: delete,
                    time: datetime()
@@ -451,7 +469,7 @@ defmodule Ontogen.Commands.CommitTest do
                  time: datetime()
                )
 
-      assert utterance ==
+      assert new_commit.utterance ==
                Ontogen.utterance!(
                  insert: insert,
                  delete: delete,
@@ -459,6 +477,8 @@ defmodule Ontogen.Commands.CommitTest do
                )
 
       assert new_commit.parent == last_commit.__id__
+      assert new_commit.insertion == expected_insertion_expr
+      assert new_commit.deletion == expected_deletion_expr
 
       # updates the head in the dataset of the repo
       assert Repo.head() == new_commit
@@ -478,9 +498,9 @@ defmodule Ontogen.Commands.CommitTest do
                     last_commit,
                     new_commit,
                     Expression.new!(graph()),
-                    EffectiveExpression.new!(original_insertion, expected_insert),
-                    EffectiveExpression.new!(original_deletion, expected_delete),
-                    CreateUtterance.call!(
+                    expected_insertion_expr,
+                    expected_deletion_expr,
+                    Ontogen.utterance!(
                       insert: insert,
                       delete: delete,
                       time: datetime()
@@ -493,7 +513,7 @@ defmodule Ontogen.Commands.CommitTest do
                 )}
     end
 
-    test "when there are no remaining changes; without an utterance" do
+    test "when there are no remaining changes; with no_effective_changes: :error" do
       [last_commit] = init_commit_history()
       {:ok, last_dataset} = Repo.fetch_dataset()
       {:ok, last_prov_graph} = Repo.fetch_prov_graph()
@@ -502,7 +522,8 @@ defmodule Ontogen.Commands.CommitTest do
                insert: Expression.graph(last_commit.insertion),
                committer: agent(:agent_jane),
                message: "Second commit",
-               time: datetime()
+               time: datetime(),
+               no_effective_changes: :error
              ) ==
                {:error, :no_effective_changes}
 
@@ -514,39 +535,6 @@ defmodule Ontogen.Commands.CommitTest do
 
       # does not change the provenance graph
       assert Repo.fetch_prov_graph() == {:ok, last_prov_graph}
-    end
-
-    test "when there are no remaining changes; with a new utterance" do
-      [last_commit] = init_commit_history()
-      {:ok, last_dataset} = Repo.fetch_dataset()
-      {:ok, last_prov_graph} = Repo.fetch_prov_graph()
-
-      assert {:ok, :no_effective_changes, utterance} =
-               Repo.commit(
-                 utter: [
-                   insert: Expression.graph(last_commit.insertion),
-                   time: datetime()
-                 ],
-                 committer: agent(:agent_jane),
-                 message: "Second commit",
-                 time: datetime()
-               )
-
-      assert utterance ==
-               Ontogen.utterance!(
-                 insert: Expression.graph(last_commit.insertion),
-                 time: datetime()
-               )
-
-      # does not change the head in the dataset of the repo
-      assert Repo.head() == last_commit
-
-      # does not change the dataset
-      assert Repo.fetch_dataset() == {:ok, last_dataset}
-
-      # adds only the utterance on the provenance graph
-      assert Repo.fetch_prov_graph() ==
-               {:ok, last_prov_graph |> Graph.add(Grax.to_rdf!(utterance))}
     end
   end
 end

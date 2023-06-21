@@ -27,27 +27,18 @@ defmodule Ontogen.ChangesetTest do
       end)
     end
 
-    test "multiple :delete statements" do
-      other_delete = EX.Foo |> EX.bar(42)
-
-      Enum.each(@statement_forms, fn statements ->
-        assert Changeset.new(delete: statements, delete: other_delete) ==
-                 {:ok,
-                  %Changeset{
-                    deletion: [
-                      statements |> RDF.graph() |> Expression.new!(),
-                      Expression.new!(other_delete)
-                    ]
-                  }}
-      end)
-    end
-
-    test "empty :deletes" do
-      assert Changeset.new(update: graph(), delete: nil, delete: nil) ==
-               {:ok, %Changeset{update: Expression.new!(graph()), deletion: nil}}
+    test "multiple occurrences of the same change key" do
+      assert Changeset.new(delete: nil, delete: {EX.S, EX.p(), EX.O}, delete: graph()) ==
+               {:ok,
+                %Changeset{
+                  deletion: graph() |> Graph.add({EX.S, EX.p(), EX.O}) |> Expression.new!()
+                }}
 
       assert Changeset.new(delete: nil, delete: nil, delete: graph()) ==
                {:ok, %Changeset{deletion: Expression.new!(graph())}}
+
+      assert Changeset.new(update: graph(), delete: nil, delete: nil) ==
+               {:ok, %Changeset{update: Expression.new!(graph()), deletion: nil}}
     end
 
     test ":update statements in various forms" do
@@ -95,10 +86,10 @@ defmodule Ontogen.ChangesetTest do
       assert Changeset.new(delete: nil) ==
                {:error, InvalidChangesetError.exception(reason: :empty)}
 
-      assert Changeset.new(insert: []) ==
+      assert Changeset.new(update: nil) ==
                {:error, InvalidChangesetError.exception(reason: :empty)}
 
-      assert Changeset.new(delete: []) ==
+      assert Changeset.new(replace: nil) ==
                {:error, InvalidChangesetError.exception(reason: :empty)}
     end
 
@@ -136,33 +127,6 @@ defmodule Ontogen.ChangesetTest do
 
       assert Changeset.new(
                replace: graph() |> Graph.add(shared_statements),
-               delete: shared_statements
-             ) ==
-               {:error,
-                InvalidChangesetError.exception(
-                  reason:
-                    "the following statements are in both insertion and deletions: #{inspect(shared_statements)}"
-                )}
-    end
-
-    test "overlapping insertion and deletion statements when multiple deletions" do
-      shared_statements = [{EX.s(), EX.p(), EX.o()}]
-      other_delete = EX.Foo1 |> EX.bar1(42)
-
-      assert Changeset.new(
-               insert: graph() |> Graph.add(shared_statements),
-               delete: shared_statements,
-               delete: other_delete
-             ) ==
-               {:error,
-                InvalidChangesetError.exception(
-                  reason:
-                    "the following statements are in both insertion and deletions: #{inspect(shared_statements)}"
-                )}
-
-      assert Changeset.new(
-               insert: graph() |> Graph.add(shared_statements),
-               delete: other_delete,
                delete: shared_statements
              ) ==
                {:error,

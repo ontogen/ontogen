@@ -63,26 +63,31 @@ defmodule Ontogen.Commands.FetchHistoryTest do
     end
 
     defp init_history do
+      graph = [
+        EX.S1 |> EX.p1(EX.O1),
+        EX.S2 |> EX.p2(42, "Foo")
+      ]
+
       init_commit_history([
         [
-          insert: graph(),
+          insert: graph,
           message: "Initial commit"
         ],
         [
-          # this leads to an EffectiveExpression
+          # this leads to a different effective change
           insert: [{EX.S3, EX.p3(), "foo"}],
           delete: EX.S1 |> EX.p1(EX.O1),
           committer: agent(:agent_jane),
           message: "Second commit"
         ],
         [
-          # this leads to an EffectiveExpression
+          # this leads to a different effective change
           insert: [{EX.S4, EX.p4(), EX.O4}, {EX.S3, EX.p3(), "foo"}],
           message: "Third commit"
         ],
         [
-          # this leads to an EffectiveExpression
-          update: [{EX.S5, EX.p5(), EX.O5}, graph()],
+          # this leads to a different effective change
+          update: [{EX.S5, EX.p5(), EX.O5}, graph],
           message: "Fourth commit"
         ]
       ])
@@ -164,7 +169,10 @@ defmodule Ontogen.Commands.FetchHistoryTest do
       [fourth, _, _, third, second, _, first] =
         init_commit_history([
           [
-            insert: graph(),
+            insert: [
+              EX.S1 |> EX.p1(EX.O1),
+              EX.S2 |> EX.p2(42, "Foo")
+            ],
             message: "Initial commit"
           ],
           [
@@ -172,7 +180,7 @@ defmodule Ontogen.Commands.FetchHistoryTest do
             message: "Irrelevant commit"
           ],
           [
-            # this leads to an EffectiveExpression
+            # this leads to a different effective change
             insert: [{EX.S3, EX.p3(), "foo"}, {EX.S3, EX.p3(), "bar"}],
             delete: EX.S1 |> EX.p1(EX.O1),
             committer: agent(:agent_jane),
@@ -291,7 +299,10 @@ defmodule Ontogen.Commands.FetchHistoryTest do
       [third, _, _, second, _, first] =
         init_commit_history([
           [
-            insert: graph(),
+            insert: [
+              EX.S1 |> EX.p1(EX.O1),
+              EX.S2 |> EX.p2(42, "Foo")
+            ],
             message: "Initial commit"
           ],
           [
@@ -313,7 +324,7 @@ defmodule Ontogen.Commands.FetchHistoryTest do
             message: "Another irrelevant commit"
           ],
           [
-            # this leads to an EffectiveExpression
+            # this leads to a different effective change
             update: [EX.S1 |> EX.p1(EX.O1), {EX.S4, EX.p4(), EX.O4}],
             message: "Third commit"
           ]
@@ -414,7 +425,10 @@ defmodule Ontogen.Commands.FetchHistoryTest do
       [fourth, _, third, second, _, first] =
         init_commit_history([
           [
-            insert: graph(),
+            insert: [
+              EX.S1 |> EX.p1(EX.O1),
+              EX.S2 |> EX.p2(42, "Foo")
+            ],
             message: "Initial commit"
           ],
           [
@@ -422,14 +436,15 @@ defmodule Ontogen.Commands.FetchHistoryTest do
             message: "Irrelevant commit"
           ],
           [
-            # this leads to an EffectiveExpression
+            # this leads to a different effective change
             insert: [{EX.S3, EX.p3(), "foo"}, {EX.S3, EX.p3(), EX.O3}],
             delete: EX.S1 |> EX.p1(EX.O1),
             committer: agent(:agent_jane),
             message: "Second relevant commit"
           ],
           [
-            insert: {EX.S1, EX.p1(), EX.O2},
+            # this leads to a different effective change (which caused the EffectiveExpression-origin-overlap-problem in the old effective change model)
+            insert: [{EX.S1, EX.p1(), EX.O2}, {EX.S3, EX.p3(), EX.O3}],
             message: "Third relevant commit"
           ],
           [

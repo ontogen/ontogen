@@ -10,7 +10,7 @@ defmodule Ontogen.Local.Repo.Test.Case do
       use Ontogen.Test.Case, async: false
 
       alias Ontogen.Repository
-      alias Ontogen.{Local, Store}
+      alias Ontogen.{Local, Store, Changeset}
       alias Ontogen.Local.Repo
 
       import unquote(__MODULE__)
@@ -71,7 +71,7 @@ defmodule Ontogen.Local.Repo.Test.Case do
       commit_args =
         Keyword.put_new(commit_args, :time, DateTime.add(time, 0 - time_offset, :hour))
 
-      assert {:ok, commit, _} = Repo.commit(commit_args)
+      assert {:ok, commit} = Repo.commit(commit_args)
       assert Repo.head() == commit
 
       commit

@@ -58,74 +58,99 @@ defmodule Ontogen.Commands.FetchHistory.Query do
   defp commit_statements_construct_pattern do
     """
     ?commit ?commit_p ?commit_o .
+    ?committed_insertion ?committed_insertion_p ?committed_insertion_o .
+    ?committed_deletion ?committed_deletion_p ?committed_deletion_o .
+    ?committed_update ?committed_update_p ?committed_update_o .
+    ?committed_replacement ?committed_replacement_p ?committed_replacement_o .
+    ?committed_overwrite ?committed_overwrite_p ?committed_overwrite_o .
+    ?committer ?committer_p ?committer_o .
+    ?utterance ?utterance_p ?utterance_o .
+    ?speaker ?speaker_p ?speaker_o .
     ?insertion ?insertion_p ?insertion_o .
     ?deletion ?deletion_p ?deletion_o .
     ?update ?update_p ?update_o .
     ?replacement ?replacement_p ?replacement_o .
-    ?committer ?committer_p ?committer_o .
-    ?origin ?origin_p ?origin_o
     """
   end
 
   defp commit_statements_query_pattern(subject) do
     """
-    ?commit ?commit_p ?commit_o .
+    ?commit
+        ?commit_p ?commit_o ;
+        og:committer ?committer ;
+        og:utterance ?utterance .
 
-      ?commit og:committer ?committer .
       ?committer ?committer_p ?committer_o .
+
       {
         {
-          ?commit og:committedInsertion ?insertion .
-          #{statement_filter("?insertion", subject)}
+          ?commit og:committedInsertion ?committed_insertion .
+          #{statement_filter("?committed_insertion", subject)}
         }
         UNION
         {
-          ?commit og:committedDeletion ?deletion .
-          #{statement_filter("?deletion", subject)}
+          ?commit og:committedDeletion ?committed_deletion .
+          #{statement_filter("?committed_deletion", subject)}
         }
         UNION
         {
-          ?commit og:committedUpdate ?update .
-          #{statement_filter("?update", subject)}
+          ?commit og:committedUpdate ?committed_update .
+          #{statement_filter("?committed_update", subject)}
         }
         UNION
         {
-          ?commit og:committedReplacement ?replacement .
-          #{statement_filter("?replacement", subject)}
+          ?commit og:committedReplacement ?committed_replacement .
+          #{statement_filter("?committed_replacement", subject)}
+        }
+        UNION
+        {
+          ?commit og:committedOverwrite ?committed_overwrite .
+          #{statement_filter("?committed_overwrite", subject)}
         }
       }
 
       OPTIONAL {
-        ?commit og:committedInsertion ?insertion .
+        ?commit og:committedInsertion ?committed_insertion .
+        ?committed_insertion ?committed_insertion_p ?committed_insertion_o .
+      }
+      OPTIONAL {
+        ?commit og:committedDeletion ?committed_deletion .
+        ?committed_deletion ?committed_deletion_p ?committed_deletion_o .
+      }
+      OPTIONAL {
+        ?commit og:committedUpdate ?committed_update .
+        ?committed_update ?committed_update_p ?committed_update_o .
+      }
+      OPTIONAL {
+        ?commit og:committedReplacement ?committed_replacement .
+        ?committed_replacement ?committed_replacement_p ?committed_replacement_o .
+      }
+      OPTIONAL {
+        ?commit og:committedOverwrite ?committed_overwrite .
+        ?committed_overwrite ?committed_overwrite_p ?committed_overwrite_o .
+      }
+
+      ?utterance
+        ?utterance_p ?utterance_o ;
+        og:speaker ?speaker .
+
+      ?speaker ?speaker_p ?speaker_o .
+
+      OPTIONAL {
+        ?utterance og:insertion ?insertion .
         ?insertion ?insertion_p ?insertion_o .
-        OPTIONAL {
-          ?insertion og:originExpression ?origin .
-          ?origin ?origin_p ?origin_o .
-        }
       }
       OPTIONAL {
-        ?commit og:committedDeletion ?deletion .
+        ?utterance og:deletion ?deletion .
         ?deletion ?deletion_p ?deletion_o .
-        OPTIONAL {
-          ?deletion og:originExpression ?origin .
-          ?origin ?origin_p ?origin_o .
-        }
       }
       OPTIONAL {
-        ?commit og:committedUpdate ?update .
+        ?utterance og:update ?update .
         ?update ?update_p ?update_o .
-        OPTIONAL {
-          ?update og:originExpression ?origin .
-          ?origin ?origin_p ?origin_o .
-        }
       }
       OPTIONAL {
-        ?commit og:committedReplacement ?replacement .
+        ?utterance og:replacement ?replacement .
         ?replacement ?replacement_p ?replacement_o .
-        OPTIONAL {
-          ?replacement og:originExpression ?origin .
-          ?origin ?origin_p ?origin_o .
-        }
       }
     """
   end

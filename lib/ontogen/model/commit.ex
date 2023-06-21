@@ -2,23 +2,24 @@ defmodule Ontogen.Commit do
   use Grax.Schema
 
   alias Ontogen.NS.Og
-  alias Ontogen.{Expression, Changeset}
+  alias Ontogen.{Changeset, Expression, Utterance}
   alias Ontogen.Commit.Id
   alias RDF.Graph
 
   schema Og.Commit do
     link parent: Og.parentCommit(), type: Ontogen.Commit, depth: 0
 
+    link utterance: Og.utterance(), type: Utterance, required: true, depth: +1
+
     link insertion: Og.committedInsertion(), type: Expression, depth: +1
-    link deletion: Og.committedDeletion(), type: list_of(Expression), depth: +1
+    link deletion: Og.committedDeletion(), type: Expression, depth: +1
     link update: Og.committedUpdate(), type: Expression, depth: +1
     link replacement: Og.committedReplacement(), type: Expression, depth: +1
+    link overwrite: Og.committedOverwrite(), type: Expression, depth: +1
 
-    link committer: Og.committer(), type: Ontogen.Agent, required: true
-
-    property message: Og.commitMessage(), type: :string
-
+    link committer: Og.committer(), type: Ontogen.Agent, required: true, depth: +1
     property time: PROV.endedAtTime(), type: :date_time, required: true
+    property message: Og.commitMessage(), type: :string
   end
 
   def new(args) do
@@ -34,25 +35,16 @@ defmodule Ontogen.Commit do
 
   def new!(args) do
     case new(args) do
-      {:ok, utterance} -> utterance
+      {:ok, commit} -> commit
       {:error, error} -> raise error
     end
   end
 
-  def effective(%__MODULE__{}, :no_effective_changes), do: {:ok, :no_effective_changes}
-
-  def effective(%__MODULE__{} = origin, effective_changeset) do
-    effective_commit = set_changes(origin, effective_changeset)
-
-    with {:ok, id} <- Id.generate(effective_commit) do
-      effective_commit
-      |> Grax.reset_id(id)
-      |> validate()
-    end
+  def empty?() do
   end
 
   defp set_changes(commit, %Changeset{} = changeset) do
-    struct(commit, changeset |> Map.from_struct() |> Map.update!(:deletion, &List.wrap/1))
+    struct(commit, Map.from_struct(changeset))
   end
 
   def validate(commit) do

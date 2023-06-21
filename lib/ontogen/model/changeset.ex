@@ -1,10 +1,11 @@
 defmodule Ontogen.Changeset do
-  defstruct [:insertion, :deletion, :update, :replacement]
+  defstruct [:insertion, :deletion, :update, :replacement, :overwrite]
 
-  alias Ontogen.{Expression, Utterance, EffectiveExpression, InvalidChangesetError}
+  alias Ontogen.{Expression, Utterance, InvalidChangesetError}
   alias RDF.{Graph, Description}
 
-  import RDF.Utils, only: [map_while_ok: 2]
+  @keys [:insert, :delete, :update, :replace, :overwrite]
+  def keys, do: @keys
 
   def new(%__MODULE__{} = changeset) do
     validate(changeset)
@@ -35,25 +36,29 @@ defmodule Ontogen.Changeset do
     {delete, args} = extract_change(args, :delete)
     {update, args} = extract_change(args, :update)
     {replace, args} = extract_change(args, :replace)
+    {overwrite, args} = extract_change(args, :overwrite)
 
     case Keyword.pop(args, :changeset) do
       {nil, args} ->
-        with :ok <- do_validate(insert, delete, update, replace),
+        with :ok <- do_validate(insert, delete, update, replace, overwrite),
              {:ok, insertion} <- build_expression(insert),
              {:ok, deletion} <- build_expression(delete),
              {:ok, update} <- build_expression(update),
-             {:ok, replacement} <- build_expression(replace) do
+             {:ok, replacement} <- build_expression(replace),
+             {:ok, overwrite} <- build_expression(overwrite) do
           {:ok,
            %__MODULE__{
              insertion: insertion,
              deletion: deletion,
              update: update,
-             replacement: replacement
+             replacement: replacement,
+             overwrite: overwrite
            }, args}
         end
 
       {_changeset, _args}
-      when not (is_nil(insert) and is_nil(delete) and is_nil(update) and is_nil(replace)) ->
+      when not (is_nil(insert) and is_nil(delete) and is_nil(update) and is_nil(replace) and
+                    is_nil(overwrite)) ->
         {:error,
          InvalidChangesetError.exception(
            reason: "a changeset can not be used with additional changes"
@@ -67,11 +72,7 @@ defmodule Ontogen.Changeset do
   end
 
   defp build_expression(nil), do: {:ok, nil}
-
-  defp build_expression(%mod{} = expression) when mod in [Expression, EffectiveExpression],
-    do: {:ok, expression}
-
-  defp build_expression(list) when is_list(list), do: map_while_ok(list, &Expression.new/1)
+  defp build_expression(%Expression{} = expression), do: {:ok, expression}
   defp build_expression(graph), do: Expression.new(graph)
 
   defp extract_change(args, key) do
@@ -80,35 +81,47 @@ defmodule Ontogen.Changeset do
     case Enum.reject(values, &is_nil/1) do
       [] -> {nil, args}
       [value] -> {to_graph(value), args}
-      values -> {Enum.map(values, &to_graph/1), args}
+      values -> {Enum.into(values, RDF.graph()), args}
     end
   end
 
   defp to_graph(nil), do: nil
-  defp to_graph([]), do: nil
-  defp to_graph(%mod{} = expression) when mod in [Expression, EffectiveExpression], do: expression
+  defp to_graph(%Expression{} = expression), do: expression
   defp to_graph(statements), do: Graph.new(statements)
+
+  def empty?(%{insertion: nil, deletion: nil, update: nil, replacement: nil, overwrite: nil}),
+    do: true
+
+  def empty?(%{insertion: _, deletion: _, update: _, replacement: _, overwrite: _}), do: false
+  def empty?(%{insertion: nil, deletion: nil, update: nil, replacement: nil}), do: true
+  def empty?(%{insertion: _, deletion: _, update: _, replacement: _}), do: false
+
+  def empty?(args) when is_list(args) do
+    args |> Keyword.take(@keys) |> Enum.empty?()
+  end
 
   def validate(
         %{
           insertion: insertion,
           deletion: deletion,
           update: update,
-          replacement: replacement
+          replacement: replacement,
+          overwrite: overwrite
         } = changeset
       ) do
-    with :ok <- do_validate(insertion, deletion, update, replacement) do
+    with :ok <- do_validate(insertion, deletion, update, replacement, overwrite) do
       {:ok, changeset}
     end
   end
 
-  defp do_validate(insertion, deletion, update, replacement) do
+  defp do_validate(insertion, deletion, update, replacement, overwrite) do
     insertion = Expression.graph(insertion)
     deletion = Expression.graph(deletion)
     update = Expression.graph(update)
     replacement = Expression.graph(replacement)
+    overwrite = Expression.graph(overwrite)
 
-    with :ok <- check_statements_presence(insertion, deletion, update, replacement),
+    with :ok <- check_statements_presence(insertion, deletion, update, replacement, overwrite),
          :ok <- check_no_insert_delete_overlap(insertion, deletion, update, replacement),
          :ok <- check_no_inserts_overlap(insertion, update, replacement),
          :ok <- check_no_replacement_overlap(insertion, update, replacement),
@@ -117,13 +130,10 @@ defmodule Ontogen.Changeset do
     end
   end
 
-  defp check_statements_presence(nil, nil, nil, nil),
+  defp check_statements_presence(nil, nil, nil, nil, nil),
     do: {:error, InvalidChangesetError.exception(reason: :empty)}
 
-  defp check_statements_presence(nil, [], nil, nil),
-    do: {:error, InvalidChangesetError.exception(reason: :empty)}
-
-  defp check_statements_presence(_, _, _, _), do: :ok
+  defp check_statements_presence(_, _, _, _, _), do: :ok
 
   defp check_no_insert_delete_overlap(insertion, deletion, update, replacement) do
     overlapping_statements =

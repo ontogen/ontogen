@@ -61,8 +61,6 @@ defmodule Ontogen.IdUtils do
 
   def to_hash(%{__id__: id}), do: to_hash(id)
   def to_hash(%IRI{} = iri), do: hash_from_iri(iri) || raise("#{iri} is not a hash id")
-  def to_hash([single]), do: to_hash(single)
-  def to_hash(list) when is_list(list), do: list |> Enum.map_join(&to_hash/1) |> hash()
 
   def to_timestamp(datetime) do
     "#{DateTime.to_unix(datetime)} #{Calendar.strftime(datetime, "%z")}"

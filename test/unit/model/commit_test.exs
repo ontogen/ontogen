@@ -11,6 +11,7 @@ defmodule Ontogen.CommitTest do
 
       assert {:ok, %Commit{} = commit} =
                Commit.new(
+                 utterance: utterance(),
                  insert: expression(),
                  committer: agent(),
                  message: message,
@@ -20,6 +21,7 @@ defmodule Ontogen.CommitTest do
       assert %IRI{value: "urn:hash::sha256:" <> _} = commit.__id__
 
       assert commit.insertion == expression()
+      assert commit.utterance == utterance()
       assert commit.committer == agent()
       assert commit.message == message
       assert commit.time == datetime()
@@ -30,6 +32,7 @@ defmodule Ontogen.CommitTest do
     test "implicit expression creation" do
       assert {:ok, %Commit{} = commit} =
                Commit.new(
+                 utterance: utterance(),
                  insert: EX.S1 |> EX.p1(EX.O1),
                  delete: {EX.S2, EX.P2, EX.O2},
                  committer: agent(),
@@ -38,12 +41,14 @@ defmodule Ontogen.CommitTest do
                )
 
       assert commit.insertion == expression(EX.S1 |> EX.p1(EX.O1))
-      assert commit.deletion == [expression({EX.S2, EX.P2, EX.O2})]
+      assert commit.deletion == expression({EX.S2, EX.P2, EX.O2})
+      assert commit.utterance == utterance()
     end
 
     test "with changeset" do
       assert {:ok, %Commit{} = commit} =
                Commit.new(
+                 utterance: utterance(),
                  changeset: changeset(),
                  committer: agent(),
                  message: "Some commit",
@@ -51,9 +56,10 @@ defmodule Ontogen.CommitTest do
                )
 
       assert commit.insertion == changeset().insertion
-      assert commit.deletion == [changeset().deletion]
+      assert commit.deletion == changeset().deletion
       assert commit.update == changeset().update
       assert commit.replacement == changeset().replacement
+      assert commit.utterance == utterance()
     end
 
     test "shared insertion and deletion statement" do

@@ -3,8 +3,6 @@ defmodule Ontogen.Commands.FetchEffectiveChangesetTest do
 
   doctest Ontogen.Commands.FetchEffectiveChangeset
 
-  alias Ontogen.{Changeset, Expression, EffectiveExpression}
-
   setup do
     init_commit_history()
 
@@ -24,9 +22,7 @@ defmodule Ontogen.Commands.FetchEffectiveChangesetTest do
       insert = [new_statement | Enum.take(graph(), 1)]
 
       assert Repo.effective_changeset!(insert: insert) ==
-               Changeset.new!(
-                 insert: Expression.new!(insert) |> EffectiveExpression.new!(new_statement)
-               )
+               Changeset.new!(insert: new_statement)
     end
 
     test "ineffective (when all of the inserted statements already exist)" do
@@ -46,9 +42,7 @@ defmodule Ontogen.Commands.FetchEffectiveChangesetTest do
       delete = [new_statement | existing_statements]
 
       assert Repo.effective_changeset!(delete: delete) ==
-               Changeset.new!(
-                 delete: Expression.new!(delete) |> EffectiveExpression.new!(existing_statements)
-               )
+               Changeset.new!(delete: existing_statements)
     end
 
     test "ineffective (when none of the deleted statements actually exist)" do
@@ -72,9 +66,7 @@ defmodule Ontogen.Commands.FetchEffectiveChangesetTest do
       update = [new_statement, EX.S1 |> EX.p1(EX.O1)]
 
       assert Repo.effective_changeset!(update: update) ==
-               Changeset.new!(
-                 update: Expression.new!(update) |> EffectiveExpression.new!(new_statement)
-               )
+               Changeset.new!(update: new_statement)
     end
 
     test "ineffective (when all of the updated statements already exist)" do
@@ -92,12 +84,7 @@ defmodule Ontogen.Commands.FetchEffectiveChangesetTest do
       overwritten = EX.S1 |> EX.p1(EX.O1)
 
       assert Repo.effective_changeset!(update: statements) ==
-               Changeset.new!(
-                 update: statements,
-                 delete:
-                   Expression.new!(statements)
-                   |> EffectiveExpression.new!(overwritten, only_subset: false)
-               )
+               Changeset.new!(update: statements, overwrite: overwritten)
     end
 
     test "when the updated statements are ineffective, the other statements are still replaced" do
@@ -106,10 +93,8 @@ defmodule Ontogen.Commands.FetchEffectiveChangesetTest do
 
       assert Repo.effective_changeset!(update: update) ==
                Changeset.new!(
-                 update: Expression.new!(update) |> EffectiveExpression.new!(new_statement),
-                 delete:
-                   Expression.new!(update)
-                   |> EffectiveExpression.new!(EX.S2 |> EX.p2("Foo"), only_subset: false)
+                 update: new_statement,
+                 overwrite: EX.S2 |> EX.p2("Foo")
                )
     end
   end
@@ -127,9 +112,7 @@ defmodule Ontogen.Commands.FetchEffectiveChangesetTest do
       replace = [new_statement | Enum.take(graph(), 1)]
 
       assert Repo.effective_changeset!(replace: replace) ==
-               Changeset.new!(
-                 replace: Expression.new!(replace) |> EffectiveExpression.new!(new_statement)
-               )
+               Changeset.new!(replace: new_statement)
     end
 
     test "ineffective (when all of the replaced statements already exist)" do
@@ -145,9 +128,7 @@ defmodule Ontogen.Commands.FetchEffectiveChangesetTest do
       assert Repo.effective_changeset!(replace: statements) ==
                Changeset.new!(
                  replace: statements,
-                 delete:
-                   Expression.new!(statements)
-                   |> EffectiveExpression.new!(graph(), only_subset: false)
+                 overwrite: graph()
                )
     end
 
@@ -157,10 +138,8 @@ defmodule Ontogen.Commands.FetchEffectiveChangesetTest do
 
       assert Repo.effective_changeset!(replace: replace) ==
                Changeset.new!(
-                 replace: Expression.new!(replace) |> EffectiveExpression.new!(new_statement),
-                 delete:
-                   Expression.new!(replace)
-                   |> EffectiveExpression.new!(EX.S2 |> EX.p2("Foo"), only_subset: false)
+                 replace: new_statement,
+                 overwrite: EX.S2 |> EX.p2("Foo")
                )
     end
   end
@@ -183,9 +162,8 @@ defmodule Ontogen.Commands.FetchEffectiveChangesetTest do
 
       assert Repo.effective_changeset!(insert: insert, delete: delete) ==
                Changeset.new!(
-                 insert: Expression.new!(insert) |> EffectiveExpression.new!(new_statement),
-                 delete:
-                   Expression.new!(delete) |> EffectiveExpression.new!(existing_delete_statements)
+                 insert: new_statement,
+                 delete: existing_delete_statements
                )
     end
 
