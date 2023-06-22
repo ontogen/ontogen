@@ -77,6 +77,9 @@ defmodule Ontogen.Local.Repo do
     end
   end
 
+  defdelegate changes(changeset), to: __MODULE__, as: :effective_changeset
+  defdelegate changes!(changeset), to: __MODULE__, as: :effective_changeset!
+
   def dataset_history(args \\ []) do
     GenServer.call(__MODULE__, {:dataset_history, args})
   end
