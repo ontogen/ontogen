@@ -11,7 +11,7 @@ defmodule Ontogen.TestFactories do
     ProvGraph,
     Agent,
     Store,
-    Expression,
+    Proposition,
     Changeset,
     Utterance
   }
@@ -30,7 +30,7 @@ defmodule Ontogen.TestFactories do
   def id(:dataset), do: ~I<http://example.com/test/dataset>
   def id(:prov_graph), do: ~I<http://example.com/test/prov_graph>
   def id(:store), do: ~I<http://example.com/Store>
-  def id(:expression), do: expression().__id__
+  def id(:proposition), do: proposition().__id__
   def id(:utterance), do: utterance().__id__
   def id(resource) when is_rdf_resource(resource), do: resource
   def id(iri) when is_binary(iri), do: RDF.iri(iri)
@@ -157,10 +157,10 @@ defmodule Ontogen.TestFactories do
             |> RDF.graph()
   def subgraph, do: @subgraph
 
-  def expression(graph \\ graph()) do
+  def proposition(graph \\ graph()) do
     graph
     |> RDF.graph()
-    |> Expression.new!()
+    |> Proposition.new!()
   end
 
   def changeset(attrs \\ []) do

@@ -3,7 +3,7 @@ defmodule Ontogen.ChangesetTest do
 
   doctest Ontogen.Changeset
 
-  alias Ontogen.{Changeset, Expression, InvalidChangesetError}
+  alias Ontogen.{Changeset, Proposition, InvalidChangesetError}
 
   @statement_forms [
     {EX.S, EX.p(), EX.O},
@@ -16,14 +16,14 @@ defmodule Ontogen.ChangesetTest do
     test ":insert statements in various forms" do
       Enum.each(@statement_forms, fn statements ->
         assert Changeset.new(insert: statements) ==
-                 {:ok, %Changeset{insertion: statements |> RDF.graph() |> Expression.new!()}}
+                 {:ok, %Changeset{insertion: statements |> RDF.graph() |> Proposition.new!()}}
       end)
     end
 
     test ":delete statements in various forms" do
       Enum.each(@statement_forms, fn statements ->
         assert Changeset.new(delete: statements) ==
-                 {:ok, %Changeset{deletion: statements |> RDF.graph() |> Expression.new!()}}
+                 {:ok, %Changeset{deletion: statements |> RDF.graph() |> Proposition.new!()}}
       end)
     end
 
@@ -31,27 +31,27 @@ defmodule Ontogen.ChangesetTest do
       assert Changeset.new(delete: nil, delete: {EX.S, EX.p(), EX.O}, delete: graph()) ==
                {:ok,
                 %Changeset{
-                  deletion: graph() |> Graph.add({EX.S, EX.p(), EX.O}) |> Expression.new!()
+                  deletion: graph() |> Graph.add({EX.S, EX.p(), EX.O}) |> Proposition.new!()
                 }}
 
       assert Changeset.new(delete: nil, delete: nil, delete: graph()) ==
-               {:ok, %Changeset{deletion: Expression.new!(graph())}}
+               {:ok, %Changeset{deletion: Proposition.new!(graph())}}
 
       assert Changeset.new(update: graph(), delete: nil, delete: nil) ==
-               {:ok, %Changeset{update: Expression.new!(graph()), deletion: nil}}
+               {:ok, %Changeset{update: Proposition.new!(graph()), deletion: nil}}
     end
 
     test ":update statements in various forms" do
       Enum.each(@statement_forms, fn statements ->
         assert Changeset.new(update: statements) ==
-                 {:ok, %Changeset{update: statements |> RDF.graph() |> Expression.new!()}}
+                 {:ok, %Changeset{update: statements |> RDF.graph() |> Proposition.new!()}}
       end)
     end
 
     test ":replace statements in various forms" do
       Enum.each(@statement_forms, fn statements ->
         assert Changeset.new(replace: statements) ==
-                 {:ok, %Changeset{replacement: statements |> RDF.graph() |> Expression.new!()}}
+                 {:ok, %Changeset{replacement: statements |> RDF.graph() |> Proposition.new!()}}
       end)
     end
 
@@ -59,8 +59,8 @@ defmodule Ontogen.ChangesetTest do
       assert Changeset.new(insert: graph(), delete: EX.S |> EX.p(EX.O)) ==
                {:ok,
                 %Changeset{
-                  insertion: Expression.new!(graph()),
-                  deletion: Expression.new!(EX.S |> EX.p(EX.O))
+                  insertion: Proposition.new!(graph()),
+                  deletion: Proposition.new!(EX.S |> EX.p(EX.O))
                 }}
     end
 
@@ -72,10 +72,10 @@ defmodule Ontogen.ChangesetTest do
       assert Changeset.new(insert: graph(), delete: delete, update: update, replace: replace) ==
                {:ok,
                 %Changeset{
-                  insertion: Expression.new!(graph()),
-                  deletion: Expression.new!(delete),
-                  update: Expression.new!(update),
-                  replacement: Expression.new!(replace)
+                  insertion: Proposition.new!(graph()),
+                  deletion: Proposition.new!(delete),
+                  update: Proposition.new!(update),
+                  replacement: Proposition.new!(replace)
                 }}
     end
 
@@ -95,7 +95,7 @@ defmodule Ontogen.ChangesetTest do
 
     test "with a utterance" do
       assert Changeset.new(utterance()) ==
-               {:ok, %Changeset{insertion: Expression.new!(graph())}}
+               {:ok, %Changeset{insertion: Proposition.new!(graph())}}
     end
 
     test "with a changeset" do

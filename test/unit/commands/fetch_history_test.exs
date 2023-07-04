@@ -443,7 +443,7 @@ defmodule Ontogen.Commands.FetchHistoryTest do
             message: "Second relevant commit"
           ],
           [
-            # this leads to a different effective change (which caused the EffectiveExpression-origin-overlap-problem in the old effective change model)
+            # this leads to a different effective change (which caused the EffectiveProposition-origin-overlap-problem in the old effective change model)
             insert: [{EX.S1, EX.p1(), EX.O2}, {EX.S3, EX.p3(), EX.O3}],
             message: "Third relevant commit"
           ],

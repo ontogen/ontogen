@@ -1,7 +1,7 @@
 defmodule Ontogen.Changeset do
   defstruct [:insertion, :deletion, :update, :replacement, :overwrite]
 
-  alias Ontogen.{Expression, Utterance, InvalidChangesetError}
+  alias Ontogen.{Proposition, Utterance, InvalidChangesetError}
   alias RDF.{Graph, Description}
 
   @keys [:insert, :delete, :update, :replace, :overwrite]
@@ -41,11 +41,11 @@ defmodule Ontogen.Changeset do
     case Keyword.pop(args, :changeset) do
       {nil, args} ->
         with :ok <- do_validate(insert, delete, update, replace, overwrite),
-             {:ok, insertion} <- build_expression(insert),
-             {:ok, deletion} <- build_expression(delete),
-             {:ok, update} <- build_expression(update),
-             {:ok, replacement} <- build_expression(replace),
-             {:ok, overwrite} <- build_expression(overwrite) do
+             {:ok, insertion} <- build_proposition(insert),
+             {:ok, deletion} <- build_proposition(delete),
+             {:ok, update} <- build_proposition(update),
+             {:ok, replacement} <- build_proposition(replace),
+             {:ok, overwrite} <- build_proposition(overwrite) do
           {:ok,
            %__MODULE__{
              insertion: insertion,
@@ -71,9 +71,9 @@ defmodule Ontogen.Changeset do
     end
   end
 
-  defp build_expression(nil), do: {:ok, nil}
-  defp build_expression(%Expression{} = expression), do: {:ok, expression}
-  defp build_expression(graph), do: Expression.new(graph)
+  defp build_proposition(nil), do: {:ok, nil}
+  defp build_proposition(%Proposition{} = proposition), do: {:ok, proposition}
+  defp build_proposition(graph), do: Proposition.new(graph)
 
   defp extract_change(args, key) do
     {values, args} = Keyword.pop_values(args, key)
@@ -86,7 +86,7 @@ defmodule Ontogen.Changeset do
   end
 
   defp to_graph(nil), do: nil
-  defp to_graph(%Expression{} = expression), do: expression
+  defp to_graph(%Proposition{} = proposition), do: proposition
   defp to_graph(statements), do: Graph.new(statements)
 
   def empty?(%{insertion: nil, deletion: nil, update: nil, replacement: nil, overwrite: nil}),
@@ -115,11 +115,11 @@ defmodule Ontogen.Changeset do
   end
 
   defp do_validate(insertion, deletion, update, replacement, overwrite) do
-    insertion = Expression.graph(insertion)
-    deletion = Expression.graph(deletion)
-    update = Expression.graph(update)
-    replacement = Expression.graph(replacement)
-    overwrite = Expression.graph(overwrite)
+    insertion = Proposition.graph(insertion)
+    deletion = Proposition.graph(deletion)
+    update = Proposition.graph(update)
+    replacement = Proposition.graph(replacement)
+    overwrite = Proposition.graph(overwrite)
 
     with :ok <- check_statements_presence(insertion, deletion, update, replacement, overwrite),
          :ok <- check_no_insert_delete_overlap(insertion, deletion, update, replacement),

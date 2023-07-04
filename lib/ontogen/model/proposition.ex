@@ -1,13 +1,14 @@
-defmodule Ontogen.Expression do
+defmodule Ontogen.Proposition do
   use Grax.Schema
 
   alias Ontogen.NS.Og
+
   alias RTC.Compound
   alias RDF.Graph
 
   import Ontogen.IdUtils
 
-  schema Og.Expression do
+  schema Og.Proposition do
     field :statements
   end
 
@@ -25,20 +26,20 @@ defmodule Ontogen.Expression do
 
   def new!(statements) do
     case new(statements) do
-      {:ok, expression} -> expression
+      {:ok, proposition} -> proposition
       {:error, error} -> raise error
     end
   end
 
-  def on_load(%{} = expression, graph, _opts) do
+  def on_load(%{} = proposition, graph, _opts) do
     {
       :ok,
       %{
-        expression
+        proposition
         | statements:
             graph
-            |> Graph.take([expression.__id__], [RTC.elements()])
-            |> Compound.from_rdf(expression.__id__)
+            |> Graph.take([proposition.__id__], [RTC.elements()])
+            |> Compound.from_rdf(proposition.__id__)
             |> Compound.change_graph_name(nil)
       }
       |> Grax.delete_additional_predicates(RTC.elements())
@@ -50,7 +51,7 @@ defmodule Ontogen.Expression do
       :ok,
       graph
       |> Graph.add(Compound.to_rdf(compound, element_style: :elements))
-      |> Graph.delete({id, RDF.type(), Og.Expression})
+      |> Graph.delete({id, RDF.type(), Og.Proposition})
     }
   end
 

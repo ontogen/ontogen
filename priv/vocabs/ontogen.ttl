@@ -78,28 +78,28 @@ og:Utterance a rdfs:Class
 
     og:insertion a rdf:Property, owl:FunctionalProperty
         ; rdfs:domain og:Utterance
-        ; rdfs:range  og:Expression
+        ; rdfs:range  og:Proposition
     .
 
     og:deletion a rdf:Property, owl:FunctionalProperty
         ; rdfs:domain og:Utterance
-        ; rdfs:range  og:Expression
+        ; rdfs:range  og:Proposition
     .
 
     og:update a rdf:Property, owl:FunctionalProperty
         ; rdfs:domain og:Utterance
-        ; rdfs:range  og:Expression
+        ; rdfs:range  og:Proposition
     .
 
     og:replacement a rdf:Property, owl:FunctionalProperty
         ; rdfs:domain og:Utterance
-        ; rdfs:range  og:Expression
+        ; rdfs:range  og:Proposition
     .
 
 
-og:Expression a rdfs:Class
+og:Proposition a rdfs:Class
     ; rdfs:subClassOf rtc:Compound
-    ; rdfs:label "Ontogen expression"
+    ; rdfs:label "Ontogen proposition"
     ; rdfs:comment "A set of RDF statements independent of an occurrence in a utterance."
 .
 
@@ -117,31 +117,31 @@ og:Commit a rdfs:Class
     og:committedInsertion a rdf:Property, owl:FunctionalProperty
         ; rdfs:subPropertyOf prov:used
         ; rdfs:domain og:Commit
-        ; rdfs:range  og:Expression
+        ; rdfs:range  og:Proposition
     .
 
     og:committedDeletion a rdf:Property
         ; rdfs:subPropertyOf prov:used
         ; rdfs:domain og:Commit
-        ; rdfs:range  og:Expression
+        ; rdfs:range  og:Proposition
     .
 
     og:committedUpdate a rdf:Property, owl:FunctionalProperty
         ; rdfs:subPropertyOf prov:used
         ; rdfs:domain og:Commit
-        ; rdfs:range  og:Expression
+        ; rdfs:range  og:Proposition
     .
 
     og:committedReplacement a rdf:Property, owl:FunctionalProperty
         ; rdfs:subPropertyOf prov:used
         ; rdfs:domain og:Commit
-        ; rdfs:range  og:Expression
+        ; rdfs:range  og:Proposition
     .
 
     og:committedOverwrite a rdf:Property, owl:FunctionalProperty
         ; rdfs:subPropertyOf prov:used
         ; rdfs:domain og:Commit
-        ; rdfs:range  og:Expression
+        ; rdfs:range  og:Proposition
     .
 
     og:parentCommit a rdf:Property

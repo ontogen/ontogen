@@ -157,15 +157,15 @@ defmodule Ontogen.Commands.FetchHistory.Query do
 
   defp statement_filter(_, nil), do: ""
 
-  defp statement_filter(expression, {s, p, o}) do
-    "#{expression} rtc:elements << #{to_term(s)} #{to_term(p)} #{to_term(o)} >> ."
+  defp statement_filter(proposition, {s, p, o}) do
+    "#{proposition} rtc:elements << #{to_term(s)} #{to_term(p)} #{to_term(o)} >> ."
   end
 
-  defp statement_filter(expression, {s, p}) do
-    "#{expression} rtc:elements << #{to_term(s)} #{to_term(p)} ?resource_o >> ."
+  defp statement_filter(proposition, {s, p}) do
+    "#{proposition} rtc:elements << #{to_term(s)} #{to_term(p)} ?resource_o >> ."
   end
 
-  defp statement_filter(expression, resource) do
-    "#{expression} rtc:elements << #{to_term(resource)} ?resource_p ?resource_o >> ."
+  defp statement_filter(proposition, resource) do
+    "#{proposition} rtc:elements << #{to_term(resource)} ?resource_p ?resource_o >> ."
   end
 end

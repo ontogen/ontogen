@@ -1,5 +1,5 @@
 defmodule Ontogen.Commands.Commit.Update do
-  alias Ontogen.{Expression, Repository}
+  alias Ontogen.{Proposition, Repository}
   alias Ontogen.NS.Og
   alias RDF.NTriples
 
@@ -31,8 +31,8 @@ defmodule Ontogen.Commands.Commit.Update do
 
   defp dataset_changes(_, nil), do: ""
 
-  defp dataset_changes(repo, expression) do
-    do_dataset_changes(repo, expression |> Expression.graph() |> triples())
+  defp dataset_changes(repo, proposition) do
+    do_dataset_changes(repo, proposition |> Proposition.graph() |> triples())
   end
 
   defp do_dataset_changes(repo, data) do

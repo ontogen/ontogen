@@ -12,7 +12,7 @@ defmodule Ontogen.CommitTest do
       assert {:ok, %Commit{} = commit} =
                Commit.new(
                  utterance: utterance(),
-                 insert: expression(),
+                 insert: proposition(),
                  committer: agent(),
                  message: message,
                  time: datetime()
@@ -20,7 +20,7 @@ defmodule Ontogen.CommitTest do
 
       assert %IRI{value: "urn:hash::sha256:" <> _} = commit.__id__
 
-      assert commit.insertion == expression()
+      assert commit.insertion == proposition()
       assert commit.utterance == utterance()
       assert commit.committer == agent()
       assert commit.message == message
@@ -29,7 +29,7 @@ defmodule Ontogen.CommitTest do
       assert Commit.root?(commit)
     end
 
-    test "implicit expression creation" do
+    test "implicit proposition creation" do
       assert {:ok, %Commit{} = commit} =
                Commit.new(
                  utterance: utterance(),
@@ -40,8 +40,8 @@ defmodule Ontogen.CommitTest do
                  time: datetime()
                )
 
-      assert commit.insertion == expression(EX.S1 |> EX.p1(EX.O1))
-      assert commit.deletion == expression({EX.S2, EX.P2, EX.O2})
+      assert commit.insertion == proposition(EX.S1 |> EX.p1(EX.O1))
+      assert commit.deletion == proposition({EX.S2, EX.P2, EX.O2})
       assert commit.utterance == utterance()
     end
 

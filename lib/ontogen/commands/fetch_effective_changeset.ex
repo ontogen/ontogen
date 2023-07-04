@@ -1,19 +1,19 @@
 defmodule Ontogen.Commands.FetchEffectiveChangeset do
-  alias Ontogen.{Changeset, Expression, Store, Repository}
+  alias Ontogen.{Changeset, Proposition, Store, Repository}
   alias RDF.{Graph, Description}
 
   import Ontogen.QueryUtils
 
   def call(store, repo, %{
-        insertion: insertion_expr,
-        deletion: deletion_expr,
-        update: update_expr,
-        replacement: replacement_expr
+        insertion: insertion_proposition,
+        deletion: deletion_proposition,
+        update: update_proposition,
+        replacement: replacement_proposition
       }) do
-    insert = Expression.graph(insertion_expr)
-    delete = Expression.graph(deletion_expr)
-    update = Expression.graph(update_expr)
-    replace = Expression.graph(replacement_expr)
+    insert = Proposition.graph(insertion_proposition)
+    delete = Proposition.graph(deletion_proposition)
+    update = Proposition.graph(update_proposition)
+    replace = Proposition.graph(replacement_proposition)
 
     dataset = Repository.dataset_graph_id(repo)
 
@@ -80,7 +80,7 @@ defmodule Ontogen.Commands.FetchEffectiveChangeset do
     if Graph.empty?(effective_insert) do
       {:ok, nil}
     else
-      Expression.new(effective_insert)
+      Proposition.new(effective_insert)
     end
   end
 
@@ -99,7 +99,7 @@ defmodule Ontogen.Commands.FetchEffectiveChangeset do
     if Graph.empty?(effective_delete) do
       {:ok, nil}
     else
-      Expression.new(effective_delete)
+      Proposition.new(effective_delete)
     end
   end
 
@@ -111,13 +111,13 @@ defmodule Ontogen.Commands.FetchEffectiveChangeset do
   end
 
   defp do_overwrite_deletion(nil, nil), do: {:ok, nil}
-  defp do_overwrite_deletion(update_overwrite, nil), do: Expression.new(update_overwrite)
+  defp do_overwrite_deletion(update_overwrite, nil), do: Proposition.new(update_overwrite)
 
   defp do_overwrite_deletion(nil, replacement_overwrite),
-    do: Expression.new(replacement_overwrite)
+    do: Proposition.new(replacement_overwrite)
 
   defp do_overwrite_deletion(update_overwrite, replacement_overwrite) do
-    update_overwrite |> Graph.add(replacement_overwrite) |> Expression.new()
+    update_overwrite |> Graph.add(replacement_overwrite) |> Proposition.new()
   end
 
   defp non_empty_graph(nil), do: nil

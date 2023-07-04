@@ -2,15 +2,15 @@ defmodule Ontogen.Utterance do
   use Grax.Schema
 
   alias Ontogen.NS.Og
-  alias Ontogen.{Expression, Changeset}
+  alias Ontogen.{Proposition, Changeset}
   alias Ontogen.Utterance.Id
   alias RDF.Graph
 
   schema Og.Utterance do
-    link insertion: Og.insertion(), type: Expression, depth: +1
-    link deletion: Og.deletion(), type: Expression, depth: +1
-    link update: Og.update(), type: Expression, depth: +1
-    link replacement: Og.replacement(), type: Expression, depth: +1
+    link insertion: Og.insertion(), type: Proposition, depth: +1
+    link deletion: Og.deletion(), type: Proposition, depth: +1
+    link update: Og.update(), type: Proposition, depth: +1
+    link replacement: Og.replacement(), type: Proposition, depth: +1
 
     property time: PROV.endedAtTime(), type: :date_time, required: true
     link speaker: Og.speaker(), type: Ontogen.Agent, depth: +1

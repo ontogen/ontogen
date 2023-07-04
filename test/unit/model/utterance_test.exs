@@ -17,7 +17,7 @@ defmodule Ontogen.UtteranceTest do
 
       assert %IRI{value: "urn:hash::sha256:" <> _} = utterance.__id__
 
-      assert utterance.insertion == expression()
+      assert utterance.insertion == proposition()
       assert utterance.time == datetime()
       assert utterance.speaker == agent()
       assert utterance.data_source == dataset()

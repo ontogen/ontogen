@@ -2,7 +2,7 @@ defmodule Ontogen.Commit do
   use Grax.Schema
 
   alias Ontogen.NS.Og
-  alias Ontogen.{Changeset, Expression, Utterance}
+  alias Ontogen.{Changeset, Proposition, Utterance}
   alias Ontogen.Commit.Id
   alias RDF.Graph
 
@@ -11,11 +11,11 @@ defmodule Ontogen.Commit do
 
     link utterance: Og.utterance(), type: Utterance, required: true, depth: +1
 
-    link insertion: Og.committedInsertion(), type: Expression, depth: +1
-    link deletion: Og.committedDeletion(), type: Expression, depth: +1
-    link update: Og.committedUpdate(), type: Expression, depth: +1
-    link replacement: Og.committedReplacement(), type: Expression, depth: +1
-    link overwrite: Og.committedOverwrite(), type: Expression, depth: +1
+    link insertion: Og.committedInsertion(), type: Proposition, depth: +1
+    link deletion: Og.committedDeletion(), type: Proposition, depth: +1
+    link update: Og.committedUpdate(), type: Proposition, depth: +1
+    link replacement: Og.committedReplacement(), type: Proposition, depth: +1
+    link overwrite: Og.committedOverwrite(), type: Proposition, depth: +1
 
     link committer: Og.committer(), type: Ontogen.Agent, required: true, depth: +1
     property time: PROV.endedAtTime(), type: :date_time, required: true
