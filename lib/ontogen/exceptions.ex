@@ -40,14 +40,14 @@ defmodule Ontogen.InvalidCommitError do
   end
 end
 
-defmodule Ontogen.InvalidUtteranceError do
+defmodule Ontogen.InvalidSpeechActError do
   @moduledoc """
-  Raised on invalid `Ontogen.Utterance` args.
+  Raised on invalid `Ontogen.SpeechAct` args.
   """
   defexception [:reason]
 
   def message(%{reason: reason}) do
-    "Invalid utterance: #{reason}"
+    "Invalid speech act: #{reason}"
   end
 end
 

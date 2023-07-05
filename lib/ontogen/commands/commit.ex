@@ -9,7 +9,7 @@ defmodule Ontogen.Commands.Commit do
     InvalidCommitError
   }
 
-  alias Ontogen.Commands.{CreateUtterance, FetchEffectiveChangeset}
+  alias Ontogen.Commands.{CreateSpeechAct, FetchEffectiveChangeset}
   alias Ontogen.Commands.Commit.Update
   alias RDF.IRI
 
@@ -17,10 +17,16 @@ defmodule Ontogen.Commands.Commit do
     parent_commit = parent_commit(repo.dataset)
     {no_effective_changes, args} = Keyword.pop(args, :no_effective_changes, :error)
 
-    with {:ok, utterance, args} <- extract_utterance(args),
-         {:ok, effective_changeset} <- FetchEffectiveChangeset.call(store, repo, utterance),
+    with {:ok, speech_act, args} <- extract_speech_act(args),
+         {:ok, effective_changeset} <- FetchEffectiveChangeset.call(store, repo, speech_act),
          {:ok, commit} <-
-           build_commit(parent_commit, utterance, effective_changeset, args, no_effective_changes),
+           build_commit(
+             parent_commit,
+             speech_act,
+             effective_changeset,
+             args,
+             no_effective_changes
+           ),
          {:ok, update} <- Update.build(repo, commit),
          :ok <- Store.update(store, nil, update),
          {:ok, new_repo} <- Repository.set_head(repo, commit) do
@@ -40,9 +46,9 @@ defmodule Ontogen.Commands.Commit do
     raise ArgumentError, "unknown :no_effective_changes value: #{inspect(unknown)}"
   end
 
-  defp build_commit(parent_commit, utterance, changeset, args, _) do
+  defp build_commit(parent_commit, speech_act, changeset, args, _) do
     args
-    |> Keyword.put(:utterance, utterance)
+    |> Keyword.put(:speech_act, speech_act)
     |> Keyword.put(:changeset, changeset)
     |> Keyword.put(:parent, parent_commit)
     |> Keyword.put_new(:committer, Local.agent())
@@ -50,21 +56,21 @@ defmodule Ontogen.Commands.Commit do
     |> Commit.new()
   end
 
-  defp extract_utterance(args) do
-    {utterance_args, args} = Keyword.pop(args, :utterance)
+  defp extract_speech_act(args) do
+    {speech_act_args, args} = Keyword.pop(args, :speech_act)
 
     cond do
-      utterance_args && Changeset.empty?(args) ->
-        with {:ok, utterance} <- CreateUtterance.call(utterance_args) do
-          {:ok, utterance, args}
+      speech_act_args && Changeset.empty?(args) ->
+        with {:ok, speech_act} <- CreateSpeechAct.call(speech_act_args) do
+          {:ok, speech_act, args}
         end
 
-      utterance_args ->
+      speech_act_args ->
         {:error,
-         InvalidCommitError.exception(reason: "utterances are not allowed with other changes")}
+         InvalidCommitError.exception(reason: "speech acts are not allowed with other changes")}
 
       true ->
-        CreateUtterance.extract(args)
+        CreateSpeechAct.extract(args)
     end
   end
 end

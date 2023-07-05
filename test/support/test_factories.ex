@@ -13,7 +13,7 @@ defmodule Ontogen.TestFactories do
     Store,
     Proposition,
     Changeset,
-    Utterance
+    SpeechAct
   }
 
   alias Ontogen.Local.Config
@@ -31,7 +31,7 @@ defmodule Ontogen.TestFactories do
   def id(:prov_graph), do: ~I<http://example.com/test/prov_graph>
   def id(:store), do: ~I<http://example.com/Store>
   def id(:proposition), do: proposition().__id__
-  def id(:utterance), do: utterance().__id__
+  def id(:speech_act), do: speech_act().__id__
   def id(resource) when is_rdf_resource(resource), do: resource
   def id(iri) when is_binary(iri), do: RDF.iri(iri)
 
@@ -177,13 +177,13 @@ defmodule Ontogen.TestFactories do
     |> Keyword.merge(attrs)
   end
 
-  def utterance(attrs \\ []) do
+  def speech_act(attrs \\ []) do
     attrs
-    |> utterance_attrs()
-    |> Utterance.new!()
+    |> speech_act_attrs()
+    |> SpeechAct.new!()
   end
 
-  def utterance_attrs(attrs \\ []) do
+  def speech_act_attrs(attrs \\ []) do
     [
       insert: graph(),
       speaker: agent(),

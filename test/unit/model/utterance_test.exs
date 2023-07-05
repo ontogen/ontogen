@@ -1,30 +1,30 @@
-defmodule Ontogen.UtteranceTest do
+defmodule Ontogen.SpeechActTest do
   use Ontogen.Test.Case
 
-  doctest Ontogen.Utterance
+  doctest Ontogen.SpeechAct
 
-  alias Ontogen.{Utterance, InvalidChangesetError}
+  alias Ontogen.{SpeechAct, InvalidChangesetError}
 
   describe "new/1" do
     test "with all required attributes" do
-      assert {:ok, %Utterance{} = utterance} =
-               Utterance.new(
+      assert {:ok, %SpeechAct{} = speech_act} =
+               SpeechAct.new(
                  insert: graph(),
                  speaker: agent(),
                  data_source: dataset(),
                  time: datetime()
                )
 
-      assert %IRI{value: "urn:hash::sha256:" <> _} = utterance.__id__
+      assert %IRI{value: "urn:hash::sha256:" <> _} = speech_act.__id__
 
-      assert utterance.insertion == proposition()
-      assert utterance.time == datetime()
-      assert utterance.speaker == agent()
-      assert utterance.data_source == dataset()
+      assert speech_act.insertion == proposition()
+      assert speech_act.time == datetime()
+      assert speech_act.speaker == agent()
+      assert speech_act.data_source == dataset()
     end
 
     test "without statements" do
-      assert Utterance.new(
+      assert SpeechAct.new(
                speaker: agent(),
                data_source: dataset(),
                time: datetime()
@@ -35,17 +35,17 @@ defmodule Ontogen.UtteranceTest do
 
   describe "Grax.to_rdf/1" do
     test "is as compact as possible" do
-      assert {:ok, %Graph{} = graph} = Grax.to_rdf(utterance())
+      assert {:ok, %Graph{} = graph} = Grax.to_rdf(speech_act())
 
-      refute Graph.include?(graph, {utterance().__id__, RDF.type(), Og.Utterance})
+      refute Graph.include?(graph, {speech_act().__id__, RDF.type(), Og.SpeechAct})
     end
   end
 
   test "RDF roundtrip" do
-    utterance = utterance()
-    assert {:ok, %Graph{} = graph} = Grax.to_rdf(utterance)
+    speech_act = speech_act()
+    assert {:ok, %Graph{} = graph} = Grax.to_rdf(speech_act)
 
-    assert Utterance.load(graph, utterance.__id__, depth: 1) ==
-             {:ok, utterance}
+    assert SpeechAct.load(graph, speech_act.__id__, depth: 1) ==
+             {:ok, speech_act}
   end
 end

@@ -18,7 +18,7 @@ defmodule Ontogen.Commands.Commit.Update do
        #{dataset_changes(repo, commit.update)}
        #{dataset_changes(repo, commit.replacement)}
        #{provenance(repo, commit)}
-       #{provenance(repo, commit.utterance)}
+       #{provenance(repo, commit.speech_act)}
      }
      """}
   end

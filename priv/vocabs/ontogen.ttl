@@ -11,107 +11,60 @@
 @prefix rtc: <https://w3id.org/rtc#> .
 
 
-og:Agent a rdfs:Class
-    ; rdfs:subClassOf prov:Agent, foaf:Agent
-    ; rdfs:label "Agent"
-.
-
-    og:email a rdf:Property
-        ; rdfs:subPropertyOf foaf:mbox
-        ; rdfs:domain og:Agent
-    .
-
-og:Repository a rdfs:Class
-    ; rdfs:label "Ontogen repository"
-.
-
-    og:dataset a rdf:Property
-        ; rdfs:domain og:Repository
-        ; rdfs:range  og:Dataset
-    .
-
-    og:provGraph a rdf:Property
-        ; rdfs:domain og:Repository
-        ; rdfs:range  og:ProvGraph
-    .
-
-og:Dataset a rdfs:Class
-    ; rdfs:subClassOf dcat:Dataset, prov:Entity
-    ; rdfs:label "Dataset"
-    ; rdfs:comment "A DCAT dataset that version-controlled with Ontogen"
-.
-
-    og:repository a rdf:Property
-        ; owl:inverseOf og:dataset
-        ; rdfs:domain og:Dataset
-        ; rdfs:range  og:Repository
-        ; skos:scopeNote "This property MAY be used only in addition to its inverse, and it MUST NOT be used to replace it."@en ;
-    .
-
-    og:head a rdf:Property
-        ; rdfs:domain og:Dataset
-        ; rdfs:range  og:Commit
-    .
-
-og:ProvGraph a rdfs:Class
-    ; rdfs:subClassOf prov:Bundle
-    ; rdfs:label "Ontogen provenance graph"
+og:Proposition a rdfs:Class
+    ; rdfs:subClassOf rtc:Compound
+    ; rdfs:label "Ontogen proposition"
+    ; rdfs:comment "Represents abstract sets of utterance-independent statements in a canonical form and with content-hashed identifiers."
 .
 
 
-og:Utterance a rdfs:Class
-        ; rdfs:subClassOf prov:Activity
-        ; rdfs:label "Utterance", "Äusserung"@de
-        ; rdfs:comment "The utterance of a set of RDF statements, i.e. a RDF graph or dataset."
+og:SpeechAct a rdfs:Class
+    ; rdfs:subClassOf prov:Activity
+    ; rdfs:label "SpeechAct", "Sprechakt"@de
+    ; rdfs:comment "The utterance of a set of RDF statements, i.e. a RDF graph or dataset."
 .
 
     og:speaker a rdf:Property, owl:FunctionalProperty
         ; rdfs:subPropertyOf prov:wasAssociatedWith, dct:creator
-        ; rdfs:domain og:Utterance
+        ; rdfs:domain og:SpeechAct
         ; rdfs:range  prov:Agent
     .
 
     og:dataSource a rdf:Property
-        ; rdfs:domain og:Utterance
+        ; rdfs:domain og:SpeechAct
         ; rdfs:range  dcat:Dataset
     .
 
     og:insertion a rdf:Property, owl:FunctionalProperty
-        ; rdfs:domain og:Utterance
+        ; rdfs:domain og:SpeechAct
         ; rdfs:range  og:Proposition
     .
 
     og:deletion a rdf:Property, owl:FunctionalProperty
-        ; rdfs:domain og:Utterance
+        ; rdfs:domain og:SpeechAct
         ; rdfs:range  og:Proposition
     .
 
     og:update a rdf:Property, owl:FunctionalProperty
-        ; rdfs:domain og:Utterance
+        ; rdfs:domain og:SpeechAct
         ; rdfs:range  og:Proposition
     .
 
     og:replacement a rdf:Property, owl:FunctionalProperty
-        ; rdfs:domain og:Utterance
+        ; rdfs:domain og:SpeechAct
         ; rdfs:range  og:Proposition
     .
 
-
-og:Proposition a rdfs:Class
-    ; rdfs:subClassOf rtc:Compound
-    ; rdfs:label "Ontogen proposition"
-    ; rdfs:comment "A set of RDF statements independent of an occurrence in a utterance."
-.
 
 og:Commit a rdfs:Class
     ; rdfs:subClassOf prov:Activity
     ; rdfs:label "Ontogen commit"
 .
 
-    og:utterance a rdf:Property, owl:FunctionalProperty
+    og:speechAct a rdf:Property, owl:FunctionalProperty
         ; rdfs:subPropertyOf prov:used
         ; rdfs:domain og:Commit
-        ; rdfs:range  og:Utterance
+        ; rdfs:range  og:SpeechAct
     .
 
     og:committedInsertion a rdf:Property, owl:FunctionalProperty
@@ -159,3 +112,52 @@ og:Commit a rdfs:Class
         ; rdfs:domain og:Commit
         ; rdfs:range  rdfs:Literal
     .
+
+
+
+og:Agent a rdfs:Class
+    ; rdfs:subClassOf prov:Agent, foaf:Agent
+    ; rdfs:label "Agent"
+.
+
+    og:email a rdf:Property
+        ; rdfs:subPropertyOf foaf:mbox
+        ; rdfs:domain og:Agent
+    .
+
+og:Repository a rdfs:Class
+    ; rdfs:label "Ontogen repository"
+.
+
+    og:dataset a rdf:Property
+        ; rdfs:domain og:Repository
+        ; rdfs:range  og:Dataset
+    .
+
+    og:provGraph a rdf:Property
+        ; rdfs:domain og:Repository
+        ; rdfs:range  og:ProvGraph
+    .
+
+og:Dataset a rdfs:Class
+    ; rdfs:subClassOf dcat:Dataset, prov:Entity
+    ; rdfs:label "Dataset"
+    ; rdfs:comment "A DCAT dataset that version-controlled with Ontogen"
+.
+
+    og:repository a rdf:Property
+        ; owl:inverseOf og:dataset
+        ; rdfs:domain og:Dataset
+        ; rdfs:range  og:Repository
+        ; skos:scopeNote "This property MAY be used only in addition to its inverse, and it MUST NOT be used to replace it."@en ;
+    .
+
+    og:head a rdf:Property
+        ; rdfs:domain og:Dataset
+        ; rdfs:range  og:Commit
+    .
+
+og:ProvGraph a rdfs:Class
+    ; rdfs:subClassOf prov:Bundle
+    ; rdfs:label "Ontogen provenance graph"
+.

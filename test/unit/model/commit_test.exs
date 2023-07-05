@@ -11,7 +11,7 @@ defmodule Ontogen.CommitTest do
 
       assert {:ok, %Commit{} = commit} =
                Commit.new(
-                 utterance: utterance(),
+                 speech_act: speech_act(),
                  insert: proposition(),
                  committer: agent(),
                  message: message,
@@ -21,7 +21,7 @@ defmodule Ontogen.CommitTest do
       assert %IRI{value: "urn:hash::sha256:" <> _} = commit.__id__
 
       assert commit.insertion == proposition()
-      assert commit.utterance == utterance()
+      assert commit.speech_act == speech_act()
       assert commit.committer == agent()
       assert commit.message == message
       assert commit.time == datetime()
@@ -32,7 +32,7 @@ defmodule Ontogen.CommitTest do
     test "implicit proposition creation" do
       assert {:ok, %Commit{} = commit} =
                Commit.new(
-                 utterance: utterance(),
+                 speech_act: speech_act(),
                  insert: EX.S1 |> EX.p1(EX.O1),
                  delete: {EX.S2, EX.P2, EX.O2},
                  committer: agent(),
@@ -42,13 +42,13 @@ defmodule Ontogen.CommitTest do
 
       assert commit.insertion == proposition(EX.S1 |> EX.p1(EX.O1))
       assert commit.deletion == proposition({EX.S2, EX.P2, EX.O2})
-      assert commit.utterance == utterance()
+      assert commit.speech_act == speech_act()
     end
 
     test "with changeset" do
       assert {:ok, %Commit{} = commit} =
                Commit.new(
-                 utterance: utterance(),
+                 speech_act: speech_act(),
                  changeset: changeset(),
                  committer: agent(),
                  message: "Some commit",
@@ -59,7 +59,7 @@ defmodule Ontogen.CommitTest do
       assert commit.deletion == changeset().deletion
       assert commit.update == changeset().update
       assert commit.replacement == changeset().replacement
-      assert commit.utterance == utterance()
+      assert commit.speech_act == speech_act()
     end
 
     test "shared insertion and deletion statement" do

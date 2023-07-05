@@ -93,8 +93,8 @@ defmodule Ontogen.ChangesetTest do
                {:error, InvalidChangesetError.exception(reason: :empty)}
     end
 
-    test "with a utterance" do
-      assert Changeset.new(utterance()) ==
+    test "with a speech act" do
+      assert Changeset.new(speech_act()) ==
                {:ok, %Changeset{insertion: Proposition.new!(graph())}}
     end
 

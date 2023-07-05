@@ -1,12 +1,12 @@
-defmodule Ontogen.Utterance do
+defmodule Ontogen.SpeechAct do
   use Grax.Schema
 
   alias Ontogen.NS.Og
   alias Ontogen.{Proposition, Changeset}
-  alias Ontogen.Utterance.Id
+  alias Ontogen.SpeechAct.Id
   alias RDF.Graph
 
-  schema Og.Utterance do
+  schema Og.SpeechAct do
     link insertion: Og.insertion(), type: Proposition, depth: +1
     link deletion: Og.deletion(), type: Proposition, depth: +1
     link update: Og.update(), type: Proposition, depth: +1
@@ -18,10 +18,10 @@ defmodule Ontogen.Utterance do
   end
 
   def new(%Changeset{} = changeset, args) do
-    with {:ok, utterance} <- build(RDF.bnode(:tmp), args),
-         utterance = struct(utterance, Map.from_struct(changeset)),
-         {:ok, id} <- Id.generate(utterance) do
-      utterance
+    with {:ok, speech_act} <- build(RDF.bnode(:tmp), args),
+         speech_act = struct(speech_act, Map.from_struct(changeset)),
+         {:ok, id} <- Id.generate(speech_act) do
+      speech_act
       |> Grax.reset_id(id)
       |> validate()
     end
@@ -29,7 +29,7 @@ defmodule Ontogen.Utterance do
 
   def new!(changeset, args) do
     case new(changeset, args) do
-      {:ok, utterance} -> utterance
+      {:ok, speech_act} -> speech_act
       {:error, error} -> raise error
     end
   end
@@ -42,20 +42,20 @@ defmodule Ontogen.Utterance do
 
   def new!(args) do
     case new(args) do
-      {:ok, utterance} -> utterance
+      {:ok, speech_act} -> speech_act
       {:error, error} -> raise error
     end
   end
 
-  def validate(utterance) do
-    Grax.validate(utterance)
+  def validate(speech_act) do
+    Grax.validate(speech_act)
   end
 
   def on_to_rdf(%__MODULE__{__id__: id}, graph, _opts) do
     {
       :ok,
       graph
-      |> Graph.delete({id, RDF.type(), Og.Utterance})
+      |> Graph.delete({id, RDF.type(), Og.SpeechAct})
     }
   end
 end

@@ -1,14 +1,14 @@
-defmodule Ontogen.Commands.CreateUtteranceTest do
+defmodule Ontogen.Commands.CreateSpeechActTest do
   use Ontogen.Store.Test.Case
 
-  doctest Ontogen.Commands.CreateUtterance
-  alias Ontogen.{Local, Utterance}
+  doctest Ontogen.Commands.CreateSpeechAct
+  alias Ontogen.{Local, SpeechAct}
 
   test "uses proper defaults" do
-    assert {:ok, %Utterance{} = utterance} = Ontogen.utterance(insert: graph())
+    assert {:ok, %SpeechAct{} = speech_act} = Ontogen.speech_act(insert: graph())
 
-    assert utterance.insertion == proposition()
-    assert DateTime.diff(DateTime.utc_now(), utterance.time, :second) <= 1
-    assert utterance.speaker == Local.agent()
+    assert speech_act.insertion == proposition()
+    assert DateTime.diff(DateTime.utc_now(), speech_act.time, :second) <= 1
+    assert speech_act.speaker == Local.agent()
   end
 end

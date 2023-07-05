@@ -64,7 +64,7 @@ defmodule Ontogen.Commands.FetchHistory.Query do
     ?committed_replacement ?committed_replacement_p ?committed_replacement_o .
     ?committed_overwrite ?committed_overwrite_p ?committed_overwrite_o .
     ?committer ?committer_p ?committer_o .
-    ?utterance ?utterance_p ?utterance_o .
+    ?speech_act ?speech_act_p ?speech_act_o .
     ?speaker ?speaker_p ?speaker_o .
     ?insertion ?insertion_p ?insertion_o .
     ?deletion ?deletion_p ?deletion_o .
@@ -78,7 +78,7 @@ defmodule Ontogen.Commands.FetchHistory.Query do
     ?commit
         ?commit_p ?commit_o ;
         og:committer ?committer ;
-        og:utterance ?utterance .
+        og:speechAct ?speech_act .
 
       ?committer ?committer_p ?committer_o .
 
@@ -130,26 +130,26 @@ defmodule Ontogen.Commands.FetchHistory.Query do
         ?committed_overwrite ?committed_overwrite_p ?committed_overwrite_o .
       }
 
-      ?utterance
-        ?utterance_p ?utterance_o ;
+      ?speech_act
+        ?speech_act_p ?speech_act_o ;
         og:speaker ?speaker .
 
       ?speaker ?speaker_p ?speaker_o .
 
       OPTIONAL {
-        ?utterance og:insertion ?insertion .
+        ?speech_act og:insertion ?insertion .
         ?insertion ?insertion_p ?insertion_o .
       }
       OPTIONAL {
-        ?utterance og:deletion ?deletion .
+        ?speech_act og:deletion ?deletion .
         ?deletion ?deletion_p ?deletion_o .
       }
       OPTIONAL {
-        ?utterance og:update ?update .
+        ?speech_act og:update ?update .
         ?update ?update_p ?update_o .
       }
       OPTIONAL {
-        ?utterance og:replacement ?replacement .
+        ?speech_act og:replacement ?replacement .
         ?replacement ?replacement_p ?replacement_o .
       }
     """

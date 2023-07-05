@@ -2,14 +2,14 @@ defmodule Ontogen.Commit do
   use Grax.Schema
 
   alias Ontogen.NS.Og
-  alias Ontogen.{Changeset, Proposition, Utterance}
+  alias Ontogen.{Changeset, Proposition, SpeechAct}
   alias Ontogen.Commit.Id
   alias RDF.Graph
 
   schema Og.Commit do
     link parent: Og.parentCommit(), type: Ontogen.Commit, depth: 0
 
-    link utterance: Og.utterance(), type: Utterance, required: true, depth: +1
+    link speech_act: Og.speechAct(), type: SpeechAct, required: true, depth: +1
 
     link insertion: Og.committedInsertion(), type: Proposition, depth: +1
     link deletion: Og.committedDeletion(), type: Proposition, depth: +1

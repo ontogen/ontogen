@@ -1,7 +1,7 @@
 defmodule Ontogen.Changeset do
   defstruct [:insertion, :deletion, :update, :replacement, :overwrite]
 
-  alias Ontogen.{Proposition, Utterance, InvalidChangesetError}
+  alias Ontogen.{Proposition, SpeechAct, InvalidChangesetError}
   alias RDF.{Graph, Description}
 
   @keys [:insert, :delete, :update, :replace, :overwrite]
@@ -11,9 +11,9 @@ defmodule Ontogen.Changeset do
     validate(changeset)
   end
 
-  def new(%Utterance{} = utterance) do
+  def new(%SpeechAct{} = speech_act) do
     __MODULE__
-    |> struct(Map.from_struct(utterance))
+    |> struct(Map.from_struct(speech_act))
     |> validate()
   end
 

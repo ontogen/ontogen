@@ -5,7 +5,7 @@ defmodule Ontogen.Commands.CommitTest do
 
   alias Ontogen.{Local, ProvGraph, Proposition, InvalidCommitError}
 
-  test "initial commit with implicit utterance" do
+  test "initial commit with implicit speech_act" do
     refute Repo.head()
 
     expected_insertion = Proposition.new!(graph())
@@ -13,7 +13,7 @@ defmodule Ontogen.Commands.CommitTest do
     time = datetime()
     message = "Initial commit"
 
-    utterance = utterance(time: datetime(-1, :day))
+    speech_act = speech_act(time: datetime(-1, :day))
 
     assert {:ok, %Ontogen.Commit{} = commit} =
              Repo.commit(
@@ -22,12 +22,12 @@ defmodule Ontogen.Commands.CommitTest do
                speaker: agent(),
                committer: committer,
                time: time,
-               utterance_time: datetime(-1, :day),
+               speech_act_time: datetime(-1, :day),
                message: message
              )
 
     assert commit.parent == nil
-    assert commit.utterance == utterance
+    assert commit.speech_act == speech_act
     assert commit.insertion == expected_insertion
     assert commit.committer == committer
     assert commit.time == time
@@ -49,7 +49,7 @@ defmodule Ontogen.Commands.CommitTest do
                 [
                   [
                     commit,
-                    utterance,
+                    speech_act,
                     expected_insertion,
                     committer
                   ]
@@ -59,12 +59,12 @@ defmodule Ontogen.Commands.CommitTest do
               )}
   end
 
-  test "initial commit with explicit utterance" do
+  test "initial commit with explicit speech_act" do
     refute Repo.head()
 
-    utterance = utterance()
+    speech_act = speech_act()
 
-    expected_insertion = utterance.insertion
+    expected_insertion = speech_act.insertion
     committer = agent(:agent_jane)
     time = datetime()
     message = "Initial commit"
@@ -72,14 +72,14 @@ defmodule Ontogen.Commands.CommitTest do
     assert {:ok,
             %Ontogen.Commit{
               parent: nil,
-              utterance: ^utterance,
+              speech_act: ^speech_act,
               insertion: ^expected_insertion,
               committer: ^committer,
               time: ^time,
               message: ^message
             } = commit} =
              Repo.commit(
-               utterance: utterance,
+               speech_act: speech_act,
                committer: committer,
                time: time,
                message: message
@@ -102,23 +102,23 @@ defmodule Ontogen.Commands.CommitTest do
                   commit,
                   expected_insertion,
                   committer,
-                  utterance()
+                  speech_act()
                 ]
                 |> Enum.map(&Grax.to_rdf!/1),
                 prefixes: ProvGraph.prefixes()
               )}
   end
 
-  test "when direct changes and an utterance given" do
-    assert Repo.commit(insert: graph(), utterance: graph()) ==
+  test "when direct changes and a speech_act given" do
+    assert Repo.commit(insert: graph(), speech_act: graph()) ==
              {:error,
               InvalidCommitError.exception(
-                reason: "utterances are not allowed with other changes"
+                reason: "speech acts are not allowed with other changes"
               )}
   end
 
   describe "defaults" do
-    test "with implicit utterance" do
+    test "with implicit speech_act" do
       refute Repo.head()
 
       expected_insertion = Proposition.new!(graph())
@@ -129,9 +129,9 @@ defmodule Ontogen.Commands.CommitTest do
       assert commit.committer == Local.agent()
       assert DateTime.diff(DateTime.utc_now(), commit.time, :second) <= 1
 
-      assert commit.utterance.insertion == expected_insertion
-      assert commit.utterance.speaker == Local.agent()
-      assert DateTime.diff(DateTime.utc_now(), commit.utterance.time, :second) <= 1
+      assert commit.speech_act.insertion == expected_insertion
+      assert commit.speech_act.speaker == Local.agent()
+      assert DateTime.diff(DateTime.utc_now(), commit.speech_act.time, :second) <= 1
 
       # inserts the provenance
       assert Repo.fetch_prov_graph() ==
@@ -147,10 +147,10 @@ defmodule Ontogen.Commands.CommitTest do
                 )}
     end
 
-    test "with explicit utterance" do
+    test "with explicit speech_act" do
       refute Repo.head()
 
-      expected_insertion = utterance().insertion
+      expected_insertion = speech_act().insertion
       committer = agent(:agent_jane)
       time = datetime()
       message = "Initial commit"
@@ -164,13 +164,13 @@ defmodule Ontogen.Commands.CommitTest do
                 message: ^message
               } = commit} =
                Repo.commit(
-                 utterance: utterance_attrs(),
+                 speech_act: speech_act_attrs(),
                  committer: committer,
                  time: time,
                  message: message
                )
 
-      assert commit.utterance == utterance()
+      assert commit.speech_act == speech_act()
 
       # inserts the provenance
       assert Repo.fetch_prov_graph() ==
@@ -180,7 +180,7 @@ defmodule Ontogen.Commands.CommitTest do
                     commit,
                     expected_insertion,
                     committer,
-                    utterance()
+                    speech_act()
                   ]
                   |> Enum.map(&Grax.to_rdf!/1),
                   prefixes: ProvGraph.prefixes()
@@ -293,7 +293,7 @@ defmodule Ontogen.Commands.CommitTest do
               )}
   end
 
-  test "replacement (with utterance)" do
+  test "replacement (with speech_act)" do
     [last_commit] = init_commit_history()
 
     insert = {EX.S4, EX.p4(), EX.O4}
@@ -309,24 +309,24 @@ defmodule Ontogen.Commands.CommitTest do
     replacement_proposition = Proposition.new!(replace)
     overwrite_proposition = Proposition.new!(expected_delete)
 
-    utterance_args = [
+    speech_act_args = [
       insert: insert,
       replace: replace,
       time: datetime(-1, :day)
     ]
 
-    utterance = Ontogen.utterance!(utterance_args)
+    speech_act = Ontogen.speech_act!(speech_act_args)
 
     assert {:ok, new_commit} =
              Repo.commit(
-               utterance: utterance_args,
+               speech_act: speech_act_args,
                committer: agent(:agent_jane),
                message: "Second commit",
                time: datetime()
              )
 
     assert new_commit.parent == last_commit.__id__
-    assert new_commit.utterance == utterance
+    assert new_commit.speech_act == speech_act
     assert new_commit.insertion == insert_proposition
     assert new_commit.replacement == replacement_proposition
     assert new_commit.overwrite == overwrite_proposition
@@ -353,7 +353,7 @@ defmodule Ontogen.Commands.CommitTest do
                   insert_proposition,
                   replacement_proposition,
                   overwrite_proposition,
-                  utterance,
+                  speech_act,
                   Local.agent(),
                   agent(:agent_jane)
                 ]
@@ -384,8 +384,8 @@ defmodule Ontogen.Commands.CommitTest do
       expected_insert_proposition = Proposition.new!(expected_insert)
       expected_delete_proposition = Proposition.new!(expected_delete)
 
-      utterance =
-        utterance(
+      speech_act =
+        speech_act(
           insert: insert,
           delete: delete,
           speaker: agent(:agent_jane),
@@ -405,7 +405,7 @@ defmodule Ontogen.Commands.CommitTest do
       assert new_commit.parent == last_commit.__id__
       assert new_commit.insertion == expected_insert_proposition
       assert new_commit.deletion == expected_delete_proposition
-      assert new_commit.utterance == utterance
+      assert new_commit.speech_act == speech_act
 
       # updates the head in the dataset of the repo
       assert Repo.head() == new_commit
@@ -424,7 +424,7 @@ defmodule Ontogen.Commands.CommitTest do
                   [
                     last_commit,
                     new_commit,
-                    utterance,
+                    speech_act,
                     Proposition.new!(graph()),
                     expected_insert_proposition,
                     expected_delete_proposition,
@@ -436,7 +436,7 @@ defmodule Ontogen.Commands.CommitTest do
                 )}
     end
 
-    test "with utterance" do
+    test "with speech_act" do
       [last_commit] = init_commit_history()
 
       insert = [
@@ -459,7 +459,7 @@ defmodule Ontogen.Commands.CommitTest do
 
       assert {:ok, new_commit} =
                Repo.commit(
-                 utterance: [
+                 speech_act: [
                    insert: insert,
                    delete: delete,
                    time: datetime()
@@ -469,8 +469,8 @@ defmodule Ontogen.Commands.CommitTest do
                  time: datetime()
                )
 
-      assert new_commit.utterance ==
-               Ontogen.utterance!(
+      assert new_commit.speech_act ==
+               Ontogen.speech_act!(
                  insert: insert,
                  delete: delete,
                  time: datetime()
@@ -500,7 +500,7 @@ defmodule Ontogen.Commands.CommitTest do
                     Proposition.new!(graph()),
                     expected_insertion_proposition,
                     expected_deletion_proposition,
-                    Ontogen.utterance!(
+                    Ontogen.speech_act!(
                       insert: insert,
                       delete: delete,
                       time: datetime()

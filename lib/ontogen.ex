@@ -1,4 +1,4 @@
 defmodule Ontogen do
-  defdelegate utterance(args), to: Ontogen.Commands.CreateUtterance, as: :call
-  defdelegate utterance!(args), to: Ontogen.Commands.CreateUtterance, as: :call!
+  defdelegate speech_act(args), to: Ontogen.Commands.CreateSpeechAct, as: :call
+  defdelegate speech_act!(args), to: Ontogen.Commands.CreateSpeechAct, as: :call!
 end

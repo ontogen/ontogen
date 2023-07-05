@@ -1,4 +1,4 @@
-defmodule Ontogen.PropositionTest do
+defmodule Ontogen.ExpressionTest do
   use Ontogen.Test.Case
 
   doctest Ontogen.Proposition
