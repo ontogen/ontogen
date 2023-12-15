@@ -10,20 +10,23 @@ aliases: [Ontogen project, Ontogen-project]
 
 ## Description
 
-<!--
-What is the Ontogen project about?
--->
+Ontogen is a PROV- and DCAT-based versioning system for RDF triple stores. It
+
+- stores a version history of the statements in an RDF dataset in a dedicated named graph of this dataset (similar to the `.git` directory of a Git repo) 
+- provides an API to control access to the contents of a triple store, in particular to implement write access in such a way, that it produces provenance metadata for the changes, recording them in a provenance history.  
+
+Ontogen is like a Git for RDF data. Unlike Git, it is not a [[Source-Control-Management]] (SCM) solution, but a [[Data-Control-Management]] solution (DCM) and in its first versions, even more specific, a [[Data-Control-Management]] solution for [[RDF]] data only, i.e. the triples in the graphs of a [[SPARQL]] triple store.
+
+While on the one hand, we have narrowed down the subject of version control to very specific type - RDF data, we take a very general stance within this realm, on the other hand. RDF itself, as being the fundamental data model for the semantic web, already has a fairly universal approach, but instead of limiting our point of view only on the syntactical and semantical level, we like to take all semiotic/linguistic layers into account and incorporate also the pragmatic layer.
+
+Ontogen achieves this by incorporating the concept of the utterance of RDF statements into the model. In other words, when, by whom, in what context, under what conditions, etc. an RDF statement was made.
+
+We achieve this by reifying the utterances of statements to dedicated resources via the RTC vocabulary. In other words, we introduce a new class of RDF resources that represent the utterances of RDF statements and can thus be used as the subject of RDF descriptions in order to be able to make metadata statements about these RDF descriptions and thus form the basis of the provenance history of graphs of an RDF dataset.
+
+Based on this concept of utterance, a model is defined as a specialization of the PROV and DCAT models towards RDF data as `prov:Entity`s resp. `dcat:Dataset`s and attempts to integrate them as far as possible for the purpose 
 
 
 # Context knowledge
-
-<!--
-This section should include background knowledge needed for the model to create a proper response, i.e. information it does not know either because of the knowledge cut-off date or unpublished knowledge.
-
-Write it down right here in a subsection or use a transclusion. If applicable, specify source information that the model can use to generate a reference in the response.
--->
-
-
 
 
 # Artefacts
