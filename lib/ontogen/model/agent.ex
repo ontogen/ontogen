@@ -21,7 +21,7 @@ defmodule Ontogen.Agent do
           email
 
         [email | _] ->
-          Logger.warn(
+          Logger.warning(
             "No unique foaf:mbox found for agent #{agent.__id__}: selected #{email} randomly"
           )
 
