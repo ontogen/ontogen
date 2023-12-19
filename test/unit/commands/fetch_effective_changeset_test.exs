@@ -9,7 +9,7 @@ defmodule Ontogen.Commands.FetchEffectiveChangesetTest do
     :ok
   end
 
-  describe "insertions" do
+  describe "inserts" do
     test "fully effective (when none of the inserted statements already exist)" do
       statements = EX.Foo |> EX.bar(EX.Baz)
 
@@ -30,7 +30,7 @@ defmodule Ontogen.Commands.FetchEffectiveChangesetTest do
     end
   end
 
-  describe "deletions" do
+  describe "deletes" do
     test "fully effective (when all of the deleted statements actually exist)" do
       assert Repo.effective_changeset!(delete: graph()) ==
                Changeset.new!(delete: graph())
@@ -99,7 +99,7 @@ defmodule Ontogen.Commands.FetchEffectiveChangesetTest do
     end
   end
 
-  describe "replacements" do
+  describe "replaces" do
     test "fully effective (when none of the replaced statements already exist)" do
       statements = EX.Foo |> EX.bar(EX.Baz)
 

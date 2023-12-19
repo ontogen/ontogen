@@ -1,11 +1,20 @@
 defmodule Ontogen.Changeset do
-  defstruct [:insertion, :deletion, :update, :replacement, :overwrite]
+  @fields [:insert, :delete, :update, :replace, :overwrite]
+  defstruct @fields
 
   alias Ontogen.{Proposition, SpeechAct, InvalidChangesetError}
   alias RDF.{Graph, Description}
 
-  @keys [:insert, :delete, :update, :replace, :overwrite]
-  def keys, do: @keys
+  @type t :: %__MODULE__{
+          insert: Proposition.t() | nil,
+          delete: Proposition.t() | nil,
+          update: Proposition.t() | nil,
+          replace: Proposition.t() | nil,
+          overwrite: Proposition.t() | nil
+        }
+
+  @spec fields :: list(atom)
+  def fields, do: @fields
 
   def new(%__MODULE__{} = changeset) do
     validate(changeset)
@@ -41,17 +50,17 @@ defmodule Ontogen.Changeset do
     case Keyword.pop(args, :changeset) do
       {nil, args} ->
         with :ok <- do_validate(insert, delete, update, replace, overwrite),
-             {:ok, insertion} <- build_proposition(insert),
-             {:ok, deletion} <- build_proposition(delete),
+             {:ok, insert} <- build_proposition(insert),
+             {:ok, delete} <- build_proposition(delete),
              {:ok, update} <- build_proposition(update),
-             {:ok, replacement} <- build_proposition(replace),
+             {:ok, replace} <- build_proposition(replace),
              {:ok, overwrite} <- build_proposition(overwrite) do
           {:ok,
            %__MODULE__{
-             insertion: insertion,
-             deletion: deletion,
+             insert: insert,
+             delete: delete,
              update: update,
-             replacement: replacement,
+             replace: replace,
              overwrite: overwrite
            }, args}
         end
@@ -89,43 +98,43 @@ defmodule Ontogen.Changeset do
   defp to_graph(%Proposition{} = proposition), do: proposition
   defp to_graph(statements), do: Graph.new(statements)
 
-  def empty?(%{insertion: nil, deletion: nil, update: nil, replacement: nil, overwrite: nil}),
+  def empty?(%{insert: nil, delete: nil, update: nil, replace: nil, overwrite: nil}),
     do: true
 
-  def empty?(%{insertion: _, deletion: _, update: _, replacement: _, overwrite: _}), do: false
-  def empty?(%{insertion: nil, deletion: nil, update: nil, replacement: nil}), do: true
-  def empty?(%{insertion: _, deletion: _, update: _, replacement: _}), do: false
+  def empty?(%{insert: _, delete: _, update: _, replace: _, overwrite: _}), do: false
+  def empty?(%{insert: nil, delete: nil, update: nil, replace: nil}), do: true
+  def empty?(%{insert: _, delete: _, update: _, replace: _}), do: false
 
   def empty?(args) when is_list(args) do
-    args |> Keyword.take(@keys) |> Enum.empty?()
+    args |> Keyword.take(@fields) |> Enum.empty?()
   end
 
   def validate(
         %{
-          insertion: insertion,
-          deletion: deletion,
+          insert: insert,
+          delete: delete,
           update: update,
-          replacement: replacement,
+          replace: replace,
           overwrite: overwrite
         } = changeset
       ) do
-    with :ok <- do_validate(insertion, deletion, update, replacement, overwrite) do
+    with :ok <- do_validate(insert, delete, update, replace, overwrite) do
       {:ok, changeset}
     end
   end
 
-  defp do_validate(insertion, deletion, update, replacement, overwrite) do
-    insertion = Proposition.graph(insertion)
-    deletion = Proposition.graph(deletion)
+  defp do_validate(insert, delete, update, replace, overwrite) do
+    insert = Proposition.graph(insert)
+    delete = Proposition.graph(delete)
     update = Proposition.graph(update)
-    replacement = Proposition.graph(replacement)
+    replace = Proposition.graph(replace)
     overwrite = Proposition.graph(overwrite)
 
-    with :ok <- check_statements_presence(insertion, deletion, update, replacement, overwrite),
-         :ok <- check_no_insert_delete_overlap(insertion, deletion, update, replacement),
-         :ok <- check_no_inserts_overlap(insertion, update, replacement),
-         :ok <- check_no_replacement_overlap(insertion, update, replacement),
-         :ok <- check_no_update_overlap(insertion, update) do
+    with :ok <- check_statements_presence(insert, delete, update, replace, overwrite),
+         :ok <- check_no_insert_delete_overlap(insert, delete, update, replace),
+         :ok <- check_no_inserts_overlap(insert, update, replace),
+         :ok <- check_no_replace_overlap(insert, update, replace),
+         :ok <- check_no_update_overlap(insert, update) do
       :ok
     end
   end
@@ -135,10 +144,9 @@ defmodule Ontogen.Changeset do
 
   defp check_statements_presence(_, _, _, _, _), do: :ok
 
-  defp check_no_insert_delete_overlap(insertion, deletion, update, replacement) do
+  defp check_no_insert_delete_overlap(insert, delete, update, replace) do
     overlapping_statements =
-      [insertion, update, replacement]
-      |> Enum.flat_map(&overlapping_statements(&1, deletion))
+      Enum.flat_map([insert, update, replace], &overlapping_statements(&1, delete))
 
     if Enum.empty?(overlapping_statements) do
       :ok
@@ -146,16 +154,16 @@ defmodule Ontogen.Changeset do
       {:error,
        InvalidChangesetError.exception(
          reason:
-           "the following statements are in both insertion and deletions: #{inspect(overlapping_statements)}"
+           "the following statements are in both insert and delete: #{inspect(overlapping_statements)}"
        )}
     end
   end
 
-  defp check_no_inserts_overlap(insertion, update, replacement) do
+  defp check_no_inserts_overlap(insert, update, replace) do
     [
-      {insertion, update},
-      {insertion, replacement},
-      {update, replacement}
+      {insert, update},
+      {insert, replace},
+      {update, replace}
     ]
     |> Enum.reduce_while(:ok, fn {graph1, graph2}, :ok ->
       overlapping_statements = overlapping_statements(graph1, graph2)
@@ -167,16 +175,16 @@ defmodule Ontogen.Changeset do
          {:error,
           InvalidChangesetError.exception(
             reason:
-              "the following statements are in multiple insertions: #{inspect(overlapping_statements)}"
+              "the following statements are in multiple inserts: #{inspect(overlapping_statements)}"
           )}}
       end
     end)
   end
 
-  defp check_no_replacement_overlap(_, _, nil), do: :ok
+  defp check_no_replace_overlap(_, _, nil), do: :ok
 
-  defp check_no_replacement_overlap(insertion, update, replacement) do
-    replacement
+  defp check_no_replace_overlap(insert, update, replace) do
+    replace
     |> Graph.subjects()
     |> Enum.find_value(fn subject ->
       cond do
@@ -187,7 +195,7 @@ defmodule Ontogen.Changeset do
                "the following update statements overlap with replace overwrites: #{inspect(Description.triples(update_description))}"
            )}
 
-        insert_description = insertion && insertion[subject] ->
+        insert_description = insert && insert[subject] ->
           {:error,
            InvalidChangesetError.exception(
              reason:
@@ -202,11 +210,11 @@ defmodule Ontogen.Changeset do
 
   defp check_no_update_overlap(_, nil), do: :ok
 
-  defp check_no_update_overlap(insertion, update) do
+  defp check_no_update_overlap(insert, update) do
     update
     |> Graph.descriptions()
     |> Enum.find_value(fn description ->
-      if insert_description = insertion && insertion[description.subject] do
+      if insert_description = insert && insert[description.subject] do
         description
         |> Description.predicates()
         |> Enum.find_value(fn predicate ->

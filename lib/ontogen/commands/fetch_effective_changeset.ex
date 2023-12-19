@@ -5,34 +5,34 @@ defmodule Ontogen.Commands.FetchEffectiveChangeset do
   import Ontogen.QueryUtils
 
   def call(store, repo, %{
-        insertion: insertion_proposition,
-        deletion: deletion_proposition,
+        insert: insert_proposition,
+        delete: delete_proposition,
         update: update_proposition,
-        replacement: replacement_proposition
+        replace: replace_proposition
       }) do
-    insert = Proposition.graph(insertion_proposition)
-    delete = Proposition.graph(deletion_proposition)
+    insert = Proposition.graph(insert_proposition)
+    delete = Proposition.graph(delete_proposition)
     update = Proposition.graph(update_proposition)
-    replace = Proposition.graph(replacement_proposition)
+    replace = Proposition.graph(replace_proposition)
 
     dataset = Repository.dataset_graph_id(repo)
 
     with {:ok, insert_delete_change_graph} <-
            Store.construct(store, dataset, insert_delete_query(insert, delete, update, replace)),
-         {:ok, effective_insertion} <- effective_insertion(insert, insert_delete_change_graph),
-         {:ok, effective_update} <- effective_insertion(update, insert_delete_change_graph),
-         {:ok, effective_replacement} <- effective_insertion(replace, insert_delete_change_graph),
-         {:ok, effective_deletion} <- effective_deletion(delete, insert_delete_change_graph),
+         {:ok, effective_insert} <- effective_insert(insert, insert_delete_change_graph),
+         {:ok, effective_update} <- effective_insert(update, insert_delete_change_graph),
+         {:ok, effective_replace} <- effective_insert(replace, insert_delete_change_graph),
+         {:ok, effective_delete} <- effective_delete(delete, insert_delete_change_graph),
          {:ok, update_overwrites_graph} <- update_overwrites(store, dataset, update),
          {:ok, replace_overwrites_graph} <- replace_overwrites(store, dataset, replace),
-         {:ok, overwrite} = overwrite_deletion(update_overwrites_graph, replace_overwrites_graph) do
-      if effective_insertion || effective_deletion || effective_update || effective_replacement ||
+         {:ok, overwrite} = overwrite_delete(update_overwrites_graph, replace_overwrites_graph) do
+      if effective_insert || effective_delete || effective_update || effective_replace ||
            overwrite do
         Changeset.new(
-          insert: effective_insertion,
-          delete: effective_deletion,
+          insert: effective_insert,
+          delete: effective_delete,
           update: effective_update,
-          replace: effective_replacement,
+          replace: effective_replace,
           overwrite: overwrite
         )
       else
@@ -65,9 +65,9 @@ defmodule Ontogen.Commands.FetchEffectiveChangeset do
     end
   end
 
-  defp effective_insertion(nil, _), do: {:ok, nil}
+  defp effective_insert(nil, _), do: {:ok, nil}
 
-  defp effective_insertion(insert, change_graph) do
+  defp effective_insert(insert, change_graph) do
     effective_insert =
       Enum.reduce(insert, insert, fn triple, effective_insert ->
         if Graph.include?(change_graph, triple) do
@@ -84,9 +84,9 @@ defmodule Ontogen.Commands.FetchEffectiveChangeset do
     end
   end
 
-  defp effective_deletion(nil, _), do: {:ok, nil}
+  defp effective_delete(nil, _), do: {:ok, nil}
 
-  defp effective_deletion(delete, change_graph) do
+  defp effective_delete(delete, change_graph) do
     effective_delete =
       Enum.reduce(delete, delete, fn triple, effective_delete ->
         if Graph.include?(change_graph, triple) do
@@ -103,21 +103,21 @@ defmodule Ontogen.Commands.FetchEffectiveChangeset do
     end
   end
 
-  defp overwrite_deletion(update_overwrite, replacement_overwrite) do
-    do_overwrite_deletion(
+  defp overwrite_delete(update_overwrite, replace_overwrite) do
+    do_overwrite_delete(
       non_empty_graph(update_overwrite),
-      non_empty_graph(replacement_overwrite)
+      non_empty_graph(replace_overwrite)
     )
   end
 
-  defp do_overwrite_deletion(nil, nil), do: {:ok, nil}
-  defp do_overwrite_deletion(update_overwrite, nil), do: Proposition.new(update_overwrite)
+  defp do_overwrite_delete(nil, nil), do: {:ok, nil}
+  defp do_overwrite_delete(update_overwrite, nil), do: Proposition.new(update_overwrite)
 
-  defp do_overwrite_deletion(nil, replacement_overwrite),
-    do: Proposition.new(replacement_overwrite)
+  defp do_overwrite_delete(nil, replace_overwrite),
+    do: Proposition.new(replace_overwrite)
 
-  defp do_overwrite_deletion(update_overwrite, replacement_overwrite) do
-    update_overwrite |> Graph.add(replacement_overwrite) |> Proposition.new()
+  defp do_overwrite_delete(update_overwrite, replace_overwrite) do
+    update_overwrite |> Graph.add(replace_overwrite) |> Proposition.new()
   end
 
   defp non_empty_graph(nil), do: nil

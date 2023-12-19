@@ -5,7 +5,7 @@ defmodule Ontogen.Commands.CreateSpeechAct do
 
   alias Ontogen.{Local, SpeechAct, Changeset, Utils}
 
-  @args_keys Changeset.keys() ++ [:speaker, :speech_act_time, :data_source]
+  @args_keys Changeset.fields() ++ [:speaker, :speech_act_time, :data_source]
   @shared_args [:time, :committer]
 
   def call(%SpeechAct{} = speech_act) do

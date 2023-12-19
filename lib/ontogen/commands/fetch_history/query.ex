@@ -58,18 +58,18 @@ defmodule Ontogen.Commands.FetchHistory.Query do
   defp commit_statements_construct_pattern do
     """
     ?commit ?commit_p ?commit_o .
-    ?committed_insertion ?committed_insertion_p ?committed_insertion_o .
-    ?committed_deletion ?committed_deletion_p ?committed_deletion_o .
+    ?committed_insert ?committed_insert_p ?committed_insert_o .
+    ?committed_delete ?committed_delete_p ?committed_delete_o .
     ?committed_update ?committed_update_p ?committed_update_o .
-    ?committed_replacement ?committed_replacement_p ?committed_replacement_o .
+    ?committed_replace ?committed_replace_p ?committed_replace_o .
     ?committed_overwrite ?committed_overwrite_p ?committed_overwrite_o .
     ?committer ?committer_p ?committer_o .
     ?speech_act ?speech_act_p ?speech_act_o .
     ?speaker ?speaker_p ?speaker_o .
-    ?insertion ?insertion_p ?insertion_o .
-    ?deletion ?deletion_p ?deletion_o .
+    ?insert ?insert_p ?insert_o .
+    ?delete ?delete_p ?delete_o .
     ?update ?update_p ?update_o .
-    ?replacement ?replacement_p ?replacement_o .
+    ?replace ?replace_p ?replace_o .
     """
   end
 
@@ -84,13 +84,13 @@ defmodule Ontogen.Commands.FetchHistory.Query do
 
       {
         {
-          ?commit og:committedInsertion ?committed_insertion .
-          #{statement_filter("?committed_insertion", subject)}
+          ?commit og:committedInsert ?committed_insert .
+          #{statement_filter("?committed_insert", subject)}
         }
         UNION
         {
-          ?commit og:committedDeletion ?committed_deletion .
-          #{statement_filter("?committed_deletion", subject)}
+          ?commit og:committedDelete ?committed_delete .
+          #{statement_filter("?committed_delete", subject)}
         }
         UNION
         {
@@ -99,8 +99,8 @@ defmodule Ontogen.Commands.FetchHistory.Query do
         }
         UNION
         {
-          ?commit og:committedReplacement ?committed_replacement .
-          #{statement_filter("?committed_replacement", subject)}
+          ?commit og:committedReplace ?committed_replace .
+          #{statement_filter("?committed_replace", subject)}
         }
         UNION
         {
@@ -110,20 +110,20 @@ defmodule Ontogen.Commands.FetchHistory.Query do
       }
 
       OPTIONAL {
-        ?commit og:committedInsertion ?committed_insertion .
-        ?committed_insertion ?committed_insertion_p ?committed_insertion_o .
+        ?commit og:committedInsert ?committed_insert .
+        ?committed_insert ?committed_insert_p ?committed_insert_o .
       }
       OPTIONAL {
-        ?commit og:committedDeletion ?committed_deletion .
-        ?committed_deletion ?committed_deletion_p ?committed_deletion_o .
+        ?commit og:committedDelete ?committed_delete .
+        ?committed_delete ?committed_delete_p ?committed_delete_o .
       }
       OPTIONAL {
         ?commit og:committedUpdate ?committed_update .
         ?committed_update ?committed_update_p ?committed_update_o .
       }
       OPTIONAL {
-        ?commit og:committedReplacement ?committed_replacement .
-        ?committed_replacement ?committed_replacement_p ?committed_replacement_o .
+        ?commit og:committedReplace ?committed_replace .
+        ?committed_replace ?committed_replace_p ?committed_replace_o .
       }
       OPTIONAL {
         ?commit og:committedOverwrite ?committed_overwrite .
@@ -137,20 +137,20 @@ defmodule Ontogen.Commands.FetchHistory.Query do
       ?speaker ?speaker_p ?speaker_o .
 
       OPTIONAL {
-        ?speech_act og:insertion ?insertion .
-        ?insertion ?insertion_p ?insertion_o .
+        ?speech_act og:insert ?insert .
+        ?insert ?insert_p ?insert_o .
       }
       OPTIONAL {
-        ?speech_act og:deletion ?deletion .
-        ?deletion ?deletion_p ?deletion_o .
+        ?speech_act og:delete ?delete .
+        ?delete ?delete_p ?delete_o .
       }
       OPTIONAL {
         ?speech_act og:update ?update .
         ?update ?update_p ?update_o .
       }
       OPTIONAL {
-        ?speech_act og:replacement ?replacement .
-        ?replacement ?replacement_p ?replacement_o .
+        ?speech_act og:replace ?replace .
+        ?replace ?replace_p ?replace_o .
       }
     """
   end

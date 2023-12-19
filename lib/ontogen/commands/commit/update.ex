@@ -9,14 +9,14 @@ defmodule Ontogen.Commands.Commit.Update do
      PREFIX og: <#{Og.__base_iri__()}>
      DELETE DATA {
        #{head(repo, commit.parent)}
-       #{dataset_changes(repo, commit.deletion)}
+       #{dataset_changes(repo, commit.delete)}
        #{dataset_changes(repo, commit.overwrite)}
      } ;
      INSERT DATA {
        #{head(repo, commit.__id__)}
-       #{dataset_changes(repo, commit.insertion)}
+       #{dataset_changes(repo, commit.insert)}
        #{dataset_changes(repo, commit.update)}
-       #{dataset_changes(repo, commit.replacement)}
+       #{dataset_changes(repo, commit.replace)}
        #{provenance(repo, commit)}
        #{provenance(repo, commit.speech_act)}
      }

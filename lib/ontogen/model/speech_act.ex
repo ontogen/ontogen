@@ -7,10 +7,10 @@ defmodule Ontogen.SpeechAct do
   alias RDF.Graph
 
   schema Og.SpeechAct do
-    link insertion: Og.insertion(), type: Proposition, depth: +1
-    link deletion: Og.deletion(), type: Proposition, depth: +1
+    link insert: Og.insert(), type: Proposition, depth: +1
+    link delete: Og.delete(), type: Proposition, depth: +1
     link update: Og.update(), type: Proposition, depth: +1
-    link replacement: Og.replacement(), type: Proposition, depth: +1
+    link replace: Og.replace(), type: Proposition, depth: +1
 
     property time: PROV.endedAtTime(), type: :date_time, required: true
     link speaker: Og.speaker(), type: Ontogen.Agent, depth: +1

@@ -8,7 +8,7 @@ defmodule Ontogen.Commands.CommitTest do
   test "initial commit with implicit speech_act" do
     refute Repo.head()
 
-    expected_insertion = Proposition.new!(graph())
+    expected_insert = Proposition.new!(graph())
     committer = agent(:agent_jane)
     time = datetime()
     message = "Initial commit"
@@ -28,7 +28,7 @@ defmodule Ontogen.Commands.CommitTest do
 
     assert commit.parent == nil
     assert commit.speech_act == speech_act
-    assert commit.insertion == expected_insertion
+    assert commit.insert == expected_insert
     assert commit.committer == committer
     assert commit.time == time
     assert commit.message == message
@@ -50,7 +50,7 @@ defmodule Ontogen.Commands.CommitTest do
                   [
                     commit,
                     speech_act,
-                    expected_insertion,
+                    expected_insert,
                     committer
                   ]
                   |> Enum.map(&Grax.to_rdf!/1)
@@ -64,7 +64,7 @@ defmodule Ontogen.Commands.CommitTest do
 
     speech_act = speech_act()
 
-    expected_insertion = speech_act.insertion
+    expected_insert = speech_act.insert
     committer = agent(:agent_jane)
     time = datetime()
     message = "Initial commit"
@@ -73,7 +73,7 @@ defmodule Ontogen.Commands.CommitTest do
             %Ontogen.Commit{
               parent: nil,
               speech_act: ^speech_act,
-              insertion: ^expected_insertion,
+              insert: ^expected_insert,
               committer: ^committer,
               time: ^time,
               message: ^message
@@ -100,7 +100,7 @@ defmodule Ontogen.Commands.CommitTest do
               RDF.graph(
                 [
                   commit,
-                  expected_insertion,
+                  expected_insert,
                   committer,
                   speech_act()
                 ]
@@ -121,15 +121,15 @@ defmodule Ontogen.Commands.CommitTest do
     test "with implicit speech_act" do
       refute Repo.head()
 
-      expected_insertion = Proposition.new!(graph())
+      expected_insert = Proposition.new!(graph())
 
       assert {:ok, commit} = Repo.commit(insert: graph())
 
-      assert commit.insertion == expected_insertion
+      assert commit.insert == expected_insert
       assert commit.committer == Local.agent()
       assert DateTime.diff(DateTime.utc_now(), commit.time, :second) <= 1
 
-      assert commit.speech_act.insertion == expected_insertion
+      assert commit.speech_act.insert == expected_insert
       assert commit.speech_act.speaker == Local.agent()
       assert DateTime.diff(DateTime.utc_now(), commit.speech_act.time, :second) <= 1
 
@@ -139,7 +139,7 @@ defmodule Ontogen.Commands.CommitTest do
                 RDF.graph(
                   [
                     commit,
-                    expected_insertion,
+                    expected_insert,
                     Local.agent()
                   ]
                   |> Enum.map(&Grax.to_rdf!/1),
@@ -150,7 +150,7 @@ defmodule Ontogen.Commands.CommitTest do
     test "with explicit speech_act" do
       refute Repo.head()
 
-      expected_insertion = speech_act().insertion
+      expected_insert = speech_act().insert
       committer = agent(:agent_jane)
       time = datetime()
       message = "Initial commit"
@@ -158,7 +158,7 @@ defmodule Ontogen.Commands.CommitTest do
       assert {:ok,
               %Ontogen.Commit{
                 parent: nil,
-                insertion: ^expected_insertion,
+                insert: ^expected_insert,
                 committer: ^committer,
                 time: ^time,
                 message: ^message
@@ -178,7 +178,7 @@ defmodule Ontogen.Commands.CommitTest do
                 RDF.graph(
                   [
                     commit,
-                    expected_insertion,
+                    expected_insert,
                     committer,
                     speech_act()
                   ]
@@ -204,8 +204,8 @@ defmodule Ontogen.Commands.CommitTest do
              )
 
     assert second_commit.parent == first_commit.__id__
-    assert second_commit.insertion == Proposition.new!(insert)
-    assert second_commit.deletion == Proposition.new!(delete)
+    assert second_commit.insert == Proposition.new!(insert)
+    assert second_commit.delete == Proposition.new!(delete)
 
     # updates the head in the dataset of the repo
     assert Repo.head() == second_commit
@@ -262,7 +262,7 @@ defmodule Ontogen.Commands.CommitTest do
     assert new_commit.parent == last_commit.__id__
     assert new_commit.update == expected_update_proposition
     assert new_commit.overwrite == expected_delete_proposition
-    assert new_commit.deletion == nil
+    assert new_commit.delete == nil
 
     # updates the head in the dataset of the repo
     assert Repo.head() == new_commit
@@ -293,7 +293,7 @@ defmodule Ontogen.Commands.CommitTest do
               )}
   end
 
-  test "replacement (with speech_act)" do
+  test "replace (with speech_act)" do
     [last_commit] = init_commit_history()
 
     insert = {EX.S4, EX.p4(), EX.O4}
@@ -306,7 +306,7 @@ defmodule Ontogen.Commands.CommitTest do
     expected_delete = RDF.graph(EX.S2 |> EX.p2(42, "Foo"))
 
     insert_proposition = Proposition.new!(insert)
-    replacement_proposition = Proposition.new!(replace)
+    replace_proposition = Proposition.new!(replace)
     overwrite_proposition = Proposition.new!(expected_delete)
 
     speech_act_args = [
@@ -327,8 +327,8 @@ defmodule Ontogen.Commands.CommitTest do
 
     assert new_commit.parent == last_commit.__id__
     assert new_commit.speech_act == speech_act
-    assert new_commit.insertion == insert_proposition
-    assert new_commit.replacement == replacement_proposition
+    assert new_commit.insert == insert_proposition
+    assert new_commit.replace == replace_proposition
     assert new_commit.overwrite == overwrite_proposition
 
     # updates the head in the dataset of the repo
@@ -351,7 +351,7 @@ defmodule Ontogen.Commands.CommitTest do
                   new_commit,
                   Proposition.new!(graph()),
                   insert_proposition,
-                  replacement_proposition,
+                  replace_proposition,
                   overwrite_proposition,
                   speech_act,
                   Local.agent(),
@@ -403,8 +403,8 @@ defmodule Ontogen.Commands.CommitTest do
                )
 
       assert new_commit.parent == last_commit.__id__
-      assert new_commit.insertion == expected_insert_proposition
-      assert new_commit.deletion == expected_delete_proposition
+      assert new_commit.insert == expected_insert_proposition
+      assert new_commit.delete == expected_delete_proposition
       assert new_commit.speech_act == speech_act
 
       # updates the head in the dataset of the repo
@@ -454,8 +454,8 @@ defmodule Ontogen.Commands.CommitTest do
       expected_insert = RDF.graph(EX.S3 |> EX.p3("foo"))
       expected_delete = RDF.graph(EX.S1 |> EX.p1(EX.O1))
 
-      expected_insertion_proposition = Proposition.new!(expected_insert)
-      expected_deletion_proposition = Proposition.new!(expected_delete)
+      expected_insert_proposition = Proposition.new!(expected_insert)
+      expected_delete_proposition = Proposition.new!(expected_delete)
 
       assert {:ok, new_commit} =
                Repo.commit(
@@ -477,8 +477,8 @@ defmodule Ontogen.Commands.CommitTest do
                )
 
       assert new_commit.parent == last_commit.__id__
-      assert new_commit.insertion == expected_insertion_proposition
-      assert new_commit.deletion == expected_deletion_proposition
+      assert new_commit.insert == expected_insert_proposition
+      assert new_commit.delete == expected_delete_proposition
 
       # updates the head in the dataset of the repo
       assert Repo.head() == new_commit
@@ -498,8 +498,8 @@ defmodule Ontogen.Commands.CommitTest do
                     last_commit,
                     new_commit,
                     Proposition.new!(graph()),
-                    expected_insertion_proposition,
-                    expected_deletion_proposition,
+                    expected_insert_proposition,
+                    expected_delete_proposition,
                     Ontogen.speech_act!(
                       insert: insert,
                       delete: delete,
@@ -519,7 +519,7 @@ defmodule Ontogen.Commands.CommitTest do
       {:ok, last_prov_graph} = Repo.fetch_prov_graph()
 
       assert Repo.commit(
-               insert: Proposition.graph(last_commit.insertion),
+               insert: Proposition.graph(last_commit.insert),
                committer: agent(:agent_jane),
                message: "Second commit",
                time: datetime(),

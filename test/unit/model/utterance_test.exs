@@ -17,7 +17,7 @@ defmodule Ontogen.SpeechActTest do
 
       assert %IRI{value: "urn:hash::sha256:" <> _} = speech_act.__id__
 
-      assert speech_act.insertion == proposition()
+      assert speech_act.insert == proposition()
       assert speech_act.time == datetime()
       assert speech_act.speaker == agent()
       assert speech_act.data_source == dataset()

@@ -11,10 +11,10 @@ defmodule Ontogen.Commit do
 
     link speech_act: Og.speechAct(), type: SpeechAct, required: true, depth: +1
 
-    link insertion: Og.committedInsertion(), type: Proposition, depth: +1
-    link deletion: Og.committedDeletion(), type: Proposition, depth: +1
+    link insert: Og.committedInsert(), type: Proposition, depth: +1
+    link delete: Og.committedDelete(), type: Proposition, depth: +1
     link update: Og.committedUpdate(), type: Proposition, depth: +1
-    link replacement: Og.committedReplacement(), type: Proposition, depth: +1
+    link replace: Og.committedReplace(), type: Proposition, depth: +1
     link overwrite: Og.committedOverwrite(), type: Proposition, depth: +1
 
     link committer: Og.committer(), type: Ontogen.Agent, required: true, depth: +1

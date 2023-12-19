@@ -16,14 +16,14 @@ defmodule Ontogen.ChangesetTest do
     test ":insert statements in various forms" do
       Enum.each(@statement_forms, fn statements ->
         assert Changeset.new(insert: statements) ==
-                 {:ok, %Changeset{insertion: statements |> RDF.graph() |> Proposition.new!()}}
+                 {:ok, %Changeset{insert: statements |> RDF.graph() |> Proposition.new!()}}
       end)
     end
 
     test ":delete statements in various forms" do
       Enum.each(@statement_forms, fn statements ->
         assert Changeset.new(delete: statements) ==
-                 {:ok, %Changeset{deletion: statements |> RDF.graph() |> Proposition.new!()}}
+                 {:ok, %Changeset{delete: statements |> RDF.graph() |> Proposition.new!()}}
       end)
     end
 
@@ -31,14 +31,14 @@ defmodule Ontogen.ChangesetTest do
       assert Changeset.new(delete: nil, delete: {EX.S, EX.p(), EX.O}, delete: graph()) ==
                {:ok,
                 %Changeset{
-                  deletion: graph() |> Graph.add({EX.S, EX.p(), EX.O}) |> Proposition.new!()
+                  delete: graph() |> Graph.add({EX.S, EX.p(), EX.O}) |> Proposition.new!()
                 }}
 
       assert Changeset.new(delete: nil, delete: nil, delete: graph()) ==
-               {:ok, %Changeset{deletion: Proposition.new!(graph())}}
+               {:ok, %Changeset{delete: Proposition.new!(graph())}}
 
       assert Changeset.new(update: graph(), delete: nil, delete: nil) ==
-               {:ok, %Changeset{update: Proposition.new!(graph()), deletion: nil}}
+               {:ok, %Changeset{update: Proposition.new!(graph()), delete: nil}}
     end
 
     test ":update statements in various forms" do
@@ -51,7 +51,7 @@ defmodule Ontogen.ChangesetTest do
     test ":replace statements in various forms" do
       Enum.each(@statement_forms, fn statements ->
         assert Changeset.new(replace: statements) ==
-                 {:ok, %Changeset{replacement: statements |> RDF.graph() |> Proposition.new!()}}
+                 {:ok, %Changeset{replace: statements |> RDF.graph() |> Proposition.new!()}}
       end)
     end
 
@@ -59,8 +59,8 @@ defmodule Ontogen.ChangesetTest do
       assert Changeset.new(insert: graph(), delete: EX.S |> EX.p(EX.O)) ==
                {:ok,
                 %Changeset{
-                  insertion: Proposition.new!(graph()),
-                  deletion: Proposition.new!(EX.S |> EX.p(EX.O))
+                  insert: Proposition.new!(graph()),
+                  delete: Proposition.new!(EX.S |> EX.p(EX.O))
                 }}
     end
 
@@ -72,10 +72,10 @@ defmodule Ontogen.ChangesetTest do
       assert Changeset.new(insert: graph(), delete: delete, update: update, replace: replace) ==
                {:ok,
                 %Changeset{
-                  insertion: Proposition.new!(graph()),
-                  deletion: Proposition.new!(delete),
+                  insert: Proposition.new!(graph()),
+                  delete: Proposition.new!(delete),
                   update: Proposition.new!(update),
-                  replacement: Proposition.new!(replace)
+                  replace: Proposition.new!(replace)
                 }}
     end
 
@@ -95,14 +95,14 @@ defmodule Ontogen.ChangesetTest do
 
     test "with a speech act" do
       assert Changeset.new(speech_act()) ==
-               {:ok, %Changeset{insertion: Proposition.new!(graph())}}
+               {:ok, %Changeset{insert: Proposition.new!(graph())}}
     end
 
     test "with a changeset" do
       assert Changeset.new(changeset()) == {:ok, changeset()}
     end
 
-    test "overlapping insertion and deletion statements" do
+    test "overlapping insert and delete statements" do
       shared_statements = [{EX.s(), EX.p(), EX.o()}]
 
       assert Changeset.new(
@@ -112,7 +112,7 @@ defmodule Ontogen.ChangesetTest do
                {:error,
                 InvalidChangesetError.exception(
                   reason:
-                    "the following statements are in both insertion and deletions: #{inspect(shared_statements)}"
+                    "the following statements are in both insert and delete: #{inspect(shared_statements)}"
                 )}
 
       assert Changeset.new(
@@ -122,7 +122,7 @@ defmodule Ontogen.ChangesetTest do
                {:error,
                 InvalidChangesetError.exception(
                   reason:
-                    "the following statements are in both insertion and deletions: #{inspect(shared_statements)}"
+                    "the following statements are in both insert and delete: #{inspect(shared_statements)}"
                 )}
 
       assert Changeset.new(
@@ -132,11 +132,11 @@ defmodule Ontogen.ChangesetTest do
                {:error,
                 InvalidChangesetError.exception(
                   reason:
-                    "the following statements are in both insertion and deletions: #{inspect(shared_statements)}"
+                    "the following statements are in both insert and delete: #{inspect(shared_statements)}"
                 )}
     end
 
-    test "overlapping insertion statements" do
+    test "overlapping insert statements" do
       shared_statements = [{EX.s(), EX.p(), EX.o()}]
 
       assert Changeset.new(
@@ -146,7 +146,7 @@ defmodule Ontogen.ChangesetTest do
                {:error,
                 InvalidChangesetError.exception(
                   reason:
-                    "the following statements are in multiple insertions: #{inspect(shared_statements)}"
+                    "the following statements are in multiple inserts: #{inspect(shared_statements)}"
                 )}
 
       assert Changeset.new(
@@ -156,7 +156,7 @@ defmodule Ontogen.ChangesetTest do
                {:error,
                 InvalidChangesetError.exception(
                   reason:
-                    "the following statements are in multiple insertions: #{inspect(shared_statements)}"
+                    "the following statements are in multiple inserts: #{inspect(shared_statements)}"
                 )}
 
       assert Changeset.new(
@@ -166,11 +166,11 @@ defmodule Ontogen.ChangesetTest do
                {:error,
                 InvalidChangesetError.exception(
                   reason:
-                    "the following statements are in multiple insertions: #{inspect(shared_statements)}"
+                    "the following statements are in multiple inserts: #{inspect(shared_statements)}"
                 )}
     end
 
-    test "overlapping insertion patterns" do
+    test "overlapping insert patterns" do
       insert1 = {EX.s(), EX.p(), EX.o1()}
       insert2 = {EX.s(), EX.p(), EX.o2()}
 

@@ -20,7 +20,7 @@ defmodule Ontogen.CommitTest do
 
       assert %IRI{value: "urn:hash::sha256:" <> _} = commit.__id__
 
-      assert commit.insertion == proposition()
+      assert commit.insert == proposition()
       assert commit.speech_act == speech_act()
       assert commit.committer == agent()
       assert commit.message == message
@@ -40,8 +40,8 @@ defmodule Ontogen.CommitTest do
                  time: datetime()
                )
 
-      assert commit.insertion == proposition(EX.S1 |> EX.p1(EX.O1))
-      assert commit.deletion == proposition({EX.S2, EX.P2, EX.O2})
+      assert commit.insert == proposition(EX.S1 |> EX.p1(EX.O1))
+      assert commit.delete == proposition({EX.S2, EX.P2, EX.O2})
       assert commit.speech_act == speech_act()
     end
 
@@ -55,14 +55,14 @@ defmodule Ontogen.CommitTest do
                  time: datetime()
                )
 
-      assert commit.insertion == changeset().insertion
-      assert commit.deletion == changeset().deletion
+      assert commit.insert == changeset().insert
+      assert commit.delete == changeset().delete
       assert commit.update == changeset().update
-      assert commit.replacement == changeset().replacement
+      assert commit.replace == changeset().replace
       assert commit.speech_act == speech_act()
     end
 
-    test "shared insertion and deletion statement" do
+    test "shared insert and delete statement" do
       shared_statements = [{EX.s(), EX.p(), EX.o()}]
 
       assert Commit.new(
@@ -75,7 +75,7 @@ defmodule Ontogen.CommitTest do
                {:error,
                 InvalidChangesetError.exception(
                   reason:
-                    "the following statements are in both insertion and deletions: #{inspect(shared_statements)}"
+                    "the following statements are in both insert and delete: #{inspect(shared_statements)}"
                 )}
     end
 
