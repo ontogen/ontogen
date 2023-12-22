@@ -4,22 +4,22 @@ defmodule Ontogen.Commands.CreateRepoTest do
   doctest Ontogen.Commands.CreateRepo
 
   alias Ontogen.{Dataset, ProvGraph}
-  alias Ontogen.Commands.{CreateRepo, RepoInfo}
+  alias Ontogen.Commands.{CreateRepo, FetchRepoInfo}
 
   test "creates graphs for the given repo" do
-    assert RepoInfo.call(Local.store(), id(:repository)) == {:error, :repo_not_found}
+    assert FetchRepoInfo.call(Local.store(), id(:repository)) == {:error, :repo_not_found}
 
     assert CreateRepo.call(Local.store(), repository()) ==
              {:ok, repository()}
 
-    assert RepoInfo.call(Local.store(), id(:repository)) == {:ok, repository()}
+    assert FetchRepoInfo.call(Local.store(), id(:repository)) == {:ok, repository()}
   end
 
   test "creates graphs with the specified custom ids" do
     base_uri = "http://example.com/test"
     repo_id = base_uri <> "/custom_repo_id"
 
-    assert RepoInfo.call(Local.store(), repo_id) == {:error, :repo_not_found}
+    assert FetchRepoInfo.call(Local.store(), repo_id) == {:error, :repo_not_found}
 
     expected_repo =
       Ontogen.Repository.build!(repo_id,
@@ -34,7 +34,7 @@ defmodule Ontogen.Commands.CreateRepoTest do
            ) ==
              {:ok, expected_repo}
 
-    assert RepoInfo.call(Local.store(), repo_id) == {:ok, expected_repo}
+    assert FetchRepoInfo.call(Local.store(), repo_id) == {:ok, expected_repo}
   end
 
   test "when the repo already exists" do

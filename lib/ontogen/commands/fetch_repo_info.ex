@@ -1,4 +1,4 @@
-defmodule Ontogen.Commands.RepoInfo do
+defmodule Ontogen.Commands.FetchRepoInfo do
   alias Ontogen.{Repository, Store}
   alias RDF.Graph
 

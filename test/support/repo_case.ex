@@ -43,7 +43,9 @@ defmodule Ontogen.Local.Repo.Test.Case do
       def base_repo, do: repository()
 
       def stored_repo do
-        {:ok, repo} = Ontogen.Commands.RepoInfo.call(Local.store(), base_repo().__id__, depth: 1)
+        {:ok, repo} =
+          Ontogen.Commands.FetchRepoInfo.call(Local.store(), base_repo().__id__, depth: 1)
+
         repo
       end
 

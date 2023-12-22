@@ -8,7 +8,7 @@ defmodule Ontogen.Local.Repo do
   alias Ontogen.Local.Repo.{Initializer, NotReadyError}
 
   alias Ontogen.Commands.{
-    RepoInfo,
+    FetchRepoInfo,
     Commit,
     FetchEffectiveChangeset,
     FetchHistory,
@@ -145,7 +145,7 @@ defmodule Ontogen.Local.Repo do
   end
 
   def handle_call(:reload, _from, %{store: store, repository: repository} = state) do
-    case RepoInfo.call(store, repository.__id__) do
+    case FetchRepoInfo.call(store, repository.__id__) do
       {:ok, repo} -> {:reply, {:ok, repo}, %{state | repository: repo}}
       error -> {:reply, error, state}
     end

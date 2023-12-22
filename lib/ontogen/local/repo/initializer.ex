@@ -1,9 +1,10 @@
 defmodule Ontogen.Local.Repo.Initializer do
-  alias Ontogen.{Local, Commands}
+  alias Ontogen.Local
   alias Ontogen.Local.Repo.IdFile
+  alias Ontogen.Commands.{CreateRepo, FetchRepoInfo}
 
   def create_repo(store, repo_spec, opts \\ []) do
-    with {:ok, repository} <- Commands.CreateRepo.call(store, repo_spec) do
+    with {:ok, repository} <- CreateRepo.call(store, repo_spec) do
       IdFile.create(repository, opts)
 
       {:ok, repository}
@@ -12,7 +13,7 @@ defmodule Ontogen.Local.Repo.Initializer do
 
   def repository(opts) do
     with {:ok, repo_id} <- repo_id(opts) do
-      Commands.RepoInfo.call(store(opts), repo_id, depth: 1)
+      FetchRepoInfo.call(store(opts), repo_id, depth: 1)
     end
   end
 

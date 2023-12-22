@@ -1,5 +1,6 @@
 defmodule Ontogen.Commands.CreateRepo do
   alias Ontogen.{Repository, Dataset, ProvGraph, Store, InvalidRepoSpecError}
+  alias Ontogen.Commands.FetchRepoInfo
   alias RDF.IRI
 
   def call(store, %Repository{} = repository) do
@@ -84,7 +85,7 @@ defmodule Ontogen.Commands.CreateRepo do
   end
 
   defp check_not_exists(store, repository) do
-    case Ontogen.Commands.RepoInfo.call(store, repository.__id__) do
+    case FetchRepoInfo.call(store, repository.__id__) do
       {:error, :repo_not_found} -> :ok
       {:ok, _} -> {:error, :repo_already_exists}
       other -> other
