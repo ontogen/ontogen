@@ -40,9 +40,6 @@ defmodule Ontogen.Commit do
     end
   end
 
-  def empty?() do
-  end
-
   defp set_changes(commit, %Changeset{} = changeset) do
     struct(commit, Map.from_struct(changeset))
   end
