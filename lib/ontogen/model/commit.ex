@@ -2,7 +2,7 @@ defmodule Ontogen.Commit do
   use Grax.Schema
 
   alias Ontogen.NS.Og
-  alias Ontogen.{Changeset, Proposition, SpeechAct}
+  alias Ontogen.{Changeset, Proposition, SpeechAct, Diff}
   alias Ontogen.Commit.Id
   alias RDF.Graph
 
@@ -50,6 +50,9 @@ defmodule Ontogen.Commit do
 
   def root?(%__MODULE__{parent: nil}), do: true
   def root?(%__MODULE__{}), do: false
+
+  defdelegate merge(commits), to: Diff, as: :merge_commits
+  defdelegate merge(commit1, commit2), to: Diff, as: :merge_commits
 
   def on_to_rdf(%__MODULE__{__id__: id}, graph, _opts) do
     {

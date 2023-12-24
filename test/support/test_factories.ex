@@ -13,6 +13,7 @@ defmodule Ontogen.TestFactories do
     Store,
     Proposition,
     Changeset,
+    Commit,
     SpeechAct
   }
 
@@ -191,5 +192,14 @@ defmodule Ontogen.TestFactories do
       time: datetime()
     ]
     |> Keyword.merge(attrs)
+  end
+
+  def commit(attrs) do
+    attrs
+    |> Keyword.put_new(:committer, agent())
+    |> Keyword.put_new(:time, datetime())
+    |> Keyword.put_new(:message, "Test commit")
+    |> Keyword.put_new(:speech_act, speech_act(attrs))
+    |> Commit.new!()
   end
 end
