@@ -30,7 +30,7 @@ part_of::
 > 
 > -- [[User Story]]
 
-```toc
+```table-of-contents
 ```
 
 ## Description
