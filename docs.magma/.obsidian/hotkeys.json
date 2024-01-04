@@ -7,5 +7,14 @@
       ],
       "key": "P"
     }
+  ],
+  "obsidian-projects:create-note": [
+    {
+      "modifiers": [
+        "Ctrl",
+        "Mod"
+      ],
+      "key": "N"
+    }
   ]
 }
