@@ -26,7 +26,7 @@ defmodule Ontogen.Commands.Commit.Update do
   defp head(_, nil), do: ""
 
   defp head(repo, head) do
-    "GRAPH <#{Repository.graph_id(repo)}> { <#{Repository.dataset_graph_id(repo)}> og:head <#{head}> }"
+    "GRAPH <#{Repository.graph_id(repo)}> { <#{repo.__id__}> og:head <#{head}> }"
   end
 
   defp dataset_changes(_, nil), do: ""

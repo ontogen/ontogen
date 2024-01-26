@@ -164,7 +164,7 @@ defmodule Ontogen.Local.Repo do
   end
 
   def handle_call(:head, _from, %{repository: repo} = state) do
-    {:reply, repo && repo.dataset.head, state}
+    {:reply, repo && repo.head, state}
   end
 
   def handle_call({:commit, args}, _from, %{repository: repo, store: store} = state) do

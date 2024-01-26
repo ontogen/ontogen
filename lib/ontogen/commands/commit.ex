@@ -14,7 +14,7 @@ defmodule Ontogen.Commands.Commit do
   alias RDF.IRI
 
   def call(store, %Repository{} = repo, args) do
-    parent_commit = parent_commit(repo.dataset)
+    parent_commit = Repository.head_id(repo)
     {no_effective_changes, args} = Keyword.pop(args, :no_effective_changes, :error)
 
     with {:ok, speech_act, args} <- extract_speech_act(args),
@@ -34,9 +34,6 @@ defmodule Ontogen.Commands.Commit do
     end
   end
 
-  defp parent_commit(%Dataset{head: nil}), do: nil
-  defp parent_commit(%Dataset{head: %IRI{} = head}), do: head
-  defp parent_commit(%Dataset{head: head}), do: head.__id__
 
   defp build_commit(_, _, :no_effective_changes, _, :error) do
     {:error, :no_effective_changes}

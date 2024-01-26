@@ -33,11 +33,11 @@ defmodule Ontogen.Commands.CommitTest do
     assert commit.time == time
     assert commit.message == message
 
-    # updates the head in the dataset of the repo
+    # updates the head in the repo
     assert Repo.head() == commit
 
-    # updates the repo graph
-    assert Repo.repository() |> flatten_property([:dataset, :head]) == stored_repo()
+    # updates the repo graph in the store
+    assert Repo.repository() |> flatten_property(:head) == stored_repo()
 
     # inserts the statements
     assert Repo.fetch_dataset() == {:ok, graph()}
@@ -88,8 +88,8 @@ defmodule Ontogen.Commands.CommitTest do
     # updates the head in the dataset of the repo
     assert Repo.head() == commit
 
-    # updates the repo graph
-    assert Repo.repository() |> flatten_property([:dataset, :head]) == stored_repo()
+    # updates the repo graph in the store
+    assert Repo.repository() |> flatten_property(:head) == stored_repo()
 
     # inserts the uttered statements
     assert Repo.fetch_dataset() == {:ok, graph()}
@@ -210,8 +210,8 @@ defmodule Ontogen.Commands.CommitTest do
     # updates the head in the dataset of the repo
     assert Repo.head() == second_commit
 
-    # updates the repo graph
-    assert Repo.repository() |> flatten_property([:dataset, :head]) == stored_repo()
+    # updates the repo graph in the store
+    assert Repo.repository() |> flatten_property(:head) == stored_repo()
 
     # applies the changes
     assert Repo.fetch_dataset() ==

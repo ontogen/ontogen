@@ -139,6 +139,11 @@ og:Repository a rdfs:Class
         ; rdfs:range  og:ProvGraph
     .
 
+    og:head a rdf:Property, owl:FunctionalProperty
+        ; rdfs:domain og:Repository
+        ; rdfs:range  og:Commit
+    .
+
 og:Dataset a rdfs:Class
     ; rdfs:subClassOf dcat:Dataset, prov:Entity
     ; rdfs:label "Dataset"
@@ -150,11 +155,6 @@ og:Dataset a rdfs:Class
         ; rdfs:domain og:Dataset
         ; rdfs:range  og:Repository
         ; skos:scopeNote "This property MAY be used only in addition to its inverse, and it MUST NOT be used to replace it."@en ;
-    .
-
-    og:head a rdf:Property
-        ; rdfs:domain og:Dataset
-        ; rdfs:range  og:Commit
     .
 
 og:ProvGraph a rdfs:Class
