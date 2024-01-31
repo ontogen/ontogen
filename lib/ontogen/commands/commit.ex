@@ -6,10 +6,11 @@ defmodule Ontogen.Commands.Commit do
     Dataset,
     Commit,
     Changeset,
+    SpeechAct,
     InvalidCommitError
   }
 
-  alias Ontogen.Commands.{CreateSpeechAct, FetchEffectiveChangeset}
+  alias Ontogen.Commands.FetchEffectiveChangeset
   alias Ontogen.Commands.Commit.Update
   alias RDF.IRI
 
@@ -57,8 +58,11 @@ defmodule Ontogen.Commands.Commit do
     {speech_act_args, args} = Keyword.pop(args, :speech_act)
 
     cond do
+      match?(%SpeechAct{}, speech_act_args) && Changeset.empty?(args) ->
+        {:ok, speech_act_args, args}
+
       speech_act_args && Changeset.empty?(args) ->
-        with {:ok, speech_act} <- CreateSpeechAct.call(speech_act_args) do
+        with {:ok, speech_act} <- SpeechAct.new(speech_act_args) do
           {:ok, speech_act, args}
         end
 
@@ -67,7 +71,7 @@ defmodule Ontogen.Commands.Commit do
          InvalidCommitError.exception(reason: "speech acts are not allowed with other changes")}
 
       true ->
-        CreateSpeechAct.extract(args)
+        SpeechAct.extract(args)
     end
   end
 end

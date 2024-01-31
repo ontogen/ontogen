@@ -3,7 +3,7 @@ defmodule Ontogen.SpeechActTest do
 
   doctest Ontogen.SpeechAct
 
-  alias Ontogen.{SpeechAct, InvalidChangesetError}
+  alias Ontogen.{SpeechAct, Local, InvalidChangesetError}
 
   describe "new/1" do
     test "with all required attributes" do
@@ -21,6 +21,14 @@ defmodule Ontogen.SpeechActTest do
       assert speech_act.time == datetime()
       assert speech_act.speaker == agent()
       assert speech_act.data_source == dataset()
+    end
+
+    test "uses proper defaults" do
+      assert {:ok, %SpeechAct{} = speech_act} = SpeechAct.new(insert: graph())
+
+      assert speech_act.insert == proposition()
+      assert DateTime.diff(DateTime.utc_now(), speech_act.time, :second) <= 1
+      assert speech_act.speaker == Local.agent()
     end
 
     test "without statements" do

@@ -1,9 +1,9 @@
 defmodule Ontogen.Changeset do
-  @fields [:insert, :delete, :update, :replace, :overwrite]
-  defstruct @fields
 
-  alias Ontogen.{Proposition, SpeechAct, InvalidChangesetError}
+  alias Ontogen.{Proposition, Action, SpeechAct, InvalidChangesetError}
   alias RDF.{Graph, Description}
+
+  defstruct Action.fields()
 
   @type t :: %__MODULE__{
           insert: Proposition.t() | nil,
@@ -12,9 +12,6 @@ defmodule Ontogen.Changeset do
           replace: Proposition.t() | nil,
           overwrite: Proposition.t() | nil
         }
-
-  @spec fields :: list(atom)
-  def fields, do: @fields
 
   def new(%__MODULE__{} = changeset) do
     validate(changeset)
@@ -106,7 +103,7 @@ defmodule Ontogen.Changeset do
   def empty?(%{insert: _, delete: _, update: _, replace: _}), do: false
 
   def empty?(args) when is_list(args) do
-    args |> Keyword.take(@fields) |> Enum.empty?()
+    args |> Keyword.take(Action.fields()) |> Enum.empty?()
   end
 
   def validate(

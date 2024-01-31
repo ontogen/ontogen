@@ -3,7 +3,7 @@ defmodule Ontogen.Commands.CommitTest do
 
   doctest Ontogen.Commands.Commit
 
-  alias Ontogen.{Local, ProvGraph, Proposition, InvalidCommitError}
+  alias Ontogen.{Local, ProvGraph, SpeechAct, Proposition, InvalidCommitError}
 
   test "initial commit with implicit speech_act" do
     refute Repo.head()
@@ -315,7 +315,7 @@ defmodule Ontogen.Commands.CommitTest do
       time: datetime(-1, :day)
     ]
 
-    speech_act = Ontogen.speech_act!(speech_act_args)
+    speech_act = SpeechAct.new!(speech_act_args)
 
     assert {:ok, new_commit} =
              Repo.commit(
@@ -470,7 +470,7 @@ defmodule Ontogen.Commands.CommitTest do
                )
 
       assert new_commit.speech_act ==
-               Ontogen.speech_act!(
+               SpeechAct.new!(
                  insert: insert,
                  delete: delete,
                  time: datetime()
@@ -500,7 +500,7 @@ defmodule Ontogen.Commands.CommitTest do
                     Proposition.new!(graph()),
                     expected_insert_proposition,
                     expected_delete_proposition,
-                    Ontogen.speech_act!(
+                    SpeechAct.new!(
                       insert: insert,
                       delete: delete,
                       time: datetime()
