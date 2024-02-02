@@ -1,20 +1,25 @@
 defmodule Ontogen.Commands.CreateRepo do
   alias Ontogen.{Repository, Dataset, ProvGraph, Store, InvalidRepoSpecError}
   alias Ontogen.Commands.FetchRepoInfo
+  alias Ontogen.Local.Repo.IdFile
   alias RDF.IRI
 
-  def call(store, %Repository{} = repository) do
+  def call(store, repository, opts \\ [])
+
+  def call(store, %Repository{} = repository, opts) do
     with :ok <- check_not_exists(store, repository),
          :ok <- init_repo_store(store, repository) do
+      IdFile.create(repository, opts)
+
       {:ok, repository}
     end
   end
 
-  def call(store, repo_spec) do
+  def call(store, repo_spec, opts) do
     with {:ok, dataset} <- dataset(repo_spec),
          {:ok, prov_graph} <- prov_graph(repo_spec),
          {:ok, repository} <- repository(repo_spec, dataset, prov_graph) do
-      call(store, repository)
+      call(store, repository, opts)
     end
   end
 

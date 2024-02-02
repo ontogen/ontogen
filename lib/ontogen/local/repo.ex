@@ -5,9 +5,11 @@ defmodule Ontogen.Local.Repo do
 
   use GenServer
 
-  alias Ontogen.Local.Repo.{Initializer, NotReadyError}
+  alias Ontogen.Local.Repo.{IdFile, NotReadyError}
+  alias Ontogen.Local.Config
 
   alias Ontogen.Commands.{
+    CreateRepo,
     FetchRepoInfo,
     Commit,
     FetchEffectiveChangeset,
@@ -100,9 +102,9 @@ defmodule Ontogen.Local.Repo do
 
   @impl true
   def init(opts) do
-    store = Initializer.store(opts)
+    store = store(opts)
 
-    case Initializer.repository(opts) do
+    case repository(opts) do
       {:ok, repository} ->
         IO.puts("Connected to repo #{repository.__id__}")
         {:ok, %{repository: repository, store: store, status: :ready}}
@@ -120,6 +122,23 @@ defmodule Ontogen.Local.Repo do
     end
   end
 
+  defp repository(opts) do
+    with {:ok, repo_id} <- repo_id(opts) do
+      FetchRepoInfo.call(store(opts), repo_id, depth: 1)
+    end
+  end
+
+  defp repo_id(opts) do
+    cond do
+      repo_id = Keyword.get(opts, :repo) -> {:ok, RDF.iri(repo_id)}
+      repo_id = IdFile.read() -> {:ok, RDF.iri(repo_id)}
+      repo_id = Application.get_env(:ontogen, :repo) -> {:ok, RDF.iri(repo_id)}
+      true -> {:error, :repo_not_defined}
+    end
+  end
+
+  defp store(opts), do: Keyword.get(opts, :store, Config.store())
+
   @impl true
   def handle_call(:status, _from, %{status: status} = state) do
     {:reply, status, state}
@@ -130,7 +149,7 @@ defmodule Ontogen.Local.Repo do
   end
 
   def handle_call({:create, repo_spec, opts}, _from, %{store: store, status: :no_repo} = state) do
-    case Initializer.create_repo(store, repo_spec, opts) do
+    case CreateRepo.call(store, repo_spec, opts) do
       {:ok, repo} -> {:reply, {:ok, repo}, %{state | repository: repo, status: :ready}}
       error -> {:reply, error, state}
     end

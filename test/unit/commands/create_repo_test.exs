@@ -15,6 +15,17 @@ defmodule Ontogen.Commands.CreateRepoTest do
     assert FetchRepoInfo.call(Local.store(), id(:repository)) == {:ok, repository()}
   end
 
+  @tag :tmp_dir
+  test "creates a repo id file", %{tmp_dir: tmp_dir} do
+    repo_id_file = Path.join(tmp_dir, "repo_id")
+    refute File.exists?(repo_id_file)
+
+    assert {:ok, _} =
+             CreateRepo.call(Local.store(), repository(), create_repo_id_file: repo_id_file)
+
+    assert File.exists?(repo_id_file)
+  end
+
   test "creates graphs with the specified custom ids" do
     base_uri = "http://example.com/test"
     repo_id = base_uri <> "/custom_repo_id"
