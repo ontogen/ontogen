@@ -17,7 +17,12 @@ defmodule Ontogen.Commit do
     link replace: Og.committedReplace(), type: Proposition, depth: +1
     link overwrite: Og.committedOverwrite(), type: Proposition, depth: +1
 
-    link committer: Og.committer(), type: Ontogen.Agent, required: true, depth: +1
+    link committer: Og.committer(),
+         type: Ontogen.Agent,
+         required: true,
+         depth: +1,
+         on_missing_description: :use_rdf_node
+
     property time: PROV.endedAtTime(), type: :date_time, required: true
     property message: Og.commitMessage(), type: :string
   end
