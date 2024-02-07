@@ -1,13 +1,13 @@
-defmodule Ontogen.Store.Test.Case do
+defmodule Ontogen.StoreCase do
   use ExUnit.CaseTemplate
 
-  alias Ontogen.{Local, Store}
+  alias Ontogen.Store
 
   using do
     quote do
-      use Ontogen.Test.Case, async: false
+      use OntogenCase, async: false
 
-      alias Ontogen.{Local, Store}
+      alias Ontogen.Store
 
       import unquote(__MODULE__)
 
@@ -16,6 +16,6 @@ defmodule Ontogen.Store.Test.Case do
   end
 
   def clean_store!(_) do
-    Local.store() |> Store.drop(:all)
+    Ontogen.Config.store() |> Store.drop(:all)
   end
 end

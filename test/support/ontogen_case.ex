@@ -1,4 +1,4 @@
-defmodule Ontogen.Test.Case do
+defmodule OntogenCase do
   @moduledoc """
   Common `ExUnit.CaseTemplate` for Ontogen tests.
   """

@@ -1,5 +1,5 @@
 defmodule Ontogen.AgentTest do
-  use Ontogen.Test.Case
+  use OntogenCase
 
   doctest Ontogen.Agent
   alias Ontogen.Agent

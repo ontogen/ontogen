@@ -1,5 +1,5 @@
 defmodule Ontogen.CommitTest do
-  use Ontogen.Test.Case
+  use OntogenCase
 
   doctest Ontogen.Commit
 

@@ -44,4 +44,24 @@ defmodule Ontogen.Store do
 
   def drop(%adapter{} = store, graph, opts \\ []),
     do: adapter.drop(store, graph, opts)
+
+  @default_repository_preloading_depth 2
+
+  def repository(store, repo_id, opts \\ []) do
+    with {:ok, graph} <- repository_graph(store, repo_id) do
+      Ontogen.Repository.load(graph, repo_id,
+        depth: Keyword.get(opts, :depth, @default_repository_preloading_depth)
+      )
+    end
+  end
+
+  defp repository_graph(store, repo_id) do
+    with {:ok, graph} <- query(store, repo_id, Ontogen.QueryUtils.graph_query()) do
+      if RDF.Graph.describes?(graph, repo_id) do
+        {:ok, graph}
+      else
+        {:error, :repo_not_found}
+      end
+    end
+  end
 end

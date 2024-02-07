@@ -17,7 +17,7 @@ defmodule Ontogen.TestFactories do
     SpeechAct
   }
 
-  alias Ontogen.Local.Config
+  alias Ontogen.Config
 
   alias Ontogen.TestNamespaces.EX
   @compile {:no_warn_undefined, Ontogen.TestNamespaces.EX}

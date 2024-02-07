@@ -1,5 +1,5 @@
 defmodule Ontogen.ChangesetTest do
-  use Ontogen.Test.Case
+  use OntogenCase
 
   doctest Ontogen.Changeset
 

@@ -1,5 +1,5 @@
 defmodule Ontogen.ProvGraphTest do
-  use Ontogen.Test.Case
+  use OntogenCase
 
   doctest Ontogen.ProvGraph
 end

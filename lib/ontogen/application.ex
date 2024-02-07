@@ -3,8 +3,6 @@ defmodule Ontogen.Application do
 
   use Application
 
-  alias Ontogen.Local
-
   @mix_env Mix.env()
 
   @impl true
@@ -16,20 +14,20 @@ defmodule Ontogen.Application do
 
   defp children(:test, args) do
     [
-      {Local.Config, local_config_load_paths(args)}
+      {Ontogen.Config, local_config_load_paths(args)}
     ]
   end
 
   defp children(_, args) do
     [
-      {Local.Config, local_config_load_paths(args)},
-      {Local.Repo, Keyword.get(args, :repo_args, [])}
+      {Ontogen.Config, local_config_load_paths(args)},
+      {Ontogen, Keyword.get(args, :repo_args, [])}
     ]
   end
 
   defp local_config_load_paths(args) do
     Keyword.get(args, :config_load_paths) ||
       Application.get_env(:ontogen, :config_load_paths) ||
-      Local.Config.default_load_paths()
+      Ontogen.Config.default_load_paths()
   end
 end

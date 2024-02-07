@@ -8,7 +8,7 @@ defmodule Ontogen.HistoryType.Native do
   import RDF.Utils, only: [map_while_ok: 2]
 
   @impl true
-  def history(history_graph, _, _opts \\ []) do
+  def history(history_graph, _, _, _opts \\ []) do
     with {:ok, commits} <-
            history_graph
            |> Graph.descriptions()

@@ -8,7 +8,7 @@ defmodule Ontogen.HistoryType.Raw do
             |> PrefixMap.merge!(RDF.standard_prefixes())
 
   @impl true
-  def history(history_graph, _, _opts \\ []) do
+  def history(history_graph, _, _, _opts \\ []) do
     {:ok, Graph.add_prefixes(history_graph, @prefixes)}
   end
 end

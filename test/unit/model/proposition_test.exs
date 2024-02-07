@@ -1,5 +1,5 @@
 defmodule Ontogen.PropositionTest do
-  use Ontogen.Test.Case
+  use OntogenCase
 
   doctest Ontogen.Proposition
 

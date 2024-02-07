@@ -1,9 +1,9 @@
 defmodule Ontogen.SpeechActTest do
-  use Ontogen.Test.Case
+  use OntogenCase
 
   doctest Ontogen.SpeechAct
 
-  alias Ontogen.{SpeechAct, Local, InvalidChangesetError}
+  alias Ontogen.{SpeechAct, Config, InvalidChangesetError}
 
   describe "new/1" do
     test "with all required attributes" do
@@ -28,7 +28,7 @@ defmodule Ontogen.SpeechActTest do
 
       assert speech_act.insert == proposition()
       assert DateTime.diff(DateTime.utc_now(), speech_act.time, :second) <= 1
-      assert speech_act.speaker == Local.agent()
+      assert speech_act.speaker == Config.agent()
     end
 
     test "without statements" do

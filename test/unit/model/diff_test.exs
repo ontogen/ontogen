@@ -1,5 +1,5 @@
 defmodule Ontogen.DiffTest do
-  use Ontogen.Test.Case
+  use OntogenCase
 
   doctest Ontogen.Diff
 

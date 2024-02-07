@@ -2,7 +2,7 @@ defmodule Ontogen.SpeechAct do
   use Grax.Schema
 
   alias Ontogen.NS.Og
-  alias Ontogen.{Proposition, Changeset, Action, Local, Utils}
+  alias Ontogen.{Proposition, Changeset, Action, Config, Utils}
   alias Ontogen.SpeechAct.Id
   alias RDF.Graph
 
@@ -28,7 +28,7 @@ defmodule Ontogen.SpeechAct do
       args
       |> Keyword.put_new(
         :speaker,
-        Keyword.get_lazy(commit_args, :committer, fn -> Local.agent() end)
+        Keyword.get_lazy(commit_args, :committer, fn -> Config.agent() end)
       )
       |> Keyword.put(
         :time,
