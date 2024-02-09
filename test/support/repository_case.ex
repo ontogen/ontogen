@@ -35,10 +35,6 @@ defmodule Ontogen.RepositoryCase do
           {:ok, ^repo} = Ontogen.reload()
         end
 
-        on_exit(fn ->
-          ClearRepositoryCommand.delete_repo(Config.store(), repo)
-        end)
-
         [repo: repo]
       end
 
