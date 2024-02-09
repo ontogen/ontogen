@@ -8,6 +8,7 @@ defmodule Ontogen do
   import Ontogen.Operation, only: [include_api: 1]
 
   include_api Ontogen.Operations.CreateRepositoryCommand
+  include_api Ontogen.Operations.ClearRepositoryCommand
   include_api Ontogen.Operations.CommitCommand
   include_api Ontogen.Operations.EffectiveChangesetQuery
   include_api Ontogen.Operations.HistoryQuery

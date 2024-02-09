@@ -15,6 +15,13 @@ defmodule Ontogen.Operations.ClearRepositoryCommand do
   alias Ontogen.{Store, Repository}
   alias Ontogen.Operations.CreateRepositoryCommand
 
+  api do
+    def clear_repository do
+      ClearRepositoryCommand.new()
+      |> ClearRepositoryCommand.__do_call__()
+    end
+  end
+
   def new, do: {:ok, new!()}
   def new!, do: %__MODULE__{}
 
