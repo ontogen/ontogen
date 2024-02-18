@@ -5,19 +5,21 @@ defmodule Ontogen.TestFactories do
 
   use RDF
 
+  alias RDF.Graph
+
   alias Ontogen.{
+    Config,
     Repository,
     Dataset,
     ProvGraph,
     Agent,
     Store,
     Proposition,
-    Changeset,
     Commit,
     SpeechAct
   }
 
-  alias Ontogen.Config
+  alias Ontogen.Changeset.Action
 
   alias Ontogen.TestNamespaces.EX
   @compile {:no_warn_undefined, Ontogen.TestNamespaces.EX}
@@ -40,6 +42,42 @@ defmodule Ontogen.TestFactories do
 
   def datetime(amount_to_add, unit \\ :second),
     do: datetime() |> DateTime.add(amount_to_add, unit)
+
+  def statement(id) do
+    {
+      apply(EX, :"s#{id}", []),
+      apply(EX, :"p#{id}", []),
+      apply(EX, :"o#{id}", [])
+    }
+  end
+
+  def statements(statements) when is_list(statements) do
+    Enum.flat_map(statements, fn
+      statement when is_integer(statement) or is_atom(statement) -> [statement(statement)]
+      statement -> statement |> RDF.graph() |> Graph.statements()
+    end)
+  end
+
+  @graph [
+           EX.S1 |> EX.p1(EX.O1),
+           EX.S2 |> EX.p2(42, "Foo")
+         ]
+         |> RDF.graph()
+  def graph, do: @graph
+
+  def graph(statement) when is_integer(statement) or is_atom(statement) do
+    statement |> statement() |> RDF.graph()
+  end
+
+  def graph(statements) when is_list(statements) do
+    statements |> statements() |> RDF.graph()
+  end
+
+  @subgraph [
+              EX.S1 |> EX.p1(EX.O1)
+            ]
+            |> RDF.graph()
+  def subgraph, do: @subgraph
 
   def local_config(id \\ :config, attrs \\ [])
 
@@ -145,29 +183,10 @@ defmodule Ontogen.TestFactories do
     |> Keyword.merge(attrs)
   end
 
-  @graph [
-           EX.S1 |> EX.p1(EX.O1),
-           EX.S2 |> EX.p2(42, "Foo")
-         ]
-         |> RDF.graph()
-  def graph, do: @graph
-
-  @subgraph [
-              EX.S1 |> EX.p1(EX.O1)
-            ]
-            |> RDF.graph()
-  def subgraph, do: @subgraph
-
   def proposition(graph \\ graph()) do
     graph
     |> RDF.graph()
     |> Proposition.new!()
-  end
-
-  def changeset(attrs \\ []) do
-    attrs
-    |> changeset_attrs()
-    |> Changeset.new!()
   end
 
   def changeset_attrs(attrs \\ []) do
@@ -176,6 +195,18 @@ defmodule Ontogen.TestFactories do
       delete: {EX.Foo, EX.bar(), 42}
     ]
     |> Keyword.merge(attrs)
+  end
+
+  def commit_changeset(attrs \\ []) do
+    attrs
+    |> changeset_attrs()
+    |> Commit.Changeset.new!()
+  end
+
+  def speech_act_changeset(attrs \\ []) do
+    attrs
+    |> changeset_attrs()
+    |> SpeechAct.Changeset.new!()
   end
 
   def speech_act(attrs \\ []) do
@@ -194,12 +225,22 @@ defmodule Ontogen.TestFactories do
     |> Keyword.merge(attrs)
   end
 
-  def commit(attrs) do
+  def commit(attrs \\ []) do
+    {changeset, attrs} = Action.extract(attrs)
+
+    changeset =
+      if Action.empty?(changeset) do
+        commit_changeset()
+      else
+        changeset
+      end
+
     attrs
     |> Keyword.put_new(:committer, agent())
     |> Keyword.put_new(:time, datetime())
     |> Keyword.put_new(:message, "Test commit")
-    |> Keyword.put_new(:speech_act, speech_act(attrs))
+    |> Keyword.put_new(:speech_act, changeset |> Keyword.new() |> speech_act())
+    |> Keyword.put_new(:changeset, changeset)
     |> Commit.new!()
   end
 end

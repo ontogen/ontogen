@@ -9,7 +9,7 @@ defmodule Ontogen.RepositoryCase do
     quote do
       use OntogenCase, async: false
 
-      alias Ontogen.{Repository, Store, Changeset}
+      alias Ontogen.{Repository, Store}
 
       import unquote(__MODULE__)
 

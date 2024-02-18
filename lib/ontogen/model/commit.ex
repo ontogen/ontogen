@@ -1,10 +1,12 @@
 defmodule Ontogen.Commit do
   use Grax.Schema
 
+  alias Ontogen.{Proposition, SpeechAct}
+  alias Ontogen.Commit.{Id, Changeset}
   alias Ontogen.NS.Og
-  alias Ontogen.{Changeset, Proposition, SpeechAct, Diff}
-  alias Ontogen.Commit.Id
   alias RDF.Graph
+
+  import Ontogen.Changeset.Helper, only: [copy_to_proposition_struct: 2]
 
   schema Og.Commit do
     link parent: Og.parentCommit(), type: Ontogen.Commit, depth: 0
@@ -27,14 +29,18 @@ defmodule Ontogen.Commit do
     property message: Og.commitMessage(), type: :string
   end
 
-  def new(args) do
-    with {:ok, changeset, args} <- Changeset.extract(args),
-         {:ok, commit} <- build(RDF.bnode(:tmp), args),
-         commit = set_changes(commit, changeset),
-         {:ok, id} <- Id.generate(commit) do
-      commit
-      |> Grax.reset_id(id)
+  def new(%Changeset{} = changeset, args) do
+    with {:ok, commit} <- build(RDF.bnode(:tmp), args) do
+      changeset
+      |> copy_to_proposition_struct(commit)
+      |> Grax.reset_id(Id.generate(commit))
       |> validate()
+    end
+  end
+
+  def new(args) do
+    with {:ok, changeset, args} <- Changeset.extract(args) do
+      new(changeset, args)
     end
   end
 
@@ -45,19 +51,12 @@ defmodule Ontogen.Commit do
     end
   end
 
-  defp set_changes(commit, %Changeset{} = changeset) do
-    struct(commit, Map.from_struct(changeset))
-  end
-
   def validate(commit) do
     Grax.validate(commit)
   end
 
   def root?(%__MODULE__{parent: nil}), do: true
   def root?(%__MODULE__{}), do: false
-
-  defdelegate merge(commits), to: Diff, as: :merge_commits
-  defdelegate merge(commit1, commit2), to: Diff, as: :merge_commits
 
   def on_to_rdf(%__MODULE__{__id__: id}, graph, _opts) do
     {

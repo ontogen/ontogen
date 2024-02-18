@@ -50,10 +50,10 @@ defmodule Ontogen.Operations.CommitCommand do
     {speech_act_args, args} = Keyword.pop(args, :speech_act)
 
     cond do
-      match?(%SpeechAct{}, speech_act_args) && Changeset.empty?(args) ->
+      match?(%SpeechAct{}, speech_act_args) && Changeset.Action.empty?(args) ->
         {:ok, speech_act_args, args}
 
-      speech_act_args && Changeset.empty?(args) ->
+      speech_act_args && Changeset.Action.empty?(args) ->
         with {:ok, speech_act} <- SpeechAct.new(speech_act_args) do
           {:ok, speech_act, args}
         end

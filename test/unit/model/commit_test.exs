@@ -3,7 +3,7 @@ defmodule Ontogen.CommitTest do
 
   doctest Ontogen.Commit
 
-  alias Ontogen.{Commit, InvalidChangesetError}
+  alias Ontogen.{Commit, Proposition, InvalidChangesetError}
 
   describe "new/1" do
     test "with all required attributes" do
@@ -49,16 +49,16 @@ defmodule Ontogen.CommitTest do
       assert {:ok, %Commit{} = commit} =
                Commit.new(
                  speech_act: speech_act(),
-                 changeset: changeset(),
+                 changeset: commit_changeset(),
                  committer: agent(),
                  message: "Some commit",
                  time: datetime()
                )
 
-      assert commit.insert == changeset().insert
-      assert commit.delete == changeset().delete
-      assert commit.update == changeset().update
-      assert commit.replace == changeset().replace
+      assert commit.insert == commit_changeset().insert |> Proposition.new!()
+      assert commit.delete == commit_changeset().delete |> Proposition.new!()
+      assert commit.update == commit_changeset().update
+      assert commit.replace == commit_changeset().replace
       assert commit.speech_act == speech_act()
     end
 

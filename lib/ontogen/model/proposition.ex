@@ -56,7 +56,5 @@ defmodule Ontogen.Proposition do
   end
 
   def graph(nil), do: nil
-  def graph([]), do: nil
-  def graph(%Graph{} = graph), do: graph
-  def graph(%{statements: compound}), do: Compound.graph(compound)
+  def graph(%__MODULE__{statements: compound}), do: Compound.graph(compound)
 end

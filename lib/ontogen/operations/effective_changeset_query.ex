@@ -1,10 +1,10 @@
 defmodule Ontogen.Operations.EffectiveChangesetQuery do
   use Ontogen.Query,
     params: [
-      changes: nil
+      changeset: nil
     ]
 
-  alias Ontogen.{Changeset, Proposition, Store, Repository}
+  alias Ontogen.{SpeechAct, Commit, Store, Repository}
   alias RDF.{Graph, Description}
 
   import Ontogen.QueryUtils
@@ -27,26 +27,9 @@ defmodule Ontogen.Operations.EffectiveChangesetQuery do
     defdelegate changes!(changeset), to: __MODULE__, as: :effective_changeset!
   end
 
-  def new(%{
-        insert: insert_proposition,
-        delete: delete_proposition,
-        update: update_proposition,
-        replace: replace_proposition
-      }) do
-    {:ok,
-     %__MODULE__{
-       changes: %{
-         insert: Proposition.graph(insert_proposition),
-         delete: Proposition.graph(delete_proposition),
-         update: Proposition.graph(update_proposition),
-         replace: Proposition.graph(replace_proposition)
-       }
-     }}
-  end
-
   def new(changeset_args) do
-    with {:ok, changeset} <- Changeset.new(changeset_args) do
-      new(changeset)
+    with {:ok, changeset} <- SpeechAct.Changeset.new(changeset_args) do
+      {:ok, %__MODULE__{changeset: changeset}}
     end
   end
 
@@ -59,7 +42,9 @@ defmodule Ontogen.Operations.EffectiveChangesetQuery do
 
   @impl true
   def call(
-        %__MODULE__{changes: %{insert: insert, delete: delete, update: update, replace: replace}},
+        %__MODULE__{
+          changeset: %{insert: insert, delete: delete, update: update, replace: replace}
+        },
         store,
         repo
       ) do
@@ -67,16 +52,16 @@ defmodule Ontogen.Operations.EffectiveChangesetQuery do
 
     with {:ok, insert_delete_change_graph} <-
            Store.construct(store, dataset, insert_delete_query(insert, delete, update, replace)),
-         {:ok, effective_insert} <- effective_insert(insert, insert_delete_change_graph),
-         {:ok, effective_update} <- effective_insert(update, insert_delete_change_graph),
-         {:ok, effective_replace} <- effective_insert(replace, insert_delete_change_graph),
-         {:ok, effective_delete} <- effective_delete(delete, insert_delete_change_graph),
+         effective_insert = effective_insert(insert, insert_delete_change_graph),
+         effective_update = effective_insert(update, insert_delete_change_graph),
+         effective_replace = effective_insert(replace, insert_delete_change_graph),
+         effective_delete = effective_delete(delete, insert_delete_change_graph),
          {:ok, update_overwrites_graph} <- update_overwrites(store, dataset, update),
          {:ok, replace_overwrites_graph} <- replace_overwrites(store, dataset, replace),
-         {:ok, overwrite} = overwrite_delete(update_overwrites_graph, replace_overwrites_graph) do
+         overwrite = overwrite_delete(update_overwrites_graph, replace_overwrites_graph) do
       if effective_insert || effective_delete || effective_update || effective_replace ||
            overwrite do
-        Changeset.new(
+        Commit.Changeset.new(
           insert: effective_insert,
           delete: effective_delete,
           update: effective_update,
@@ -107,42 +92,30 @@ defmodule Ontogen.Operations.EffectiveChangesetQuery do
     end
   end
 
-  defp effective_insert(nil, _), do: {:ok, nil}
+  defp effective_insert(nil, _), do: nil
 
   defp effective_insert(insert, change_graph) do
-    effective_insert =
-      Enum.reduce(insert, insert, fn triple, effective_insert ->
-        if Graph.include?(change_graph, triple) do
-          Graph.delete(effective_insert, triple)
-        else
-          effective_insert
-        end
-      end)
-
-    if Graph.empty?(effective_insert) do
-      {:ok, nil}
-    else
-      Proposition.new(effective_insert)
-    end
+    Enum.reduce(insert, insert, fn triple, effective_insert ->
+      if Graph.include?(change_graph, triple) do
+        Graph.delete(effective_insert, triple)
+      else
+        effective_insert
+      end
+    end)
+    |> non_empty_graph()
   end
 
-  defp effective_delete(nil, _), do: {:ok, nil}
+  defp effective_delete(nil, _), do: nil
 
   defp effective_delete(delete, change_graph) do
-    effective_delete =
-      Enum.reduce(delete, delete, fn triple, effective_delete ->
-        if Graph.include?(change_graph, triple) do
-          effective_delete
-        else
-          Graph.delete(effective_delete, triple)
-        end
-      end)
-
-    if Graph.empty?(effective_delete) do
-      {:ok, nil}
-    else
-      Proposition.new(effective_delete)
-    end
+    Enum.reduce(delete, delete, fn triple, effective_delete ->
+      if Graph.include?(change_graph, triple) do
+        effective_delete
+      else
+        Graph.delete(effective_delete, triple)
+      end
+    end)
+    |> non_empty_graph()
   end
 
   defp overwrite_delete(update_overwrite, replace_overwrite) do
@@ -152,14 +125,12 @@ defmodule Ontogen.Operations.EffectiveChangesetQuery do
     )
   end
 
-  defp do_overwrite_delete(nil, nil), do: {:ok, nil}
-  defp do_overwrite_delete(update_overwrite, nil), do: Proposition.new(update_overwrite)
-
-  defp do_overwrite_delete(nil, replace_overwrite),
-    do: Proposition.new(replace_overwrite)
+  defp do_overwrite_delete(nil, nil), do: nil
+  defp do_overwrite_delete(update_overwrite, nil), do: update_overwrite
+  defp do_overwrite_delete(nil, replace_overwrite), do: replace_overwrite
 
   defp do_overwrite_delete(update_overwrite, replace_overwrite) do
-    update_overwrite |> Graph.add(replace_overwrite) |> Proposition.new()
+    update_overwrite |> Graph.add(replace_overwrite) |> non_empty_graph()
   end
 
   defp non_empty_graph(nil), do: nil

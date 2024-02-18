@@ -3,6 +3,8 @@ defmodule Ontogen.Operations.EffectiveChangesetQueryTest do
 
   doctest Ontogen.Operations.EffectiveChangesetQuery
 
+  alias Ontogen.Commit.Changeset
+
   setup do
     init_commit_history()
 

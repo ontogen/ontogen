@@ -1,10 +1,13 @@
 defmodule Ontogen.SpeechAct do
   use Grax.Schema
 
+  alias Ontogen.{Proposition, Changeset, Config, Utils, InvalidSpeechActError}
+  alias Ontogen.Changeset.Action
+  alias Ontogen.SpeechAct.{Id, Changeset}
   alias Ontogen.NS.Og
-  alias Ontogen.{Proposition, Changeset, Action, Config, Utils}
-  alias Ontogen.SpeechAct.Id
   alias RDF.Graph
+
+  import Ontogen.Changeset.Helper, only: [copy_to_proposition_struct: 2]
 
   @args_keys Action.fields() ++ [:speaker, :speech_act_time, :data_source]
   @shared_args [:time, :committer]
@@ -35,11 +38,10 @@ defmodule Ontogen.SpeechAct do
         speech_act_time || Keyword.get_lazy(commit_args, :time, fn -> DateTime.utc_now() end)
       )
 
-    with {:ok, speech_act} <- build(RDF.bnode(:tmp), args),
-         speech_act = struct(speech_act, Map.from_struct(changeset)),
-         {:ok, id} <- Id.generate(speech_act) do
-      speech_act
-      |> Grax.reset_id(id)
+    with {:ok, speech_act} <- build(RDF.bnode(:tmp), args) do
+      changeset
+      |> copy_to_proposition_struct(speech_act)
+      |> Grax.reset_id(Id.generate(speech_act))
       |> validate()
     end
   end
@@ -77,7 +79,17 @@ defmodule Ontogen.SpeechAct do
   end
 
   def validate(speech_act) do
-    Grax.validate(speech_act)
+    with {:ok, speech_act} <- Grax.validate(speech_act) do
+      if origin(speech_act) do
+        {:ok, speech_act}
+      else
+        {:error, InvalidSpeechActError.exception(reason: "origin missing")}
+      end
+    end
+  end
+
+  def origin(%__MODULE__{} = speech_act) do
+    speech_act.speaker || speech_act.data_source
   end
 
   def on_to_rdf(%__MODULE__{__id__: id}, graph, _opts) do
