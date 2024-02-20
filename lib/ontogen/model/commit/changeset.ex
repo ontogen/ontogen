@@ -82,6 +82,24 @@ defmodule Ontogen.Commit.Changeset do
     Validation.validate(changeset)
   end
 
+  @merge_limitations_warning """
+  > #### Warning {: .warning}
+  >
+  > This function is used internally to collapse the changes of multiple consecutive
+  > commits from a commit sequence into one and relies on the fact that these consist
+  > complete effective changes incl. overwrites, which might lead to surprising results
+  > and limits its general applicability. E.g. a single merged `replace` does not
+  > remove the statements with only matching subjects from the other actions, but only
+  > the fully matching statements, since we rely on the fact that a complete commit
+  > includes also the `overwrite`s of these statements, leading to the removals of
+  > these statements during the merge.
+  """
+
+  @doc """
+  Merge the changes of a list commit into one.
+
+  #{@merge_limitations_warning}
+  """
   def merge([first | rest]) do
     with {:ok, changeset} <- new(first) do
       Enum.reduce(rest, changeset, &do_merge(&2, &1))
@@ -90,6 +108,11 @@ defmodule Ontogen.Commit.Changeset do
     end
   end
 
+  @doc """
+  Merge the changes of two commit changesets into one.
+
+  #{@merge_limitations_warning}
+  """
   def merge(%__MODULE__{} = changeset, changes) do
     do_merge(changeset, changes)
   end
@@ -127,6 +150,8 @@ defmodule Ontogen.Commit.Changeset do
     update = to_graph(update)
 
     if update && not Graph.empty?(update) do
+      # We don't need to consider the special update semantics here, since we rely on complete
+      # commit changes, which include all overwritten statements in the overwrite graph.
       %__MODULE__{
         changeset
         | insert: graph_delete(changeset.insert, update),
@@ -148,6 +173,8 @@ defmodule Ontogen.Commit.Changeset do
     replace = to_graph(replace)
 
     if replace && not Graph.empty?(replace) do
+      # We don't need to consider the special replace semantics here, since we rely on complete
+      # commit changes, which include all overwritten statements in the overwrite graph.
       %__MODULE__{
         changeset
         | insert: graph_delete(changeset.insert, replace),
