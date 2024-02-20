@@ -131,13 +131,13 @@ defmodule Ontogen.Commit.ChangesetTest do
                overwrite: statement(5)
              ]
              |> Changeset.merge(insert: statements([1, 2, 3, 4, 5])) ==
-               %Changeset{
+               Changeset.new!(
                  insert: graph([1, 2, 5]),
                  delete: graph([6]),
                  update: graph([3]),
                  replace: graph([4]),
                  overwrite: nil
-               }
+               )
     end
 
     test "single update" do
@@ -149,13 +149,13 @@ defmodule Ontogen.Commit.ChangesetTest do
                overwrite: statement(5)
              ]
              |> Changeset.merge(update: statements([1, 2, 3, 4, 5])) ==
-               %Changeset{
+               Changeset.new!(
                  insert: graph([6]),
                  delete: nil,
                  update: graph([1, 2, 3, 5]),
                  replace: graph([4]),
                  overwrite: nil
-               }
+               )
     end
 
     test "single replace" do
@@ -167,13 +167,13 @@ defmodule Ontogen.Commit.ChangesetTest do
                overwrite: statement(5)
              ]
              |> Changeset.merge(replace: statements([1, 2, 3, 4, 5])) ==
-               %Changeset{
+               Changeset.new!(
                  insert: nil,
                  delete: nil,
                  update: graph([6]),
                  replace: graph([1, 2, 3, 4, 5]),
                  overwrite: nil
-               }
+               )
     end
 
     test "single delete" do
@@ -185,13 +185,13 @@ defmodule Ontogen.Commit.ChangesetTest do
                overwrite: statement(5)
              ]
              |> Changeset.merge(delete: statements([1, 2, 3, 4, 5])) ==
-               %Changeset{
+               Changeset.new!(
                  insert: graph([6]),
                  delete: graph([1, 2, 5, 3, 4]),
                  update: nil,
                  replace: nil,
                  overwrite: nil
-               }
+               )
     end
 
     test "single overwrite" do
@@ -227,13 +227,13 @@ defmodule Ontogen.Commit.ChangesetTest do
                delete: statement(:S4_2),
                overwrite: statement(:S5_2)
              ) ==
-               %Changeset{
+               Changeset.new!(
                  insert: graph([:S1_1, :S1_2]),
                  update: graph([:S2_1, :S2_2]),
                  replace: graph([:S3_1, :S3_2]),
                  delete: graph([:S4_1, :S4_2]),
                  overwrite: graph([:S5_1, :S5_2])
-               }
+               )
     end
 
     test "equal changesets" do
@@ -247,7 +247,7 @@ defmodule Ontogen.Commit.ChangesetTest do
         ]
 
       assert Changeset.merge(changeset, changeset) ==
-               struct(Changeset, changeset)
+               Changeset.new!(changeset)
     end
 
     test "insert overlap resolution" do
@@ -399,7 +399,7 @@ defmodule Ontogen.Commit.ChangesetTest do
                  {EX.s5(), EX.p5(), EX.update_overwrite_overlap()}
                ]
              ) ==
-               %Changeset{
+               Changeset.new!(
                  insert:
                    RDF.graph([
                      {EX.s1_1(), EX.p1_1(), EX.o1_1()},
@@ -433,7 +433,7 @@ defmodule Ontogen.Commit.ChangesetTest do
                      {EX.s5_2(), EX.p5_2(), EX.o5_2()},
                      {EX.s5(), EX.p5(), EX.update_overwrite_overlap()}
                    ])
-               }
+               )
     end
 
     test "replace overlap resolution" do
@@ -492,7 +492,7 @@ defmodule Ontogen.Commit.ChangesetTest do
                  {EX.replace_overwrite_overlap(), EX.p(), EX.o()}
                ]
              ) ==
-               %Changeset{
+               Changeset.new!(
                  insert:
                    RDF.graph([
                      {EX.s1_1(), EX.p1_1(), EX.o1_1()},
@@ -526,7 +526,7 @@ defmodule Ontogen.Commit.ChangesetTest do
                      {EX.s5_2(), EX.p5_2(), EX.o5_2()},
                      {EX.replace_overwrite_overlap(), EX.p(), EX.o()}
                    ])
-               }
+               )
     end
 
     test "delete overlap resolution" do
@@ -585,7 +585,7 @@ defmodule Ontogen.Commit.ChangesetTest do
                  {EX.s5(), EX.delete_overwrite_overlap(), EX.o()}
                ]
              ) ==
-               %Changeset{
+               Changeset.new!(
                  insert:
                    RDF.graph([
                      {EX.s1_1(), EX.p1_1(), EX.o1_1()},
@@ -620,7 +620,7 @@ defmodule Ontogen.Commit.ChangesetTest do
                      {EX.s5_2(), EX.p5_2(), EX.o5_2()},
                      {EX.s5(), EX.delete_overwrite_overlap(), EX.o()}
                    ])
-               }
+               )
     end
 
     test "overwrite overlap resolution" do
@@ -679,7 +679,7 @@ defmodule Ontogen.Commit.ChangesetTest do
                  {EX.replace_overwrite_overlap(), EX.p(), EX.o()}
                ]
              ) ==
-               %Changeset{
+               Changeset.new!(
                  insert:
                    RDF.graph([
                      {EX.s1_1(), EX.p1_1(), EX.o1_1()},
@@ -713,26 +713,24 @@ defmodule Ontogen.Commit.ChangesetTest do
                      {EX.s3(), EX.p3(), EX.update_overwrite_overlap()},
                      {EX.replace_overwrite_overlap(), EX.p(), EX.o()}
                    ])
-               }
+               )
     end
 
     test "empty elements in commits" do
       assert [insert: statement(1)]
              |> Changeset.merge(delete: statement(1)) ==
-               %Changeset{delete: RDF.graph([statement(1)])}
+               Changeset.new!(delete: statement(1))
 
       assert [delete: statement(1)]
              |> Changeset.merge(insert: statement(1)) ==
-               %Changeset{insert: RDF.graph([statement(1)])}
+               Changeset.new!(insert: statement(1))
     end
   end
 
   describe "merge/1" do
     test "one element list" do
       assert Changeset.merge([commit(insert: statement(1))]) ==
-               %Changeset{
-                 insert: RDF.graph([statement(1)])
-               }
+               Changeset.new!(insert: statement(1))
     end
 
     test "two element list" do
@@ -750,7 +748,7 @@ defmodule Ontogen.Commit.ChangesetTest do
                [delete: statement(1)],
                [insert: statement(1)]
              ]) ==
-               %Changeset{insert: graph([1])}
+               Changeset.new!(insert: statement(1))
     end
   end
 end
