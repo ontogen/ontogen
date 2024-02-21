@@ -9,7 +9,14 @@ defmodule Ontogen.Changeset.Validation do
   Otherwise, an `:error` tuple is returned.
   """
   def validate(%{insert: insert, delete: delete, update: update, replace: replace} = changeset) do
-    with :ok <- check_statements_presence(insert, delete, update, replace),
+    with :ok <-
+           check_statements_presence(
+             insert,
+             delete,
+             update,
+             replace,
+             Map.get(changeset, :overwrite)
+           ),
          :ok <- check_no_insert_delete_overlap(insert, delete, update, replace),
          :ok <- check_no_inserts_overlap(insert, update, replace),
          :ok <- check_no_replace_overlap(insert, update, replace),
@@ -18,10 +25,10 @@ defmodule Ontogen.Changeset.Validation do
     end
   end
 
-  defp check_statements_presence(nil, nil, nil, nil),
+  defp check_statements_presence(nil, nil, nil, nil, nil),
     do: {:error, InvalidChangesetError.exception(reason: :empty)}
 
-  defp check_statements_presence(_, _, _, _), do: :ok
+  defp check_statements_presence(_, _, _, _, _), do: :ok
 
   defp check_no_insert_delete_overlap(insert, delete, update, replace) do
     overlapping_statements =

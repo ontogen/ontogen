@@ -203,13 +203,13 @@ defmodule Ontogen.Commit.ChangesetTest do
                overwrite: statement(5)
              ]
              |> Changeset.merge(overwrite: statements([1, 2, 3, 4, 5])) ==
-               %Changeset{
+               Changeset.new!(
                  insert: nil,
                  delete: nil,
                  update: nil,
                  replace: nil,
                  overwrite: graph([1, 2, 5, 3, 4])
-               }
+               )
     end
 
     test "disjunctive changesets" do
