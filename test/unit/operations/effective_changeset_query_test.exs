@@ -11,46 +11,46 @@ defmodule Ontogen.Operations.EffectiveChangesetQueryTest do
     :ok
   end
 
-  describe "inserts" do
-    test "fully effective (when none of the inserted statements already exist)" do
+  describe "adds" do
+    test "fully effective (when none of the added statements already exist)" do
       statements = EX.Foo |> EX.bar(EX.Baz)
 
-      assert Ontogen.effective_changeset!(insert: statements) ==
-               Changeset.new!(insert: statements)
+      assert Ontogen.effective_changeset!(add: statements) ==
+               Changeset.new!(add: statements)
     end
 
-    test "partially effective (when some of the inserted statements already exist)" do
+    test "partially effective (when some of the added statements already exist)" do
       new_statement = EX.Foo |> EX.bar(EX.Baz)
-      insert = [new_statement | Enum.take(graph(), 1)]
+      add = [new_statement | Enum.take(graph(), 1)]
 
-      assert Ontogen.effective_changeset!(insert: insert) ==
-               Changeset.new!(insert: new_statement)
+      assert Ontogen.effective_changeset!(add: add) ==
+               Changeset.new!(add: new_statement)
     end
 
-    test "ineffective (when all of the inserted statements already exist)" do
-      assert Ontogen.effective_changeset!(insert: graph()) == :no_effective_changes
+    test "ineffective (when all of the added statements already exist)" do
+      assert Ontogen.effective_changeset!(add: graph()) == :no_effective_changes
     end
   end
 
-  describe "deletes" do
-    test "fully effective (when all of the deleted statements actually exist)" do
-      assert Ontogen.effective_changeset!(delete: graph()) ==
-               Changeset.new!(delete: graph())
+  describe "removes" do
+    test "fully effective (when all of the removed statements actually exist)" do
+      assert Ontogen.effective_changeset!(remove: graph()) ==
+               Changeset.new!(remove: graph())
     end
 
-    test "partially effective (when some of the deleted statements actually exist)" do
+    test "partially effective (when some of the removed statements actually exist)" do
       new_statement = EX.Foo |> EX.bar(EX.Baz)
       existing_statements = Enum.take(graph(), 1)
-      delete = [new_statement | existing_statements]
+      remove = [new_statement | existing_statements]
 
-      assert Ontogen.effective_changeset!(delete: delete) ==
-               Changeset.new!(delete: existing_statements)
+      assert Ontogen.effective_changeset!(remove: remove) ==
+               Changeset.new!(remove: existing_statements)
     end
 
-    test "ineffective (when none of the deleted statements actually exist)" do
+    test "ineffective (when none of the removed statements actually exist)" do
       statements = EX.Foo |> EX.bar(EX.Baz)
 
-      assert Ontogen.effective_changeset!(delete: statements) ==
+      assert Ontogen.effective_changeset!(remove: statements) ==
                :no_effective_changes
     end
   end
@@ -75,7 +75,7 @@ defmodule Ontogen.Operations.EffectiveChangesetQueryTest do
       assert Ontogen.effective_changeset!(update: graph()) == :no_effective_changes
     end
 
-    test "deletes existing statements to the same subject-predicate" do
+    test "removes existing statements to the same subject-predicate" do
       statements = [
         # this statement should lead to an overwrite
         EX.S1 |> EX.p1(EX.O2),
@@ -121,7 +121,7 @@ defmodule Ontogen.Operations.EffectiveChangesetQueryTest do
       assert Ontogen.effective_changeset!(replace: graph()) == :no_effective_changes
     end
 
-    test "deletes existing statements to the same subject" do
+    test "removes existing statements to the same subject" do
       statements = [
         EX.S1 |> EX.p1(EX.O2),
         EX.S2 |> EX.p3("Foo")
@@ -146,33 +146,33 @@ defmodule Ontogen.Operations.EffectiveChangesetQueryTest do
     end
   end
 
-  describe "combined inserts and deletes" do
+  describe "combined adds and removes" do
     test "fully effective" do
       statements = EX.Foo |> EX.bar(EX.Baz)
 
-      assert Ontogen.effective_changeset!(insert: statements, delete: graph()) ==
-               Changeset.new!(insert: statements, delete: graph())
+      assert Ontogen.effective_changeset!(add: statements, remove: graph()) ==
+               Changeset.new!(add: statements, remove: graph())
     end
 
     test "partially effective" do
       non_existing_statements = EX.Foo |> EX.bar(EX.Baz1)
       new_statement = EX.Foo |> EX.bar(EX.Baz2)
       existing_statements = Enum.take(graph(), 1)
-      insert = [new_statement | existing_statements]
-      existing_delete_statements = Graph.delete(graph(), existing_statements)
-      delete = [non_existing_statements, existing_delete_statements]
+      add = [new_statement | existing_statements]
+      existing_remove_statements = Graph.delete(graph(), existing_statements)
+      remove = [non_existing_statements, existing_remove_statements]
 
-      assert Ontogen.effective_changeset!(insert: insert, delete: delete) ==
+      assert Ontogen.effective_changeset!(add: add, remove: remove) ==
                Changeset.new!(
-                 insert: new_statement,
-                 delete: existing_delete_statements
+                 add: new_statement,
+                 remove: existing_remove_statements
                )
     end
 
     test "ineffective" do
       statements = EX.Foo |> EX.bar(EX.Baz)
 
-      assert Ontogen.effective_changeset!(insert: graph(), delete: statements) ==
+      assert Ontogen.effective_changeset!(add: graph(), remove: statements) ==
                :no_effective_changes
     end
   end

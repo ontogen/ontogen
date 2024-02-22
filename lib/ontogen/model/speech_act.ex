@@ -13,10 +13,10 @@ defmodule Ontogen.SpeechAct do
   @shared_args [:time, :committer]
 
   schema Og.SpeechAct do
-    link insert: Og.insert(), type: Proposition, depth: +1
-    link delete: Og.delete(), type: Proposition, depth: +1
+    link add: Og.add(), type: Proposition, depth: +1
     link update: Og.update(), type: Proposition, depth: +1
     link replace: Og.replace(), type: Proposition, depth: +1
+    link remove: Og.remove(), type: Proposition, depth: +1
 
     property time: PROV.endedAtTime(), type: :date_time, required: true
     link speaker: Og.speaker(), type: Ontogen.Agent, depth: +1

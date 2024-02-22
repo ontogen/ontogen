@@ -9,10 +9,10 @@ defmodule Ontogen.Commit.Changeset do
   defstruct Action.fields()
 
   @type t :: %__MODULE__{
-          insert: Graph.t() | nil,
-          delete: Graph.t() | nil,
+          add: Graph.t() | nil,
           update: Graph.t() | nil,
           replace: Graph.t() | nil,
+          remove: Graph.t() | nil,
           overwrite: Graph.t() | nil
         }
 
@@ -26,10 +26,10 @@ defmodule Ontogen.Commit.Changeset do
 
   def new(%Commit{} = commit) do
     %__MODULE__{
-      insert: to_graph(commit.insert),
-      delete: to_graph(commit.delete),
+      add: to_graph(commit.add),
       update: to_graph(commit.update),
       replace: to_graph(commit.replace),
+      remove: to_graph(commit.remove),
       overwrite: to_graph(commit.overwrite)
     }
     |> validate()
@@ -37,10 +37,10 @@ defmodule Ontogen.Commit.Changeset do
 
   def new(%{} = action_map) when is_action_map(action_map) do
     %__MODULE__{
-      insert: to_graph(Map.get(action_map, :insert)),
-      delete: to_graph(Map.get(action_map, :delete)),
+      add: to_graph(Map.get(action_map, :add)),
       update: to_graph(Map.get(action_map, :update)),
       replace: to_graph(Map.get(action_map, :replace)),
+      remove: to_graph(Map.get(action_map, :remove)),
       overwrite: to_graph(Map.get(action_map, :overwrite))
     }
     |> validate()
@@ -125,21 +125,21 @@ defmodule Ontogen.Commit.Changeset do
     end
   end
 
-  defp do_merge(changeset, insert: insert) do
-    insert = to_graph(insert)
+  defp do_merge(changeset, add: add) do
+    add = to_graph(add)
 
-    if insert && not Graph.empty?(insert) do
+    if add && not Graph.empty?(add) do
       %__MODULE__{
         changeset
-        | insert:
+        | add:
             graph_add(
-              changeset.insert,
-              insert
+              changeset.add,
+              add
               |> Graph.delete(changeset.update || [])
               |> Graph.delete(changeset.replace || [])
             ),
-          delete: graph_delete(changeset.delete, insert),
-          overwrite: graph_delete(changeset.overwrite, insert)
+          remove: graph_delete(changeset.remove, add),
+          overwrite: graph_delete(changeset.overwrite, add)
       }
     else
       changeset
@@ -154,14 +154,14 @@ defmodule Ontogen.Commit.Changeset do
       # commit changes, which include all overwritten statements in the overwrite graph.
       %__MODULE__{
         changeset
-        | insert: graph_delete(changeset.insert, update),
+        | add: graph_delete(changeset.add, update),
           update:
             graph_add(
               changeset.update,
               update
               |> Graph.delete(changeset.replace || [])
             ),
-          delete: graph_delete(changeset.delete, update),
+          remove: graph_delete(changeset.remove, update),
           overwrite: graph_delete(changeset.overwrite, update)
       }
     else
@@ -177,10 +177,10 @@ defmodule Ontogen.Commit.Changeset do
       # commit changes, which include all overwritten statements in the overwrite graph.
       %__MODULE__{
         changeset
-        | insert: graph_delete(changeset.insert, replace),
+        | add: graph_delete(changeset.add, replace),
           update: graph_delete(changeset.update, replace),
           replace: graph_add(changeset.replace, replace),
-          delete: graph_delete(changeset.delete, replace),
+          remove: graph_delete(changeset.remove, replace),
           overwrite: graph_delete(changeset.overwrite, replace)
       }
     else
@@ -188,17 +188,17 @@ defmodule Ontogen.Commit.Changeset do
     end
   end
 
-  defp do_merge(changeset, delete: delete) do
-    delete = to_graph(delete)
+  defp do_merge(changeset, remove: remove) do
+    remove = to_graph(remove)
 
-    if delete && not Graph.empty?(delete) do
+    if remove && not Graph.empty?(remove) do
       %__MODULE__{
         changeset
-        | insert: graph_delete(changeset.insert, delete),
-          update: graph_delete(changeset.update, delete),
-          replace: graph_delete(changeset.replace, delete),
-          delete: graph_add(changeset.delete, delete),
-          overwrite: graph_delete(changeset.overwrite, delete)
+        | add: graph_delete(changeset.add, remove),
+          update: graph_delete(changeset.update, remove),
+          replace: graph_delete(changeset.replace, remove),
+          remove: graph_add(changeset.remove, remove),
+          overwrite: graph_delete(changeset.overwrite, remove)
       }
     else
       changeset
@@ -211,10 +211,10 @@ defmodule Ontogen.Commit.Changeset do
     if overwrite && not Graph.empty?(overwrite) do
       %__MODULE__{
         changeset
-        | insert: graph_delete(changeset.insert, overwrite),
+        | add: graph_delete(changeset.add, overwrite),
           update: graph_delete(changeset.update, overwrite),
           replace: graph_delete(changeset.replace, overwrite),
-          delete: graph_delete(changeset.delete, overwrite),
+          remove: graph_delete(changeset.remove, overwrite),
           overwrite: graph_add(changeset.overwrite, overwrite)
       }
     else
@@ -231,6 +231,6 @@ defmodule Ontogen.Commit.Changeset do
   defp graph_add(nil, additions), do: Graph.new(additions)
   defp graph_add(graph, additions), do: Graph.add(graph, additions)
   defp graph_delete(nil, _), do: nil
-  defp graph_delete(graph, deletions), do: graph |> Graph.delete(deletions) |> graph_cleanup()
+  defp graph_delete(graph, removals), do: graph |> Graph.delete(removals) |> graph_cleanup()
   defp graph_cleanup(graph), do: unless(Graph.empty?(graph), do: graph)
 end

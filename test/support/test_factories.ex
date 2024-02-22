@@ -220,8 +220,8 @@ defmodule Ontogen.TestFactories do
 
   def changeset_attrs(attrs \\ []) do
     [
-      insert: graph(),
-      delete: {EX.Foo, EX.bar(), 42}
+      add: graph(),
+      remove: {EX.Foo, EX.bar(), 42}
     ]
     |> Keyword.merge(attrs)
   end
@@ -246,7 +246,7 @@ defmodule Ontogen.TestFactories do
 
   def speech_act_attrs(attrs \\ []) do
     [
-      insert: graph(),
+      add: graph(),
       speaker: agent(),
       data_source: dataset(),
       time: datetime()

@@ -31,16 +31,16 @@ defmodule Ontogen.Operations.HistoryQuery.Query do
   defp commit_statements_construct_pattern do
     """
     ?commit ?commit_p ?commit_o .
-    ?committed_insert ?committed_insert_p ?committed_insert_o .
-    ?committed_delete ?committed_delete_p ?committed_delete_o .
+    ?committed_add ?committed_add_p ?committed_add_o .
+    ?committed_remove ?committed_remove_p ?committed_remove_o .
     ?committed_update ?committed_update_p ?committed_update_o .
     ?committed_replace ?committed_replace_p ?committed_replace_o .
     ?committed_overwrite ?committed_overwrite_p ?committed_overwrite_o .
     ?committer ?committer_p ?committer_o .
     ?speech_act ?speech_act_p ?speech_act_o .
     ?speaker ?speaker_p ?speaker_o .
-    ?insert ?insert_p ?insert_o .
-    ?delete ?delete_p ?delete_o .
+    ?add ?add_p ?add_o .
+    ?remove ?remove_p ?remove_o .
     ?update ?update_p ?update_o .
     ?replace ?replace_p ?replace_o .
     """
@@ -57,13 +57,13 @@ defmodule Ontogen.Operations.HistoryQuery.Query do
 
       {
         {
-          ?commit og:committedInsert ?committed_insert .
-          #{statement_filter("?committed_insert", subject)}
+          ?commit og:committedAdd ?committed_add .
+          #{statement_filter("?committed_add", subject)}
         }
         UNION
         {
-          ?commit og:committedDelete ?committed_delete .
-          #{statement_filter("?committed_delete", subject)}
+          ?commit og:committedRemove ?committed_remove .
+          #{statement_filter("?committed_remove", subject)}
         }
         UNION
         {
@@ -83,12 +83,12 @@ defmodule Ontogen.Operations.HistoryQuery.Query do
       }
 
       OPTIONAL {
-        ?commit og:committedInsert ?committed_insert .
-        ?committed_insert ?committed_insert_p ?committed_insert_o .
+        ?commit og:committedAdd ?committed_add .
+        ?committed_add ?committed_add_p ?committed_add_o .
       }
       OPTIONAL {
-        ?commit og:committedDelete ?committed_delete .
-        ?committed_delete ?committed_delete_p ?committed_delete_o .
+        ?commit og:committedRemove ?committed_remove .
+        ?committed_remove ?committed_remove_p ?committed_remove_o .
       }
       OPTIONAL {
         ?commit og:committedUpdate ?committed_update .
@@ -110,12 +110,12 @@ defmodule Ontogen.Operations.HistoryQuery.Query do
       ?speaker ?speaker_p ?speaker_o .
 
       OPTIONAL {
-        ?speech_act og:insert ?insert .
-        ?insert ?insert_p ?insert_o .
+        ?speech_act og:add ?add .
+        ?add ?add_p ?add_o .
       }
       OPTIONAL {
-        ?speech_act og:delete ?delete .
-        ?delete ?delete_p ?delete_o .
+        ?speech_act og:remove ?remove .
+        ?remove ?remove_p ?remove_o .
       }
       OPTIONAL {
         ?speech_act og:update ?update .

@@ -9,7 +9,7 @@ defmodule Ontogen.SpeechActTest do
     test "with all required attributes" do
       assert {:ok, %SpeechAct{} = speech_act} =
                SpeechAct.new(
-                 insert: graph(),
+                 add: graph(),
                  speaker: agent(),
                  data_source: dataset(),
                  time: datetime()
@@ -17,16 +17,16 @@ defmodule Ontogen.SpeechActTest do
 
       assert %IRI{value: "urn:hash::sha256:" <> _} = speech_act.__id__
 
-      assert speech_act.insert == proposition()
+      assert speech_act.add == proposition()
       assert speech_act.time == datetime()
       assert speech_act.speaker == agent()
       assert speech_act.data_source == dataset()
     end
 
     test "uses proper defaults" do
-      assert {:ok, %SpeechAct{} = speech_act} = SpeechAct.new(insert: graph())
+      assert {:ok, %SpeechAct{} = speech_act} = SpeechAct.new(add: graph())
 
-      assert speech_act.insert == proposition()
+      assert speech_act.add == proposition()
       assert DateTime.diff(DateTime.utc_now(), speech_act.time, :second) <= 1
       assert speech_act.speaker == Config.agent()
     end

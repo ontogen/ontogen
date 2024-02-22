@@ -9,10 +9,10 @@ defmodule Ontogen.SpeechAct.Id do
 
   def content(speech_act) do
     [
-      if(speech_act.insert, do: "insert #{to_hash(speech_act.insert)}"),
-      if(speech_act.delete, do: "delete #{to_hash(speech_act.delete)}"),
+      if(speech_act.add, do: "add #{to_hash(speech_act.add)}"),
       if(speech_act.update, do: "update #{to_hash(speech_act.update)}"),
       if(speech_act.replace, do: "replace #{to_hash(speech_act.replace)}"),
+      if(speech_act.remove, do: "remove #{to_hash(speech_act.remove)}"),
       "context <#{to_id(SpeechAct.origin(speech_act))}> #{to_timestamp(speech_act.time)}"
     ]
     |> Enum.reject(&is_nil/1)

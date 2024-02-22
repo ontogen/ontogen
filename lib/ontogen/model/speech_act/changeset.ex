@@ -9,10 +9,10 @@ defmodule Ontogen.SpeechAct.Changeset do
   defstruct Action.fields() -- [:overwrite]
 
   @type t :: %__MODULE__{
-          insert: Graph.t() | nil,
-          delete: Graph.t() | nil,
+          add: Graph.t() | nil,
           update: Graph.t() | nil,
-          replace: Graph.t() | nil
+          replace: Graph.t() | nil,
+          remove: Graph.t() | nil
         }
 
   @doc """
@@ -25,20 +25,20 @@ defmodule Ontogen.SpeechAct.Changeset do
 
   def new(%SpeechAct{} = speech_act) do
     %__MODULE__{
-      insert: to_graph(speech_act.insert),
-      delete: to_graph(speech_act.delete),
+      add: to_graph(speech_act.add),
       update: to_graph(speech_act.update),
-      replace: to_graph(speech_act.replace)
+      replace: to_graph(speech_act.replace),
+      remove: to_graph(speech_act.remove)
     }
     |> validate()
   end
 
   def new(%{} = action_map) when is_action_map(action_map) do
     %__MODULE__{
-      insert: to_graph(Map.get(action_map, :insert)),
-      delete: to_graph(Map.get(action_map, :delete)),
+      add: to_graph(Map.get(action_map, :add)),
       update: to_graph(Map.get(action_map, :update)),
-      replace: to_graph(Map.get(action_map, :replace))
+      replace: to_graph(Map.get(action_map, :replace)),
+      remove: to_graph(Map.get(action_map, :remove))
     }
     |> validate()
   end

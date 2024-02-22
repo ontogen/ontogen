@@ -35,12 +35,7 @@ og:SpeechAct a rdfs:Class
         ; rdfs:range  dcat:Dataset
     .
 
-    og:insert a rdf:Property, owl:FunctionalProperty
-        ; rdfs:domain og:SpeechAct
-        ; rdfs:range  og:Proposition
-    .
-
-    og:delete a rdf:Property, owl:FunctionalProperty
+    og:add a rdf:Property, owl:FunctionalProperty
         ; rdfs:domain og:SpeechAct
         ; rdfs:range  og:Proposition
     .
@@ -51,6 +46,11 @@ og:SpeechAct a rdfs:Class
     .
 
     og:replace a rdf:Property, owl:FunctionalProperty
+        ; rdfs:domain og:SpeechAct
+        ; rdfs:range  og:Proposition
+    .
+
+    og:remove a rdf:Property, owl:FunctionalProperty
         ; rdfs:domain og:SpeechAct
         ; rdfs:range  og:Proposition
     .
@@ -67,13 +67,7 @@ og:Commit a rdfs:Class
         ; rdfs:range  og:SpeechAct
     .
 
-    og:committedInsert a rdf:Property, owl:FunctionalProperty
-        ; rdfs:subPropertyOf prov:used
-        ; rdfs:domain og:Commit
-        ; rdfs:range  og:Proposition
-    .
-
-    og:committedDelete a rdf:Property
+    og:committedAdd a rdf:Property, owl:FunctionalProperty
         ; rdfs:subPropertyOf prov:used
         ; rdfs:domain og:Commit
         ; rdfs:range  og:Proposition
@@ -86,6 +80,12 @@ og:Commit a rdfs:Class
     .
 
     og:committedReplace a rdf:Property, owl:FunctionalProperty
+        ; rdfs:subPropertyOf prov:used
+        ; rdfs:domain og:Commit
+        ; rdfs:range  og:Proposition
+    .
+
+    og:committedRemove a rdf:Property
         ; rdfs:subPropertyOf prov:used
         ; rdfs:domain og:Commit
         ; rdfs:range  og:Proposition

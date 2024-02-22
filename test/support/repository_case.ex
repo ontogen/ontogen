@@ -53,7 +53,7 @@ defmodule Ontogen.RepositoryCase do
   def init_commit_history do
     init_commit_history([
       [
-        insert: graph(),
+        add: graph(),
         message: "Initial commit",
         time: datetime() |> DateTime.add(-1, :hour)
       ]

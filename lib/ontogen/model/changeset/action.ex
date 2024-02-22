@@ -1,6 +1,6 @@
 defmodule Ontogen.Changeset.Action do
   # during a Changeset.merge these actions will be applied in the reverse order defined here
-  @fields [:insert, :update, :replace, :delete, :overwrite]
+  @fields [:add, :update, :replace, :remove, :overwrite]
 
   @doc """
   Returns a list of the action fields.
@@ -21,16 +21,16 @@ defmodule Ontogen.Changeset.Action do
 
   ## Example
 
-      iex> is_action_map(:insert)
+      iex> is_action_map(:add)
       false
 
       iex> is_action_map(%{foo: []})
       false
 
-      iex> is_action_map(%{insert: []})
+      iex> is_action_map(%{add: []})
       true
 
-      iex> is_action_map(%{delete: [], replace: []})
+      iex> is_action_map(%{remove: [], replace: []})
       true
 
       iex> is_action_map(%{overwrite: []})
@@ -50,8 +50,8 @@ defmodule Ontogen.Changeset.Action do
   """
   defguard is_action_map(map)
            when is_map(map) and
-                  (is_map_key(map, :insert) or
-                     is_map_key(map, :delete) or
+                  (is_map_key(map, :add) or
+                     is_map_key(map, :remove) or
                      is_map_key(map, :update) or
                      is_map_key(map, :replace))
 
@@ -59,16 +59,16 @@ defmodule Ontogen.Changeset.Action do
   Extracts a map of actions from the given keywords and returns it with the remaining unprocessed keywords.
   """
   def extract(args) do
-    {insert, args} = Keyword.pop(args, :insert)
-    {delete, args} = Keyword.pop(args, :delete)
+    {add, args} = Keyword.pop(args, :add)
+    {remove, args} = Keyword.pop(args, :remove)
     {update, args} = Keyword.pop(args, :update)
     {replace, args} = Keyword.pop(args, :replace)
     {overwrite, args} = Keyword.pop(args, :overwrite)
 
     {
       %{
-        insert: insert,
-        delete: delete,
+        add: add,
+        remove: remove,
         update: update,
         replace: replace,
         overwrite: overwrite
@@ -80,12 +80,12 @@ defmodule Ontogen.Changeset.Action do
   @doc """
   Checks if a changeset structure contains any changes.
   """
-  def empty?(%{insert: nil, delete: nil, update: nil, replace: nil, overwrite: nil}),
+  def empty?(%{add: nil, update: nil, replace: nil, remove: nil, overwrite: nil}),
     do: true
 
-  def empty?(%{insert: _, delete: _, update: _, replace: _, overwrite: _}), do: false
-  def empty?(%{insert: nil, delete: nil, update: nil, replace: nil}), do: true
-  def empty?(%{insert: _, delete: _, update: _, replace: _}), do: false
+  def empty?(%{add: _, update: _, replace: _, remove: _, overwrite: _}), do: false
+  def empty?(%{add: nil, update: nil, replace: nil, remove: nil}), do: true
+  def empty?(%{add: _, update: _, replace: _, remove: _}), do: false
 
   def empty?(args) when is_list(args) do
     args |> Keyword.take(fields()) |> Enum.empty?()

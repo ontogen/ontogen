@@ -12,7 +12,7 @@ defmodule Ontogen.CommitTest do
       assert {:ok, %Commit{} = commit} =
                Commit.new(
                  speech_act: speech_act(),
-                 insert: proposition(),
+                 add: proposition(),
                  committer: agent(),
                  message: message,
                  time: datetime()
@@ -20,7 +20,7 @@ defmodule Ontogen.CommitTest do
 
       assert %IRI{value: "urn:hash::sha256:" <> _} = commit.__id__
 
-      assert commit.insert == proposition()
+      assert commit.add == proposition()
       assert commit.speech_act == speech_act()
       assert commit.committer == agent()
       assert commit.message == message
@@ -33,15 +33,15 @@ defmodule Ontogen.CommitTest do
       assert {:ok, %Commit{} = commit} =
                Commit.new(
                  speech_act: speech_act(),
-                 insert: EX.S1 |> EX.p1(EX.O1),
-                 delete: {EX.S2, EX.P2, EX.O2},
+                 add: EX.S1 |> EX.p1(EX.O1),
+                 remove: {EX.S2, EX.P2, EX.O2},
                  committer: agent(),
                  message: "Some commit",
                  time: datetime()
                )
 
-      assert commit.insert == proposition(EX.S1 |> EX.p1(EX.O1))
-      assert commit.delete == proposition({EX.S2, EX.P2, EX.O2})
+      assert commit.add == proposition(EX.S1 |> EX.p1(EX.O1))
+      assert commit.remove == proposition({EX.S2, EX.P2, EX.O2})
       assert commit.speech_act == speech_act()
     end
 
@@ -55,34 +55,34 @@ defmodule Ontogen.CommitTest do
                  time: datetime()
                )
 
-      assert commit.insert == commit_changeset().insert |> Proposition.new!()
-      assert commit.delete == commit_changeset().delete |> Proposition.new!()
+      assert commit.add == commit_changeset().add |> Proposition.new!()
+      assert commit.remove == commit_changeset().remove |> Proposition.new!()
       assert commit.update == commit_changeset().update
       assert commit.replace == commit_changeset().replace
       assert commit.speech_act == speech_act()
     end
 
-    test "shared insert and delete statement" do
+    test "shared add and remove statement" do
       shared_statements = [{EX.s(), EX.p(), EX.o()}]
 
       assert Commit.new(
-               insert: graph() |> Graph.add(shared_statements),
-               delete: shared_statements,
+               add: graph() |> Graph.add(shared_statements),
+               remove: shared_statements,
                committer: agent(),
-               message: "Inserted and deleted statement",
+               message: "Inserted and removed statement",
                time: datetime()
              ) ==
                {:error,
                 InvalidChangesetError.exception(
                   reason:
-                    "the following statements are in both insert and delete: #{inspect(shared_statements)}"
+                    "the following statements are in both add and remove: #{inspect(shared_statements)}"
                 )}
     end
 
     test "without statements" do
       assert Commit.new(
                committer: agent(),
-               message: "without inserted and deleted statements",
+               message: "without added and removed statements",
                time: datetime()
              ) ==
                {:error, InvalidChangesetError.exception(reason: :empty)}

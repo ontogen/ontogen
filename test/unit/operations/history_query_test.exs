@@ -76,19 +76,19 @@ defmodule Ontogen.Operations.HistoryQueryTest do
 
       init_commit_history([
         [
-          insert: graph,
+          add: graph,
           message: "Initial commit"
         ],
         [
           # this leads to a different effective change
-          insert: [{EX.S3, EX.p3(), "foo"}],
-          delete: EX.S1 |> EX.p1(EX.O1),
+          add: [{EX.S3, EX.p3(), "foo"}],
+          remove: EX.S1 |> EX.p1(EX.O1),
           committer: agent(:agent_jane),
           message: "Second commit"
         ],
         [
           # this leads to a different effective change
-          insert: [{EX.S4, EX.p4(), EX.O4}, {EX.S3, EX.p3(), "foo"}],
+          add: [{EX.S4, EX.p4(), EX.O4}, {EX.S3, EX.p3(), "foo"}],
           message: "Third commit"
         ],
         [
@@ -175,33 +175,33 @@ defmodule Ontogen.Operations.HistoryQueryTest do
       [fourth, _, _, third, second, _, first] =
         init_commit_history([
           [
-            insert: [
+            add: [
               EX.S1 |> EX.p1(EX.O1),
               EX.S2 |> EX.p2(42, "Foo")
             ],
             message: "Initial commit"
           ],
           [
-            insert: {EX.S3, EX.p3(), "foo"},
+            add: {EX.S3, EX.p3(), "foo"},
             message: "Irrelevant commit"
           ],
           [
             # this leads to a different effective change
-            insert: [{EX.S3, EX.p3(), "foo"}, {EX.S3, EX.p3(), "bar"}],
-            delete: EX.S1 |> EX.p1(EX.O1),
+            add: [{EX.S3, EX.p3(), "foo"}, {EX.S3, EX.p3(), "bar"}],
+            remove: EX.S1 |> EX.p1(EX.O1),
             committer: agent(:agent_jane),
             message: "Second relevant commit"
           ],
           [
-            insert: {EX.S1, EX.p4(), EX.O4},
+            add: {EX.S1, EX.p4(), EX.O4},
             message: "Third relevant commit"
           ],
           [
-            insert: [{EX.S1, EX.p4(), EX.O4}, {EX.S4, EX.p4(), EX.O4}],
+            add: [{EX.S1, EX.p4(), EX.O4}, {EX.S4, EX.p4(), EX.O4}],
             message: "Irrelevant effective commit"
           ],
           [
-            insert: {EX.S5, EX.p2(), EX.O2},
+            add: {EX.S5, EX.p2(), EX.O2},
             message: "Another irrelevant commit"
           ],
           [
@@ -305,28 +305,28 @@ defmodule Ontogen.Operations.HistoryQueryTest do
       [third, _, _, second, _, first] =
         init_commit_history([
           [
-            insert: [
+            add: [
               EX.S1 |> EX.p1(EX.O1),
               EX.S2 |> EX.p2(42, "Foo")
             ],
             message: "Initial commit"
           ],
           [
-            insert: {EX.S3, EX.p3(), EX.O3},
+            add: {EX.S3, EX.p3(), EX.O3},
             message: "Irrelevant commit"
           ],
           [
-            insert: {EX.S3, EX.p3(), "foo"},
-            delete: EX.S1 |> EX.p1(EX.O1),
+            add: {EX.S3, EX.p3(), "foo"},
+            remove: EX.S1 |> EX.p1(EX.O1),
             committer: agent(:agent_jane),
             message: "Second relevant commit"
           ],
           [
-            insert: {EX.S1, EX.p1(), EX.O2},
+            add: {EX.S1, EX.p1(), EX.O2},
             message: "Another irrelevant commit"
           ],
           [
-            insert: {EX.S4, EX.p4(), EX.O4},
+            add: {EX.S4, EX.p4(), EX.O4},
             message: "Another irrelevant commit"
           ],
           [
@@ -431,30 +431,30 @@ defmodule Ontogen.Operations.HistoryQueryTest do
       [fourth, _, third, second, _, first] =
         init_commit_history([
           [
-            insert: [
+            add: [
               EX.S1 |> EX.p1(EX.O1),
               EX.S2 |> EX.p2(42, "Foo")
             ],
             message: "Initial commit"
           ],
           [
-            insert: {EX.S3, EX.p3(), EX.O3},
+            add: {EX.S3, EX.p3(), EX.O3},
             message: "Irrelevant commit"
           ],
           [
             # this leads to a different effective change
-            insert: [{EX.S3, EX.p3(), "foo"}, {EX.S3, EX.p3(), EX.O3}],
-            delete: EX.S1 |> EX.p1(EX.O1),
+            add: [{EX.S3, EX.p3(), "foo"}, {EX.S3, EX.p3(), EX.O3}],
+            remove: EX.S1 |> EX.p1(EX.O1),
             committer: agent(:agent_jane),
             message: "Second relevant commit"
           ],
           [
             # this leads to a different effective change (which caused the EffectiveProposition-origin-overlap-problem in the old effective change model)
-            insert: [{EX.S1, EX.p1(), EX.O2}, {EX.S3, EX.p3(), EX.O3}],
+            add: [{EX.S1, EX.p1(), EX.O2}, {EX.S3, EX.p3(), EX.O3}],
             message: "Third relevant commit"
           ],
           [
-            insert: {EX.S4, EX.p4(), EX.O4},
+            add: {EX.S4, EX.p4(), EX.O4},
             message: "Another irrelevant commit"
           ],
           [

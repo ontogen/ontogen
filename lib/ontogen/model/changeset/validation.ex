@@ -8,19 +8,19 @@ defmodule Ontogen.Changeset.Validation do
   If valid, the given structure is returned unchanged in an `:ok` tuple.
   Otherwise, an `:error` tuple is returned.
   """
-  def validate(%{insert: insert, delete: delete, update: update, replace: replace} = changeset) do
+  def validate(%{add: add, update: update, replace: replace, remove: remove} = changeset) do
     with :ok <-
            check_statements_presence(
-             insert,
-             delete,
+             add,
              update,
              replace,
+             remove,
              Map.get(changeset, :overwrite)
            ),
-         :ok <- check_no_insert_delete_overlap(insert, delete, update, replace),
-         :ok <- check_no_inserts_overlap(insert, update, replace),
-         :ok <- check_no_replace_overlap(insert, update, replace),
-         :ok <- check_no_update_overlap(insert, update) do
+         :ok <- check_no_add_remove_overlap(add, update, replace, remove),
+         :ok <- check_no_add_overlap(add, update, replace),
+         :ok <- check_no_replace_overlap(add, update, replace),
+         :ok <- check_no_update_overlap(add, update) do
       {:ok, changeset}
     end
   end
@@ -30,9 +30,9 @@ defmodule Ontogen.Changeset.Validation do
 
   defp check_statements_presence(_, _, _, _, _), do: :ok
 
-  defp check_no_insert_delete_overlap(insert, delete, update, replace) do
+  defp check_no_add_remove_overlap(add, update, replace, remove) do
     overlapping_statements =
-      Enum.flat_map([insert, update, replace], &overlapping_statements(&1, delete))
+      Enum.flat_map([add, update, replace], &overlapping_statements(&1, remove))
 
     if Enum.empty?(overlapping_statements) do
       :ok
@@ -40,15 +40,15 @@ defmodule Ontogen.Changeset.Validation do
       {:error,
        InvalidChangesetError.exception(
          reason:
-           "the following statements are in both insert and delete: #{inspect(overlapping_statements)}"
+           "the following statements are in both add and remove: #{inspect(overlapping_statements)}"
        )}
     end
   end
 
-  defp check_no_inserts_overlap(insert, update, replace) do
+  defp check_no_add_overlap(add, update, replace) do
     [
-      {insert, update},
-      {insert, replace},
+      {add, update},
+      {add, replace},
       {update, replace}
     ]
     |> Enum.reduce_while(:ok, fn {graph1, graph2}, :ok ->
@@ -61,7 +61,7 @@ defmodule Ontogen.Changeset.Validation do
          {:error,
           InvalidChangesetError.exception(
             reason:
-              "the following statements are in multiple inserts: #{inspect(overlapping_statements)}"
+              "the following statements are in multiple adds: #{inspect(overlapping_statements)}"
           )}}
       end
     end)
@@ -69,7 +69,7 @@ defmodule Ontogen.Changeset.Validation do
 
   defp check_no_replace_overlap(_, _, nil), do: :ok
 
-  defp check_no_replace_overlap(insert, update, replace) do
+  defp check_no_replace_overlap(add, update, replace) do
     replace
     |> Graph.subjects()
     |> Enum.find_value(fn subject ->
@@ -81,11 +81,11 @@ defmodule Ontogen.Changeset.Validation do
                "the following update statements overlap with replace overwrites: #{inspect(Description.triples(update_description))}"
            )}
 
-        insert_description = insert && insert[subject] ->
+        add_description = add && add[subject] ->
           {:error,
            InvalidChangesetError.exception(
              reason:
-               "the following insert statements overlap with replace overwrites: #{inspect(Description.triples(insert_description))}"
+               "the following add statements overlap with replace overwrites: #{inspect(Description.triples(add_description))}"
            )}
 
         true ->
@@ -96,19 +96,19 @@ defmodule Ontogen.Changeset.Validation do
 
   defp check_no_update_overlap(_, nil), do: :ok
 
-  defp check_no_update_overlap(insert, update) do
+  defp check_no_update_overlap(add, update) do
     update
     |> Graph.descriptions()
     |> Enum.find_value(fn description ->
-      if insert_description = insert && insert[description.subject] do
+      if add_description = add && add[description.subject] do
         description
         |> Description.predicates()
         |> Enum.find_value(fn predicate ->
-          if insert_description[predicate] do
+          if add_description[predicate] do
             {:error,
              InvalidChangesetError.exception(
                reason:
-                 "the following insert statements overlap with update overwrites: #{inspect(insert_description |> Description.take([predicate]) |> Description.triples())}"
+                 "the following add statements overlap with update overwrites: #{inspect(add_description |> Description.take([predicate]) |> Description.triples())}"
              )}
           end
         end)
