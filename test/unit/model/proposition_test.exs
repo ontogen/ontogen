@@ -19,6 +19,11 @@ defmodule Ontogen.PropositionTest do
     end
   end
 
+  test "the identifier is the RDC-canonicalized hash" do
+    assert Ontogen.Proposition.new!([{EX.S1, EX.P1, ~B"foo"}]) |> Grax.id() ==
+             Ontogen.Proposition.new!([{EX.S1, EX.P1, ~B"bar"}]) |> Grax.id()
+  end
+
   test "graph/1" do
     assert Proposition.graph(proposition()) == graph()
   end

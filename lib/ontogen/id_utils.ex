@@ -21,13 +21,10 @@ defmodule Ontogen.IdUtils do
   def hash_from_iri(_), do: nil
 
   def dataset_hash(%RDF.Dataset{} = dataset) do
-    unless Dataset.empty?(dataset) do
-      {:ok,
-       dataset
-       |> NQuads.write_string!()
-       |> hash()}
-    else
+    if Dataset.empty?(dataset) do
       {:error, error("empty dataset")}
+    else
+      {:ok, Dataset.canonical_hash(dataset)}
     end
   end
 
