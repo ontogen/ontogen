@@ -6,17 +6,17 @@ defmodule Ontogen.Operations.HistoryQuery.Query do
   import Ontogen.QueryUtils
 
   def build(operation) do
-    {:ok, query(operation.subject, operation.from_commit, operation.to_commit)}
+    {:ok, query(operation.subject, operation.range)}
   end
 
-  defp query(subject, from_commit, to_commit) do
+  defp query(subject, range) do
     """
     PREFIX og: <#{Og.__base_iri__()}>
     PREFIX rtc: <#{RTC.__base_iri__()}>
     CONSTRUCT { #{commit_statements_construct_pattern()} }
     WHERE {
-      <#{from_commit}> og:parentCommit* ?commit .
-      #{filter_commits(to_commit)}
+      <#{range.last}> og:parentCommit* ?commit .
+      #{filter_commits(range.first)}
       #{commit_statements_query_pattern(subject)}
     }
     """
@@ -24,8 +24,8 @@ defmodule Ontogen.Operations.HistoryQuery.Query do
 
   defp filter_commits(nil), do: ""
 
-  defp filter_commits(to_commit) do
-    "MINUS { <#{to_commit}> og:parentCommit* ?commit . }"
+  defp filter_commits(first_commit) do
+    "MINUS { <#{first_commit}> og:parentCommit* ?commit . }"
   end
 
   defp commit_statements_construct_pattern do

@@ -3,13 +3,12 @@ defmodule Ontogen.Operations.HistoryQuery do
     params: [
       subject_type: nil,
       subject: nil,
-      from_commit: nil,
-      to_commit: nil,
+      range: nil,
       history_type_opts: nil
     ]
 
   alias Ontogen.Operations.HistoryQuery.Query
-  alias Ontogen.{Store, Repository, HistoryType}
+  alias Ontogen.{Commit, Store, Repository, HistoryType}
   alias RDF.{Triple, Statement}
 
   import RDF.Guards
@@ -27,16 +26,13 @@ defmodule Ontogen.Operations.HistoryQuery do
   end
 
   def new(subject, args \\ []) do
-    {from_commit, args} = Keyword.pop(args, :from_commit)
-    {to_commit, args} = Keyword.pop(args, :to_commit)
-
-    with {:ok, subject_type, subject} <- normalize_subject(subject) do
+    with {:ok, subject_type, subject} <- normalize_subject(subject),
+         {:ok, range, args} <- Commit.Range.extract(args) do
       {:ok,
        %__MODULE__{
          subject_type: subject_type,
          subject: subject,
-         from_commit: from_commit,
-         to_commit: to_commit,
+         range: range,
          history_type_opts: args
        }}
     end
@@ -77,13 +73,9 @@ defmodule Ontogen.Operations.HistoryQuery do
     end
   end
 
-  defp finish_range(%__MODULE__{from_commit: nil} = operation, repository) do
-    if commit = Repository.head_id(repository) do
-      {:ok, %__MODULE__{operation | from_commit: commit}}
-    else
-      {:error, :no_head}
+  defp finish_range(%__MODULE__{} = operation, repository) do
+    with {:ok, absolute_range} <- Commit.Range.absolute(operation.range, repository) do
+      {:ok, %__MODULE__{operation | range: absolute_range}}
     end
   end
-
-  defp finish_range(%__MODULE__{} = operation, _), do: {:ok, operation}
 end

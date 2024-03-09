@@ -14,51 +14,45 @@ defmodule Ontogen.Operations.HistoryQueryTest do
       assert Ontogen.dataset_history() == {:ok, history}
     end
 
-    test "full native history up to certain commit" do
+    test "native history with a specified start commit" do
       [fourth, third, second, first] = history = init_history()
 
-      assert Ontogen.dataset_history(to_commit: first.__id__) == {:ok, Enum.slice(history, 0..2)}
-      assert Ontogen.dataset_history(to_commit: second.__id__) == {:ok, Enum.slice(history, 0..1)}
-      assert Ontogen.dataset_history(to_commit: third.__id__) == {:ok, Enum.slice(history, 0..0)}
-      assert Ontogen.dataset_history(to_commit: fourth.__id__) == {:ok, []}
+      assert Ontogen.dataset_history(first: first.__id__) == {:ok, Enum.slice(history, 0..2)}
+      assert Ontogen.dataset_history(first: second.__id__) == {:ok, Enum.slice(history, 0..1)}
+      assert Ontogen.dataset_history(first: third.__id__) == {:ok, Enum.slice(history, 0..0)}
+      assert Ontogen.dataset_history(first: fourth.__id__) == {:ok, []}
     end
 
-    test "full native history from a certain commit" do
+    test "native history with a specified end commit" do
       [fourth, third, second, first] = history = init_history()
 
-      assert Ontogen.dataset_history(from_commit: fourth.__id__) == {:ok, history}
-
-      assert Ontogen.dataset_history(from_commit: third.__id__) ==
-               {:ok, Enum.slice(history, 1..3)}
-
-      assert Ontogen.dataset_history(from_commit: second.__id__) ==
-               {:ok, Enum.slice(history, 2..3)}
-
-      assert Ontogen.dataset_history(from_commit: first.__id__) ==
-               {:ok, Enum.slice(history, 3..3)}
+      assert Ontogen.dataset_history(last: fourth.__id__) == {:ok, history}
+      assert Ontogen.dataset_history(last: third.__id__) == {:ok, Enum.slice(history, 1..3)}
+      assert Ontogen.dataset_history(last: second.__id__) == {:ok, Enum.slice(history, 2..3)}
+      assert Ontogen.dataset_history(last: first.__id__) == {:ok, Enum.slice(history, 3..3)}
     end
 
-    test "full native history from a certain commit to a certain commit" do
+    test "native history with a specified start and end commit" do
       [fourth, third, second, first] = history = init_history()
 
-      assert Ontogen.dataset_history(from_commit: fourth.__id__, to_commit: first.__id__) ==
+      assert Ontogen.dataset_history(first: first.__id__, last: fourth.__id__) ==
                {:ok, Enum.slice(history, 0..2)}
 
-      assert Ontogen.dataset_history(from_commit: third.__id__, to_commit: second.__id__) ==
+      assert Ontogen.dataset_history(first: second.__id__, last: third.__id__) ==
                {:ok, Enum.slice(history, 1..1)}
     end
 
-    test "when from_commit comes later than to_commit" do
+    test "when the specified end commit comes later than the start commit" do
       [fourth, third, second, first] = init_history()
 
-      assert Ontogen.dataset_history(from_commit: second.__id__, to_commit: third.__id__) ==
+      assert Ontogen.dataset_history(first: third.__id__, last: second.__id__) ==
                {:ok, []}
 
-      assert Ontogen.dataset_history(from_commit: first.__id__, to_commit: fourth.__id__) ==
+      assert Ontogen.dataset_history(first: fourth.__id__, last: first.__id__) ==
                {:ok, []}
     end
 
-    test "full raw history" do
+    test "raw history" do
       history = init_history()
 
       assert Ontogen.dataset_history(type: :raw) ==
@@ -111,57 +105,57 @@ defmodule Ontogen.Operations.HistoryQueryTest do
       assert Ontogen.resource_history(EX.S1) == {:ok, history}
     end
 
-    test "full native history up to certain commit" do
+    test "native history with a specified start commit" do
       [fourth, third, second, first] = history = init_resource_history()
 
-      assert Ontogen.resource_history(EX.S1, to_commit: first.__id__) ==
+      assert Ontogen.resource_history(EX.S1, first: first.__id__) ==
                {:ok, Enum.slice(history, 0..2)}
 
-      assert Ontogen.resource_history(EX.S1, to_commit: second.__id__) ==
+      assert Ontogen.resource_history(EX.S1, first: second.__id__) ==
                {:ok, Enum.slice(history, 0..1)}
 
-      assert Ontogen.resource_history(EX.S1, to_commit: third.__id__) ==
+      assert Ontogen.resource_history(EX.S1, first: third.__id__) ==
                {:ok, Enum.slice(history, 0..0)}
 
-      assert Ontogen.resource_history(EX.S1, to_commit: fourth.__id__) == {:ok, []}
+      assert Ontogen.resource_history(EX.S1, first: fourth.__id__) == {:ok, []}
     end
 
-    test "full native history from a certain commit" do
+    test "native history with a specified end commit" do
       [fourth, third, second, first] = history = init_resource_history()
 
-      assert Ontogen.resource_history(EX.S1, from_commit: fourth.__id__) == {:ok, history}
+      assert Ontogen.resource_history(EX.S1, last: fourth.__id__) == {:ok, history}
 
-      assert Ontogen.resource_history(EX.S1, from_commit: third.__id__) ==
+      assert Ontogen.resource_history(EX.S1, last: third.__id__) ==
                {:ok, Enum.slice(history, 1..3)}
 
-      assert Ontogen.resource_history(EX.S1, from_commit: second.__id__) ==
+      assert Ontogen.resource_history(EX.S1, last: second.__id__) ==
                {:ok, Enum.slice(history, 2..3)}
 
-      assert Ontogen.resource_history(EX.S1, from_commit: first.__id__) ==
+      assert Ontogen.resource_history(EX.S1, last: first.__id__) ==
                {:ok, Enum.slice(history, 3..3)}
     end
 
-    test "full native history from a certain commit to a certain commit" do
+    test "native history with a specified start and end commit" do
       [fourth, third, second, first] = history = init_resource_history()
 
-      assert Ontogen.resource_history(EX.S1, from_commit: fourth.__id__, to_commit: first.__id__) ==
+      assert Ontogen.resource_history(EX.S1, first: first.__id__, last: fourth.__id__) ==
                {:ok, Enum.slice(history, 0..2)}
 
-      assert Ontogen.resource_history(EX.S1, from_commit: third.__id__, to_commit: second.__id__) ==
+      assert Ontogen.resource_history(EX.S1, first: second.__id__, last: third.__id__) ==
                {:ok, Enum.slice(history, 1..1)}
     end
 
-    test "when from_commit comes later than to_commit" do
+    test "when the specified end commit comes later than the start commit" do
       [fourth, third, second, first] = init_resource_history()
 
-      assert Ontogen.resource_history(EX.S1, from_commit: second.__id__, to_commit: third.__id__) ==
+      assert Ontogen.resource_history(EX.S1, first: third.__id__, last: second.__id__) ==
                {:ok, []}
 
-      assert Ontogen.resource_history(EX.S1, from_commit: first.__id__, to_commit: fourth.__id__) ==
+      assert Ontogen.resource_history(EX.S1, first: fourth.__id__, last: first.__id__) ==
                {:ok, []}
     end
 
-    test "full raw history" do
+    test "raw history" do
       history = init_resource_history()
 
       assert Ontogen.resource_history(EX.S1, type: :raw) ==
@@ -225,71 +219,71 @@ defmodule Ontogen.Operations.HistoryQueryTest do
       assert Ontogen.statement_history(statement_of_interest()) == {:ok, history}
     end
 
-    test "full native history up to certain commit" do
+    test "native history with a specified start commit" do
       [third, second, first] = history = init_statement_history()
 
-      assert Ontogen.statement_history(statement_of_interest(), to_commit: first.__id__) ==
+      assert Ontogen.statement_history(statement_of_interest(), first: first.__id__) ==
                {:ok, Enum.slice(history, 0..1)}
 
-      assert Ontogen.statement_history(statement_of_interest(), to_commit: second.__id__) ==
+      assert Ontogen.statement_history(statement_of_interest(), first: second.__id__) ==
                {:ok, Enum.slice(history, 0..0)}
 
-      assert Ontogen.statement_history(statement_of_interest(), to_commit: third.__id__) ==
+      assert Ontogen.statement_history(statement_of_interest(), first: third.__id__) ==
                {:ok, []}
     end
 
-    test "full native history from a certain commit" do
+    test "native history with a specified end commit" do
       [third, second, first] = history = init_statement_history()
 
-      assert Ontogen.statement_history(statement_of_interest(), from_commit: third.__id__) ==
+      assert Ontogen.statement_history(statement_of_interest(), last: third.__id__) ==
                {:ok, history}
 
-      assert Ontogen.statement_history(statement_of_interest(), from_commit: second.__id__) ==
+      assert Ontogen.statement_history(statement_of_interest(), last: second.__id__) ==
                {:ok, Enum.slice(history, 1..2)}
 
-      assert Ontogen.statement_history(statement_of_interest(), from_commit: first.__id__) ==
+      assert Ontogen.statement_history(statement_of_interest(), last: first.__id__) ==
                {:ok, Enum.slice(history, 2..2)}
     end
 
-    test "full native history from a certain commit to a certain commit" do
+    test "native history with a specified start and end commit" do
       [third, second, first] = history = init_statement_history()
 
       assert Ontogen.statement_history(statement_of_interest(),
-               from_commit: third.__id__,
-               to_commit: third.__id__
+               first: third.__id__,
+               last: third.__id__
              ) ==
                {:ok, []}
 
       assert Ontogen.statement_history(statement_of_interest(),
-               from_commit: third.__id__,
-               to_commit: second.__id__
+               first: second.__id__,
+               last: third.__id__
              ) ==
                {:ok, Enum.slice(history, 0..0)}
 
       assert Ontogen.statement_history(statement_of_interest(),
-               from_commit: second.__id__,
-               to_commit: first.__id__
+               first: first.__id__,
+               last: second.__id__
              ) ==
                {:ok, Enum.slice(history, 1..1)}
     end
 
-    test "when from_commit comes later than to_commit" do
+    test "when the specified end commit comes later than the start commit" do
       [third, second, first] = init_statement_history()
 
       assert Ontogen.statement_history(statement_of_interest(),
-               from_commit: second.__id__,
-               to_commit: third.__id__
+               first: third.__id__,
+               last: second.__id__
              ) ==
                {:ok, []}
 
       assert Ontogen.statement_history(statement_of_interest(),
-               from_commit: first.__id__,
-               to_commit: second.__id__
+               first: second.__id__,
+               last: first.__id__
              ) ==
                {:ok, []}
     end
 
-    test "full raw history" do
+    test "raw history" do
       history = init_statement_history()
 
       assert Ontogen.statement_history(statement_of_interest(), type: :raw) ==
@@ -351,71 +345,71 @@ defmodule Ontogen.Operations.HistoryQueryTest do
       assert Ontogen.statement_history(predication_of_interest()) == {:ok, history}
     end
 
-    test "full native history up to certain commit" do
+    test "native history with a specified start commit" do
       [fourth, third, second, first] = history = init_predication_history()
 
-      assert Ontogen.statement_history(predication_of_interest(), to_commit: first.__id__) ==
+      assert Ontogen.statement_history(predication_of_interest(), first: first.__id__) ==
                {:ok, Enum.slice(history, 0..2)}
 
-      assert Ontogen.statement_history(predication_of_interest(), to_commit: second.__id__) ==
+      assert Ontogen.statement_history(predication_of_interest(), first: second.__id__) ==
                {:ok, Enum.slice(history, 0..1)}
 
-      assert Ontogen.statement_history(predication_of_interest(), to_commit: third.__id__) ==
+      assert Ontogen.statement_history(predication_of_interest(), first: third.__id__) ==
                {:ok, Enum.slice(history, 0..0)}
 
-      assert Ontogen.statement_history(predication_of_interest(), to_commit: fourth.__id__) ==
+      assert Ontogen.statement_history(predication_of_interest(), first: fourth.__id__) ==
                {:ok, []}
     end
 
-    test "full native history from a certain commit" do
+    test "native history with a specified end commit" do
       [fourth, third, second, first] = history = init_predication_history()
 
-      assert Ontogen.statement_history(predication_of_interest(), from_commit: fourth.__id__) ==
+      assert Ontogen.statement_history(predication_of_interest(), last: fourth.__id__) ==
                {:ok, history}
 
-      assert Ontogen.statement_history(predication_of_interest(), from_commit: third.__id__) ==
+      assert Ontogen.statement_history(predication_of_interest(), last: third.__id__) ==
                {:ok, Enum.slice(history, 1..3)}
 
-      assert Ontogen.statement_history(predication_of_interest(), from_commit: second.__id__) ==
+      assert Ontogen.statement_history(predication_of_interest(), last: second.__id__) ==
                {:ok, Enum.slice(history, 2..3)}
 
-      assert Ontogen.statement_history(predication_of_interest(), from_commit: first.__id__) ==
+      assert Ontogen.statement_history(predication_of_interest(), last: first.__id__) ==
                {:ok, Enum.slice(history, 3..3)}
     end
 
-    test "full native history from a certain commit to a certain commit" do
+    test "native history with a specified start and end commit" do
       [fourth, third, second, first] = history = init_predication_history()
 
       assert Ontogen.statement_history(predication_of_interest(),
-               from_commit: fourth.__id__,
-               to_commit: first.__id__
+               first: first.__id__,
+               last: fourth.__id__
              ) ==
                {:ok, Enum.slice(history, 0..2)}
 
       assert Ontogen.statement_history(predication_of_interest(),
-               from_commit: third.__id__,
-               to_commit: second.__id__
+               first: second.__id__,
+               last: third.__id__
              ) ==
                {:ok, Enum.slice(history, 1..1)}
     end
 
-    test "when from_commit comes later than to_commit" do
+    test "when the specified end commit comes later than the start commit" do
       [fourth, third, second, first] = init_predication_history()
 
       assert Ontogen.statement_history(predication_of_interest(),
-               from_commit: second.__id__,
-               to_commit: third.__id__
+               first: third.__id__,
+               last: second.__id__
              ) ==
                {:ok, []}
 
       assert Ontogen.statement_history(predication_of_interest(),
-               from_commit: first.__id__,
-               to_commit: fourth.__id__
+               first: fourth.__id__,
+               last: first.__id__
              ) ==
                {:ok, []}
     end
 
-    test "full raw history" do
+    test "raw history" do
       history = init_predication_history()
 
       assert Ontogen.statement_history(predication_of_interest(), type: :raw) ==
