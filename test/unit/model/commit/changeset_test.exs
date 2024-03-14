@@ -125,90 +125,90 @@ defmodule Ontogen.Commit.ChangesetTest do
     test "single add" do
       assert [
                add: statement(1),
-               remove: statements([2, 6]),
-               update: statement(3),
-               replace: statement(4),
-               overwrite: statement(5)
+               # an add overlapping with an update never happens effectively
+               update: nil,
+               # an add overlapping with a replace never happens effectively
+               replace: nil,
+               remove: statements([2, 4]),
+               overwrite: statement(3)
              ]
-             |> Changeset.merge(add: statements([1, 2, 3, 4, 5])) ==
+             |> Changeset.merge(add: statements([2, 3, 5])) ==
                Changeset.new!(
-                 add: graph([1, 2, 5]),
-                 remove: graph([6]),
-                 update: graph([3]),
-                 replace: graph([4]),
+                 add: graph([1, 5]),
+                 remove: graph([4]),
                  overwrite: nil
                )
     end
 
     test "single update" do
       assert [
-               add: statements([1, 6]),
-               remove: statement(2),
-               update: statement(3),
-               replace: statement(4),
-               overwrite: statement(5)
+               # an update overlapping with an add never happens effectively
+               add: nil,
+               update: statement(1),
+               # an update overlapping with a replace never happens effectively
+               replace: nil,
+               remove: statements([2, 4]),
+               overwrite: statement(3)
              ]
-             |> Changeset.merge(update: statements([1, 2, 3, 4, 5])) ==
+             |> Changeset.merge(update: statements([2, 3, 5])) ==
                Changeset.new!(
-                 add: graph([6]),
-                 remove: nil,
-                 update: graph([1, 2, 3, 5]),
-                 replace: graph([4]),
+                 update: graph([1, 5]),
+                 remove: graph([4]),
                  overwrite: nil
                )
     end
 
     test "single replace" do
       assert [
-               add: statement(1),
-               remove: statement(2),
-               update: statements([3, 6]),
-               replace: statement(4),
-               overwrite: statement(5)
+               # a replace overlapping with an add never happens effectively
+               add: nil,
+               # a replace overlapping with an update never happens effectively
+               update: nil,
+               replace: statement(1),
+               remove: statements([2, 4]),
+               overwrite: statement(3)
              ]
-             |> Changeset.merge(replace: statements([1, 2, 3, 4, 5])) ==
+             |> Changeset.merge(replace: statements([2, 3, 5])) ==
                Changeset.new!(
-                 add: nil,
-                 remove: nil,
-                 update: graph([6]),
-                 replace: graph([1, 2, 3, 4, 5]),
+                 replace: graph([1, 5]),
+                 remove: graph([4]),
                  overwrite: nil
                )
     end
 
     test "single remove" do
       assert [
-               add: statements([1, 6]),
-               remove: statement(2),
-               update: statement(3),
-               replace: statement(4),
-               overwrite: statement(5)
+               add: statements([1, 5]),
+               update: statement(2),
+               replace: statement(3),
+               remove: statement(4),
+               # a remove overlapping with an overwrite never happens effectively
+               overwrite: nil
              ]
-             |> Changeset.merge(remove: statements([1, 2, 3, 4, 5])) ==
+             |> Changeset.merge(remove: statements([1, 2, 3, 6])) ==
                Changeset.new!(
-                 add: graph([6]),
-                 remove: graph([1, 2, 5, 3, 4]),
+                 add: graph([5]),
                  update: nil,
                  replace: nil,
-                 overwrite: nil
+                 remove: graph([4, 6])
                )
     end
 
     test "single overwrite" do
       assert [
                add: statement(1),
-               remove: statement(2),
-               update: statement(3),
-               replace: statement(4),
-               overwrite: statement(5)
+               update: statements([2, 5]),
+               replace: statements([3, 6]),
+               # a remove overlapping with an overwrite never happens effectively
+               remove: nil,
+               overwrite: nil
              ]
-             |> Changeset.merge(overwrite: statements([1, 2, 3, 4, 5])) ==
+             |> Changeset.merge(overwrite: statements([1, 2, 3])) ==
                Changeset.new!(
                  add: nil,
-                 remove: nil,
-                 update: nil,
-                 replace: nil,
-                 overwrite: graph([1, 2, 5, 3, 4])
+                 update: graph([5]),
+                 replace: graph([6]),
+                 overwrite: nil
                )
     end
 
@@ -250,480 +250,14 @@ defmodule Ontogen.Commit.ChangesetTest do
                Changeset.new!(changeset)
     end
 
-    test "add overlap resolution" do
-      assert [
-               add: [
-                 {EX.s1_1(), EX.p1_1(), EX.o1_1()},
-                 {EX.add_remove_overlap(), EX.p(), EX.o()},
-                 {EX.add_update_overlap(), EX.p(), EX.o()},
-                 {EX.add_replace_overlap(), EX.p(), EX.o()},
-                 {EX.add_overwrite_overlap(), EX.p(), EX.o()}
-               ],
-               remove: [
-                 {EX.s2_1(), EX.p2_1(), EX.o2_1()},
-                 {EX.s(), EX.remove_add_overlap(), EX.o()}
-               ],
-               update: [
-                 {EX.s3_1(), EX.p3_1(), EX.o3_1()},
-                 {EX.s(), EX.p(), EX.update_add_overlap()}
-               ],
-               replace: [
-                 {EX.s4_1(), EX.p4_1(), EX.o4_1()},
-                 {EX.replace_add_overlap(), EX.p(), EX.o()}
-               ],
-               overwrite: [
-                 {EX.s5_1(), EX.p5_1(), EX.o5_1()},
-                 {EX.s(), EX.p(), EX.overwrite_add_overlap()}
-               ]
-             ]
-             |> Changeset.merge(
-               add: [
-                 {EX.s1_1(), EX.p1_1(), EX.o1_1()},
-                 {EX.s1_2(), EX.p1_2(), EX.o1_2()},
-                 {EX.s(), EX.remove_add_overlap(), EX.o()},
-                 {EX.s(), EX.p(), EX.update_add_overlap()},
-                 {EX.replace_add_overlap(), EX.p(), EX.o()},
-                 {EX.s(), EX.p(), EX.overwrite_add_overlap()}
-               ],
-               remove: [
-                 {EX.s2_1(), EX.p2_1(), EX.o2_1()},
-                 {EX.s2_2(), EX.p2_2(), EX.o2_2()},
-                 {EX.add_remove_overlap(), EX.p(), EX.o()}
-               ],
-               update: [
-                 {EX.s3_1(), EX.p3_1(), EX.o3_1()},
-                 {EX.s3_2(), EX.p3_2(), EX.o3_2()},
-                 {EX.add_update_overlap(), EX.p(), EX.o()}
-               ],
-               replace: [
-                 {EX.s4_1(), EX.p4_1(), EX.o4_1()},
-                 {EX.s4_2(), EX.p4_2(), EX.o4_2()},
-                 {EX.add_replace_overlap(), EX.p(), EX.o()}
-               ],
-               overwrite: [
-                 {EX.s5_1(), EX.p5_1(), EX.o5_1()},
-                 {EX.s5_2(), EX.p5_2(), EX.o5_2()},
-                 {EX.add_overwrite_overlap(), EX.p(), EX.o()}
-               ]
-             ) ==
-               %Changeset{
-                 add:
-                   RDF.graph([
-                     {EX.s1_1(), EX.p1_1(), EX.o1_1()},
-                     {EX.s1_2(), EX.p1_2(), EX.o1_2()},
-                     {EX.s(), EX.remove_add_overlap(), EX.o()},
-                     {EX.s(), EX.p(), EX.overwrite_add_overlap()}
-                   ]),
-                 remove:
-                   RDF.graph([
-                     {EX.s2_1(), EX.p2_1(), EX.o2_1()},
-                     {EX.s2_2(), EX.p2_2(), EX.o2_2()},
-                     {EX.add_remove_overlap(), EX.p(), EX.o()}
-                   ]),
-                 update:
-                   RDF.graph([
-                     {EX.s3_1(), EX.p3_1(), EX.o3_1()},
-                     {EX.s3_2(), EX.p3_2(), EX.o3_2()},
-                     {EX.add_update_overlap(), EX.p(), EX.o()},
-                     {EX.s(), EX.p(), EX.update_add_overlap()}
-                   ]),
-                 replace:
-                   RDF.graph([
-                     {EX.s4_1(), EX.p4_1(), EX.o4_1()},
-                     {EX.s4_2(), EX.p4_2(), EX.o4_2()},
-                     {EX.add_replace_overlap(), EX.p(), EX.o()},
-                     {EX.replace_add_overlap(), EX.p(), EX.o()}
-                   ]),
-                 overwrite:
-                   RDF.graph([
-                     {EX.s5_1(), EX.p5_1(), EX.o5_1()},
-                     {EX.s5_2(), EX.p5_2(), EX.o5_2()},
-                     {EX.add_overwrite_overlap(), EX.p(), EX.o()}
-                   ])
-               }
-    end
-
-    test "update overlap resolution" do
-      assert [
-               add: [
-                 {EX.s1_1(), EX.p1_1(), EX.o1_1()},
-                 {EX.add_update_overlap(), EX.p(), EX.o()}
-               ],
-               remove: [
-                 {EX.s2_1(), EX.p2_1(), EX.o2_1()},
-                 {EX.s2(), EX.remove_update_overlap(), EX.o()}
-               ],
-               update: [
-                 {EX.s3_1(), EX.p3_1(), EX.o3_1()},
-                 {EX.s1(), EX.p1(), EX.update_add_overlap()},
-                 {EX.s2(), EX.p2(), EX.update_remove_overlap()},
-                 {EX.s4(), EX.p4(), EX.update_replace_overlap()},
-                 {EX.s5(), EX.p5(), EX.update_overwrite_overlap()}
-               ],
-               replace: [
-                 {EX.s4_1(), EX.p4_1(), EX.o4_1()},
-                 {EX.replace_update_overlap(), EX.p(), EX.o()}
-               ],
-               overwrite: [
-                 {EX.s5_1(), EX.p5_1(), EX.o5_1()},
-                 {EX.s3(), EX.p3(), EX.overwrite_update_overlap()}
-               ]
-             ]
-             |> Changeset.merge(
-               add: [
-                 {EX.s1_1(), EX.p1_1(), EX.o1_1()},
-                 {EX.s1_2(), EX.p1_2(), EX.o1_2()},
-                 {EX.s1(), EX.p1(), EX.update_add_overlap()}
-               ],
-               remove: [
-                 {EX.s2_1(), EX.p2_1(), EX.o2_1()},
-                 {EX.s2_2(), EX.p2_2(), EX.o2_2()},
-                 {EX.s2(), EX.p2(), EX.update_remove_overlap()}
-               ],
-               update: [
-                 {EX.s3_1(), EX.p3_1(), EX.o3_1()},
-                 {EX.s3_2(), EX.p3_2(), EX.o3_2()},
-                 {EX.add_update_overlap(), EX.p(), EX.o()},
-                 {EX.s2(), EX.remove_update_overlap(), EX.o()},
-                 {EX.replace_update_overlap(), EX.p(), EX.o()},
-                 {EX.s3(), EX.p3(), EX.overwrite_update_overlap()}
-               ],
-               replace: [
-                 {EX.s4_1(), EX.p4_1(), EX.o4_1()},
-                 {EX.s4_2(), EX.p4_2(), EX.o4_2()},
-                 {EX.s4(), EX.p4(), EX.update_replace_overlap()}
-               ],
-               overwrite: [
-                 {EX.s5_1(), EX.p5_1(), EX.o5_1()},
-                 {EX.s5_2(), EX.p5_2(), EX.o5_2()},
-                 {EX.s5(), EX.p5(), EX.update_overwrite_overlap()}
-               ]
-             ) ==
-               Changeset.new!(
-                 add:
-                   RDF.graph([
-                     {EX.s1_1(), EX.p1_1(), EX.o1_1()},
-                     {EX.s1_2(), EX.p1_2(), EX.o1_2()}
-                   ]),
-                 remove:
-                   RDF.graph([
-                     {EX.s2_1(), EX.p2_1(), EX.o2_1()},
-                     {EX.s2_2(), EX.p2_2(), EX.o2_2()},
-                     {EX.s2(), EX.p2(), EX.update_remove_overlap()}
-                   ]),
-                 update:
-                   RDF.graph([
-                     {EX.s3_1(), EX.p3_1(), EX.o3_1()},
-                     {EX.s3_2(), EX.p3_2(), EX.o3_2()},
-                     {EX.add_update_overlap(), EX.p(), EX.o()},
-                     {EX.s2(), EX.remove_update_overlap(), EX.o()},
-                     {EX.s3(), EX.p3(), EX.overwrite_update_overlap()},
-                     {EX.s1(), EX.p1(), EX.update_add_overlap()}
-                   ]),
-                 replace:
-                   RDF.graph([
-                     {EX.s4_1(), EX.p4_1(), EX.o4_1()},
-                     {EX.s4_2(), EX.p4_2(), EX.o4_2()},
-                     {EX.s4(), EX.p4(), EX.update_replace_overlap()},
-                     {EX.replace_update_overlap(), EX.p(), EX.o()}
-                   ]),
-                 overwrite:
-                   RDF.graph([
-                     {EX.s5_1(), EX.p5_1(), EX.o5_1()},
-                     {EX.s5_2(), EX.p5_2(), EX.o5_2()},
-                     {EX.s5(), EX.p5(), EX.update_overwrite_overlap()}
-                   ])
-               )
-    end
-
-    test "replace overlap resolution" do
-      assert [
-               add: [
-                 {EX.s1_1(), EX.p1_1(), EX.o1_1()},
-                 {EX.add_replace_overlap(), EX.p(), EX.o()}
-               ],
-               remove: [
-                 {EX.s2_1(), EX.p2_1(), EX.o2_1()},
-                 {EX.s(), EX.remove_replace_overlap(), EX.o()}
-               ],
-               update: [
-                 {EX.s3_1(), EX.p3_1(), EX.o3_1()},
-                 {EX.s(), EX.p(), EX.update_replace_overlap()}
-               ],
-               replace: [
-                 {EX.s4_1(), EX.p4_1(), EX.o4_1()},
-                 {EX.replace_add_overlap(), EX.p(), EX.o()},
-                 {EX.replace_remove_overlap(), EX.p(), EX.o()},
-                 {EX.replace_update_overlap(), EX.p(), EX.o()},
-                 {EX.replace_overwrite_overlap(), EX.p(), EX.o()}
-               ],
-               overwrite: [
-                 {EX.s5_1(), EX.p5_1(), EX.o5_1()},
-                 {EX.s(), EX.p(), EX.overwrite_replace_overlap()}
-               ]
-             ]
-             |> Changeset.merge(
-               add: [
-                 {EX.s1_1(), EX.p1_1(), EX.o1_1()},
-                 {EX.s1_2(), EX.p1_2(), EX.o1_2()},
-                 {EX.replace_add_overlap(), EX.p(), EX.o()}
-               ],
-               remove: [
-                 {EX.s2_1(), EX.p2_1(), EX.o2_1()},
-                 {EX.s2_2(), EX.p2_2(), EX.o2_2()},
-                 {EX.replace_remove_overlap(), EX.p(), EX.o()}
-               ],
-               update: [
-                 {EX.s3_1(), EX.p3_1(), EX.o3_1()},
-                 {EX.s3_2(), EX.p3_2(), EX.o3_2()},
-                 {EX.replace_update_overlap(), EX.p(), EX.o()}
-               ],
-               replace: [
-                 {EX.s4_1(), EX.p4_1(), EX.o4_1()},
-                 {EX.s4_2(), EX.p4_2(), EX.o4_2()},
-                 {EX.add_replace_overlap(), EX.p(), EX.o()},
-                 {EX.s(), EX.remove_replace_overlap(), EX.o()},
-                 {EX.s(), EX.p(), EX.update_replace_overlap()},
-                 {EX.s(), EX.p(), EX.overwrite_replace_overlap()}
-               ],
-               overwrite: [
-                 {EX.s5_1(), EX.p5_1(), EX.o5_1()},
-                 {EX.s5_2(), EX.p5_2(), EX.o5_2()},
-                 {EX.replace_overwrite_overlap(), EX.p(), EX.o()}
-               ]
-             ) ==
-               Changeset.new!(
-                 add:
-                   RDF.graph([
-                     {EX.s1_1(), EX.p1_1(), EX.o1_1()},
-                     {EX.s1_2(), EX.p1_2(), EX.o1_2()}
-                   ]),
-                 remove:
-                   RDF.graph([
-                     {EX.s2_1(), EX.p2_1(), EX.o2_1()},
-                     {EX.s2_2(), EX.p2_2(), EX.o2_2()},
-                     {EX.replace_remove_overlap(), EX.p(), EX.o()}
-                   ]),
-                 update:
-                   RDF.graph([
-                     {EX.s3_1(), EX.p3_1(), EX.o3_1()},
-                     {EX.s3_2(), EX.p3_2(), EX.o3_2()}
-                   ]),
-                 replace:
-                   RDF.graph([
-                     {EX.s4_1(), EX.p4_1(), EX.o4_1()},
-                     {EX.s4_2(), EX.p4_2(), EX.o4_2()},
-                     {EX.add_replace_overlap(), EX.p(), EX.o()},
-                     {EX.s(), EX.remove_replace_overlap(), EX.o()},
-                     {EX.s(), EX.p(), EX.update_replace_overlap()},
-                     {EX.s(), EX.p(), EX.overwrite_replace_overlap()},
-                     {EX.replace_add_overlap(), EX.p(), EX.o()},
-                     {EX.replace_update_overlap(), EX.p(), EX.o()}
-                   ]),
-                 overwrite:
-                   RDF.graph([
-                     {EX.s5_1(), EX.p5_1(), EX.o5_1()},
-                     {EX.s5_2(), EX.p5_2(), EX.o5_2()},
-                     {EX.replace_overwrite_overlap(), EX.p(), EX.o()}
-                   ])
-               )
-    end
-
-    test "remove overlap resolution" do
-      assert [
-               add: [
-                 {EX.s1_1(), EX.p1_1(), EX.o1_1()},
-                 {EX.add_remove_overlap(), EX.p(), EX.o()}
-               ],
-               remove: [
-                 {EX.s2_1(), EX.p2_1(), EX.o2_1()},
-                 {EX.s1(), EX.remove_add_overlap(), EX.o()},
-                 {EX.s3(), EX.remove_update_overlap(), EX.o()},
-                 {EX.s4(), EX.remove_replace_overlap(), EX.o()},
-                 {EX.s5(), EX.remove_overwrite_overlap(), EX.o()}
-               ],
-               update: [
-                 {EX.s3_1(), EX.p3_1(), EX.o3_1()},
-                 {EX.s(), EX.p(), EX.update_remove_overlap()}
-               ],
-               replace: [
-                 {EX.s4_1(), EX.p4_1(), EX.o4_1()},
-                 {EX.replace_remove_overlap(), EX.p(), EX.o()}
-               ],
-               overwrite: [
-                 {EX.s5_1(), EX.p5_1(), EX.o5_1()},
-                 {EX.s(), EX.p(), EX.overwrite_remove_overlap()}
-               ]
-             ]
-             |> Changeset.merge(
-               add: [
-                 {EX.s1_1(), EX.p1_1(), EX.o1_1()},
-                 {EX.s1_2(), EX.p1_2(), EX.o1_2()},
-                 {EX.s1(), EX.remove_add_overlap(), EX.o()}
-               ],
-               remove: [
-                 {EX.s2_1(), EX.p2_1(), EX.o2_1()},
-                 {EX.s2_2(), EX.p2_2(), EX.o2_2()},
-                 {EX.add_remove_overlap(), EX.p(), EX.o()},
-                 {EX.s(), EX.p(), EX.update_remove_overlap()},
-                 {EX.replace_remove_overlap(), EX.p(), EX.o()},
-                 {EX.s(), EX.p(), EX.overwrite_remove_overlap()}
-               ],
-               update: [
-                 {EX.s3_1(), EX.p3_1(), EX.o3_1()},
-                 {EX.s3_2(), EX.p3_2(), EX.o3_2()},
-                 {EX.s3(), EX.remove_update_overlap(), EX.o()}
-               ],
-               replace: [
-                 {EX.s4_1(), EX.p4_1(), EX.o4_1()},
-                 {EX.s4_2(), EX.p4_2(), EX.o4_2()},
-                 {EX.s4(), EX.remove_replace_overlap(), EX.o()}
-               ],
-               overwrite: [
-                 {EX.s5_1(), EX.p5_1(), EX.o5_1()},
-                 {EX.s5_2(), EX.p5_2(), EX.o5_2()},
-                 {EX.s5(), EX.remove_overwrite_overlap(), EX.o()}
-               ]
-             ) ==
-               Changeset.new!(
-                 add:
-                   RDF.graph([
-                     {EX.s1_1(), EX.p1_1(), EX.o1_1()},
-                     {EX.s1_2(), EX.p1_2(), EX.o1_2()},
-                     {EX.s1(), EX.remove_add_overlap(), EX.o()}
-                   ]),
-                 remove:
-                   RDF.graph([
-                     {EX.s2_1(), EX.p2_1(), EX.o2_1()},
-                     {EX.s2_2(), EX.p2_2(), EX.o2_2()},
-                     {EX.add_remove_overlap(), EX.p(), EX.o()},
-                     {EX.s(), EX.p(), EX.update_remove_overlap()},
-                     {EX.replace_remove_overlap(), EX.p(), EX.o()},
-                     {EX.s(), EX.p(), EX.overwrite_remove_overlap()}
-                     #                     {EX.s5(), EX.remove_overwrite_overlap(), EX.o()}
-                   ]),
-                 update:
-                   RDF.graph([
-                     {EX.s3_1(), EX.p3_1(), EX.o3_1()},
-                     {EX.s3_2(), EX.p3_2(), EX.o3_2()},
-                     {EX.s3(), EX.remove_update_overlap(), EX.o()}
-                   ]),
-                 replace:
-                   RDF.graph([
-                     {EX.s4_1(), EX.p4_1(), EX.o4_1()},
-                     {EX.s4_2(), EX.p4_2(), EX.o4_2()},
-                     {EX.s4(), EX.remove_replace_overlap(), EX.o()}
-                   ]),
-                 overwrite:
-                   RDF.graph([
-                     {EX.s5_1(), EX.p5_1(), EX.o5_1()},
-                     {EX.s5_2(), EX.p5_2(), EX.o5_2()},
-                     {EX.s5(), EX.remove_overwrite_overlap(), EX.o()}
-                   ])
-               )
-    end
-
-    test "overwrite overlap resolution" do
-      assert [
-               add: [
-                 {EX.s1_1(), EX.p1_1(), EX.o1_1()},
-                 {EX.add_overwrite_overlap(), EX.p(), EX.o()}
-               ],
-               remove: [
-                 {EX.s2_1(), EX.p2_1(), EX.o2_1()},
-                 {EX.s2(), EX.remove_overwrite_overlap(), EX.o()}
-               ],
-               update: [
-                 {EX.s3_1(), EX.p3_1(), EX.o3_1()},
-                 {EX.s3(), EX.p3(), EX.update_overwrite_overlap()}
-               ],
-               replace: [
-                 {EX.s4_1(), EX.p4_1(), EX.o4_1()},
-                 {EX.replace_overwrite_overlap(), EX.p(), EX.o()}
-               ],
-               overwrite: [
-                 {EX.s5_1(), EX.p5_1(), EX.o5_1()},
-                 {EX.s1(), EX.p1(), EX.overwrite_add_overlap()},
-                 {EX.s2(), EX.p2(), EX.overwrite_remove_overlap()},
-                 {EX.s3(), EX.p3(), EX.overwrite_update_overlap()},
-                 {EX.s4(), EX.p4(), EX.overwrite_replace_overlap()}
-               ]
-             ]
-             |> Changeset.merge(
-               add: [
-                 {EX.s1_1(), EX.p1_1(), EX.o1_1()},
-                 {EX.s1_2(), EX.p1_2(), EX.o1_2()},
-                 {EX.s1(), EX.p1(), EX.overwrite_add_overlap()}
-               ],
-               remove: [
-                 {EX.s2_1(), EX.p2_1(), EX.o2_1()},
-                 {EX.s2_2(), EX.p2_2(), EX.o2_2()},
-                 {EX.s2(), EX.p2(), EX.overwrite_remove_overlap()}
-               ],
-               update: [
-                 {EX.s3_1(), EX.p3_1(), EX.o3_1()},
-                 {EX.s3_2(), EX.p3_2(), EX.o3_2()},
-                 {EX.s3(), EX.p3(), EX.overwrite_update_overlap()}
-               ],
-               replace: [
-                 {EX.s4_1(), EX.p4_1(), EX.o4_1()},
-                 {EX.s4_2(), EX.p4_2(), EX.o4_2()},
-                 {EX.s4(), EX.p4(), EX.overwrite_replace_overlap()}
-               ],
-               overwrite: [
-                 {EX.s5_1(), EX.p5_1(), EX.o5_1()},
-                 {EX.s5_2(), EX.p5_2(), EX.o5_2()},
-                 {EX.add_overwrite_overlap(), EX.p(), EX.o()},
-                 {EX.s2(), EX.remove_overwrite_overlap(), EX.o()},
-                 {EX.s3(), EX.p3(), EX.update_overwrite_overlap()},
-                 {EX.replace_overwrite_overlap(), EX.p(), EX.o()}
-               ]
-             ) ==
-               Changeset.new!(
-                 add:
-                   RDF.graph([
-                     {EX.s1_1(), EX.p1_1(), EX.o1_1()},
-                     {EX.s1_2(), EX.p1_2(), EX.o1_2()},
-                     {EX.s1(), EX.p1(), EX.overwrite_add_overlap()}
-                   ]),
-                 remove:
-                   RDF.graph([
-                     {EX.s2_1(), EX.p2_1(), EX.o2_1()},
-                     {EX.s2_2(), EX.p2_2(), EX.o2_2()},
-                     {EX.s2(), EX.p2(), EX.overwrite_remove_overlap()}
-                   ]),
-                 update:
-                   RDF.graph([
-                     {EX.s3_1(), EX.p3_1(), EX.o3_1()},
-                     {EX.s3_2(), EX.p3_2(), EX.o3_2()},
-                     {EX.s3(), EX.p3(), EX.overwrite_update_overlap()}
-                   ]),
-                 replace:
-                   RDF.graph([
-                     {EX.s4_1(), EX.p4_1(), EX.o4_1()},
-                     {EX.s4_2(), EX.p4_2(), EX.o4_2()},
-                     {EX.s4(), EX.p4(), EX.overwrite_replace_overlap()}
-                   ]),
-                 overwrite:
-                   RDF.graph([
-                     {EX.s5_1(), EX.p5_1(), EX.o5_1()},
-                     {EX.s5_2(), EX.p5_2(), EX.o5_2()},
-                     {EX.add_overwrite_overlap(), EX.p(), EX.o()},
-                     {EX.s2(), EX.remove_overwrite_overlap(), EX.o()},
-                     {EX.s3(), EX.p3(), EX.update_overwrite_overlap()},
-                     {EX.replace_overwrite_overlap(), EX.p(), EX.o()}
-                   ])
-               )
-    end
-
-    test "empty elements in commits" do
+    test "empty results" do
       assert [add: statement(1)]
              |> Changeset.merge(remove: statement(1)) ==
-               Changeset.new!(remove: statement(1))
+               Changeset.empty()
 
       assert [remove: statement(1)]
              |> Changeset.merge(add: statement(1)) ==
-               Changeset.new!(add: statement(1))
+               Changeset.empty()
     end
   end
 
@@ -749,6 +283,16 @@ defmodule Ontogen.Commit.ChangesetTest do
                [add: statement(1)]
              ]) ==
                Changeset.new!(add: statement(1))
+    end
+
+    test "four element list" do
+      assert Changeset.merge([
+               [add: EX.S1 |> EX.p1(EX.O1)],
+               [remove: EX.S1 |> EX.p1(EX.O1)],
+               [add: EX.S1 |> EX.p4(EX.O4)],
+               [replace: EX.S1 |> EX.p2(EX.O2), overwrite: EX.S1 |> EX.p4(EX.O4)]
+             ]) ==
+               Changeset.new!(replace: EX.S1 |> EX.p2(EX.O2))
     end
   end
 end

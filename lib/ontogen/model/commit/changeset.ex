@@ -17,6 +17,12 @@ defmodule Ontogen.Commit.Changeset do
         }
 
   @doc """
+  Creates the empty changeset.
+  """
+  @spec empty :: t()
+  def empty, do: %__MODULE__{}
+
+  @doc """
   Creates a new valid changeset.
   """
   @spec new(t() | Commit.t() | keyword) :: {:ok, t()} | {:error, any()}
@@ -82,11 +88,19 @@ defmodule Ontogen.Commit.Changeset do
     Validation.validate(changeset)
   end
 
+  @doc """
+  Returns if the given changeset is empty.
+  """
+  def empty?(%__MODULE__{add: nil, update: nil, replace: nil, remove: nil, overwrite: nil}),
+    do: true
+
+  def empty?(%__MODULE__{}), do: false
+
   @merge_limitations_warning """
   > #### Warning {: .warning}
   >
   > This function is used internally to collapse the changes of multiple consecutive
-  > commits from a commit sequence into one and relies on the fact that these consist
+  > commits from a commit sequence into one and relies on the fact that these consist of
   > complete effective changes incl. overwrites, which might lead to surprising results
   > and limits its general applicability. E.g. a single merged `replace` does not
   > remove the statements with only matching subjects from the other actions, but only
@@ -129,17 +143,20 @@ defmodule Ontogen.Commit.Changeset do
     add = to_graph(add)
 
     if add && not Graph.empty?(add) do
+      neutralized_removals = graph_intersection(changeset.remove, add)
+      neutralized_overwrites = graph_intersection(changeset.overwrite, add)
+
       %__MODULE__{
         changeset
         | add:
             graph_add(
               changeset.add,
               add
-              |> Graph.delete(changeset.update || [])
-              |> Graph.delete(changeset.replace || [])
+              |> graph_delete(neutralized_removals)
+              |> graph_delete(neutralized_overwrites)
             ),
-          remove: graph_delete(changeset.remove, add),
-          overwrite: graph_delete(changeset.overwrite, add)
+          remove: graph_delete(changeset.remove, neutralized_removals),
+          overwrite: graph_delete(changeset.overwrite, neutralized_overwrites)
       }
     else
       changeset
@@ -150,19 +167,20 @@ defmodule Ontogen.Commit.Changeset do
     update = to_graph(update)
 
     if update && not Graph.empty?(update) do
-      # We don't need to consider the special update semantics here, since we rely on complete
-      # commit changes, which include all overwritten statements in the overwrite graph.
+      neutralized_removals = graph_intersection(changeset.remove, update)
+      neutralized_overwrites = graph_intersection(changeset.overwrite, update)
+
       %__MODULE__{
         changeset
-        | add: graph_delete(changeset.add, update),
-          update:
+        | update:
             graph_add(
               changeset.update,
               update
-              |> Graph.delete(changeset.replace || [])
+              |> graph_delete(neutralized_removals)
+              |> graph_delete(neutralized_overwrites)
             ),
-          remove: graph_delete(changeset.remove, update),
-          overwrite: graph_delete(changeset.overwrite, update)
+          remove: graph_delete(changeset.remove, neutralized_removals),
+          overwrite: graph_delete(changeset.overwrite, neutralized_overwrites)
       }
     else
       changeset
@@ -173,15 +191,20 @@ defmodule Ontogen.Commit.Changeset do
     replace = to_graph(replace)
 
     if replace && not Graph.empty?(replace) do
-      # We don't need to consider the special replace semantics here, since we rely on complete
-      # commit changes, which include all overwritten statements in the overwrite graph.
+      neutralized_removals = graph_intersection(changeset.remove, replace)
+      neutralized_overwrites = graph_intersection(changeset.overwrite, replace)
+
       %__MODULE__{
         changeset
-        | add: graph_delete(changeset.add, replace),
-          update: graph_delete(changeset.update, replace),
-          replace: graph_add(changeset.replace, replace),
-          remove: graph_delete(changeset.remove, replace),
-          overwrite: graph_delete(changeset.overwrite, replace)
+        | replace:
+            graph_add(
+              changeset.replace,
+              replace
+              |> graph_delete(neutralized_removals)
+              |> graph_delete(neutralized_overwrites)
+            ),
+          remove: graph_delete(changeset.remove, neutralized_removals),
+          overwrite: graph_delete(changeset.overwrite, neutralized_overwrites)
       }
     else
       changeset
@@ -192,13 +215,23 @@ defmodule Ontogen.Commit.Changeset do
     remove = to_graph(remove)
 
     if remove && not Graph.empty?(remove) do
+      neutralized_adds = graph_intersection(changeset.add, remove)
+      neutralized_updates = graph_intersection(changeset.update, remove)
+      neutralized_replaces = graph_intersection(changeset.replace, remove)
+
       %__MODULE__{
         changeset
-        | add: graph_delete(changeset.add, remove),
-          update: graph_delete(changeset.update, remove),
-          replace: graph_delete(changeset.replace, remove),
-          remove: graph_add(changeset.remove, remove),
-          overwrite: graph_delete(changeset.overwrite, remove)
+        | add: graph_delete(changeset.add, neutralized_adds),
+          update: graph_delete(changeset.update, neutralized_updates),
+          replace: graph_delete(changeset.replace, neutralized_replaces),
+          remove:
+            graph_add(
+              changeset.remove,
+              remove
+              |> graph_delete(neutralized_adds)
+              |> graph_delete(neutralized_updates)
+              |> graph_delete(neutralized_replaces)
+            )
       }
     else
       changeset
@@ -209,13 +242,23 @@ defmodule Ontogen.Commit.Changeset do
     overwrite = to_graph(overwrite)
 
     if overwrite && not Graph.empty?(overwrite) do
+      neutralized_adds = graph_intersection(changeset.add, overwrite)
+      neutralized_updates = graph_intersection(changeset.update, overwrite)
+      neutralized_replaces = graph_intersection(changeset.replace, overwrite)
+
       %__MODULE__{
         changeset
-        | add: graph_delete(changeset.add, overwrite),
-          update: graph_delete(changeset.update, overwrite),
-          replace: graph_delete(changeset.replace, overwrite),
-          remove: graph_delete(changeset.remove, overwrite),
-          overwrite: graph_add(changeset.overwrite, overwrite)
+        | add: graph_delete(changeset.add, neutralized_adds),
+          update: graph_delete(changeset.update, neutralized_updates),
+          replace: graph_delete(changeset.replace, neutralized_replaces),
+          overwrite:
+            graph_add(
+              changeset.overwrite,
+              overwrite
+              |> graph_delete(neutralized_adds)
+              |> graph_delete(neutralized_updates)
+              |> graph_delete(neutralized_replaces)
+            )
       }
     else
       changeset
@@ -228,9 +271,12 @@ defmodule Ontogen.Commit.Changeset do
     |> Enum.reduce(changeset, &do_merge(&2, [&1]))
   end
 
-  defp graph_add(nil, additions), do: Graph.new(additions)
+  defp graph_add(nil, additions), do: graph_cleanup(additions)
   defp graph_add(graph, additions), do: Graph.add(graph, additions)
   defp graph_delete(nil, _), do: nil
   defp graph_delete(graph, removals), do: graph |> Graph.delete(removals) |> graph_cleanup()
+  defp graph_intersection(nil, _), do: Graph.new()
+  defp graph_intersection(graph1, graph2), do: Graph.intersection(graph1, graph2)
+  defp graph_cleanup(nil), do: nil
   defp graph_cleanup(graph), do: unless(Graph.empty?(graph), do: graph)
 end
