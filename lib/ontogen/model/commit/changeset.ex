@@ -265,10 +265,39 @@ defmodule Ontogen.Commit.Changeset do
     end
   end
 
+  defp do_merge(changeset, %__MODULE__{} = changes) do
+    changeset
+    # The order must be kept in sync with Ontogen.Changeset.Action order!
+    |> do_merge(overwrite: changes.overwrite)
+    |> do_merge(remove: changes.remove)
+    |> do_merge(replace: changes.replace)
+    |> do_merge(update: changes.update)
+    |> do_merge(add: changes.add)
+  end
+
+  defp do_merge(changeset, %Commit{} = commit) do
+    do_merge(changeset, new!(commit))
+  end
+
   defp do_merge(changeset, changes) when is_list(changes) do
     changes
+    # TODO: currently all tests pass without this sorting ...
     |> Action.sort_changes()
     |> Enum.reduce(changeset, &do_merge(&2, [&1]))
+  end
+
+  def limit(%__MODULE__{} = changeset, :dataset, nil) do
+    changeset
+  end
+
+  def limit(%__MODULE__{} = changeset, :resource, resource) do
+    %__MODULE__{
+      add: graph_take(changeset.add, resource),
+      update: graph_take(changeset.update, resource),
+      replace: graph_take(changeset.replace, resource),
+      remove: graph_take(changeset.remove, resource),
+      overwrite: graph_take(changeset.overwrite, resource)
+    }
   end
 
   defp graph_add(nil, additions), do: graph_cleanup(additions)
@@ -279,4 +308,9 @@ defmodule Ontogen.Commit.Changeset do
   defp graph_intersection(graph1, graph2), do: Graph.intersection(graph1, graph2)
   defp graph_cleanup(nil), do: nil
   defp graph_cleanup(graph), do: unless(Graph.empty?(graph), do: graph)
+
+  defp graph_take(nil, _), do: nil
+
+  defp graph_take(graph, subjects),
+    do: graph |> Graph.take(List.wrap(subjects)) |> graph_cleanup()
 end

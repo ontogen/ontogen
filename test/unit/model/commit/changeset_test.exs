@@ -295,4 +295,21 @@ defmodule Ontogen.Commit.ChangesetTest do
                Changeset.new!(replace: EX.S1 |> EX.p2(EX.O2))
     end
   end
+
+  test "limit/3" do
+    changeset = %Changeset{
+      add: graph([1, {EX.S, EX.p1(), EX.O1}]),
+      update: nil,
+      replace: graph([1]),
+      remove: graph([2, {EX.S, EX.p1(), EX.O2}]),
+      overwrite: graph([{EX.S, EX.p2(), EX.O2}])
+    }
+
+    assert Changeset.limit(changeset, :resource, RDF.iri(EX.S)) ==
+             %Changeset{
+               add: graph([{EX.S, EX.p1(), EX.O1}]),
+               remove: graph([{EX.S, EX.p1(), EX.O2}]),
+               overwrite: graph([{EX.S, EX.p2(), EX.O2}])
+             }
+  end
 end

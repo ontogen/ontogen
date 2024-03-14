@@ -22,9 +22,6 @@ defmodule Ontogen.Operations.EffectiveChangesetQuery do
         {:error, error} -> raise error
       end
     end
-
-    defdelegate changes(changeset), to: __MODULE__, as: :effective_changeset
-    defdelegate changes!(changeset), to: __MODULE__, as: :effective_changeset!
   end
 
   def new(changeset_args) do
