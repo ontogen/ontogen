@@ -10,58 +10,58 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
       assert Ontogen.dataset_changes() == {:error, :no_head}
     end
 
-    test "last commit (default)" do
-      [last_commit | _] = init_history()
+    test "target commit (default)" do
+      [target_commit | _] = init_history()
 
-      assert Ontogen.dataset_changes() == Ontogen.dataset_changes(last: last_commit.__id__)
+      assert Ontogen.dataset_changes() == Ontogen.dataset_changes(target: target_commit.__id__)
     end
 
-    test "with a specified start commit" do
+    test "with a specified base commit" do
       [fourth, third, second, first] = init_history()
 
-      assert Ontogen.dataset_changes(first: first) ==
+      assert Ontogen.dataset_changes(base: first) ==
                {:ok, Changeset.merge([second, third, fourth])}
 
-      assert Ontogen.dataset_changes(first: second) ==
+      assert Ontogen.dataset_changes(base: second) ==
                {:ok, Changeset.merge([third, fourth])}
 
-      assert Ontogen.dataset_changes(first: third) ==
+      assert Ontogen.dataset_changes(base: third) ==
                Changeset.new(fourth)
 
-      assert Ontogen.dataset_changes(first: fourth) ==
+      assert Ontogen.dataset_changes(base: fourth) ==
                {:ok, nil}
     end
 
-    test "with a specified end commit" do
+    test "with a specified target commit" do
       [fourth, third, second, first] = history = init_history()
 
-      assert Ontogen.dataset_changes(last: fourth.__id__) ==
+      assert Ontogen.dataset_changes(target: fourth.__id__) ==
                {:ok, history |> Enum.reverse() |> Changeset.merge()}
 
-      assert Ontogen.dataset_changes(last: third.__id__) ==
+      assert Ontogen.dataset_changes(target: third.__id__) ==
                {:ok, Changeset.merge([first, second, third])}
 
-      assert Ontogen.dataset_changes(last: second.__id__) ==
+      assert Ontogen.dataset_changes(target: second.__id__) ==
                {:ok, Changeset.merge([first, second])}
 
-      assert Ontogen.dataset_changes(last: first.__id__) ==
+      assert Ontogen.dataset_changes(target: first.__id__) ==
                Changeset.new(first)
     end
 
-    test "with a specified start and end commit" do
+    test "with a specified base and target commit" do
       [fourth, third, second, first] = init_history()
 
-      assert Ontogen.dataset_changes(first: first.__id__, last: fourth.__id__) ==
+      assert Ontogen.dataset_changes(base: first.__id__, target: fourth.__id__) ==
                {:ok, Changeset.merge([second, third, fourth])}
 
-      assert Ontogen.dataset_changes(first: second.__id__, last: third.__id__) ==
+      assert Ontogen.dataset_changes(base: second.__id__, target: third.__id__) ==
                Changeset.new(third)
     end
 
-    test "when the specified end commit comes later than the start commit" do
+    test "when the specified target commit comes later than the base commit" do
       [_fourth, third, second, _first] = init_history()
 
-      assert Ontogen.dataset_changes(first: third.__id__, last: second.__id__) ==
+      assert Ontogen.dataset_changes(base: third.__id__, target: second.__id__) ==
                {:ok, nil}
     end
 
@@ -102,55 +102,55 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
       assert Ontogen.resource_changes(EX.S1) == {:error, :no_head}
     end
 
-    test "last commit (default)" do
-      [last_commit | _] = init_resource_history()
+    test "target commit (default)" do
+      [target_commit | _] = init_resource_history()
 
       changeset = Ontogen.resource_changes(EX.S1)
 
-      assert changeset == Ontogen.resource_changes(EX.S1, last: last_commit)
+      assert changeset == Ontogen.resource_changes(EX.S1, target: target_commit)
       assert changeset == Changeset.new(replace: [{EX.S1, EX.p2(), EX.O2}])
     end
 
-    test "with a specified start commit" do
+    test "with a specified base commit" do
       [fourth, third, second, first] = init_resource_history()
 
-      assert Ontogen.resource_changes(EX.S1, first: first) ==
+      assert Ontogen.resource_changes(EX.S1, base: first) ==
                {:ok, resource_limited_merge([second, third, fourth], EX.S1)}
 
-      assert Ontogen.resource_changes(EX.S1, first: third) ==
+      assert Ontogen.resource_changes(EX.S1, base: third) ==
                {:ok, resource_limited_merge([fourth], EX.S1)}
 
-      assert Ontogen.resource_changes(EX.S1, first: fourth) ==
+      assert Ontogen.resource_changes(EX.S1, base: fourth) ==
                {:ok, nil}
     end
 
-    test "with a specified end commit" do
+    test "with a specified target commit" do
       [fourth, third, second, first] = history = init_resource_history()
 
-      assert Ontogen.resource_changes(EX.S1, last: fourth.__id__) ==
+      assert Ontogen.resource_changes(EX.S1, target: fourth.__id__) ==
                {:ok, history |> Enum.reverse() |> resource_limited_merge(EX.S1)}
 
-      assert Ontogen.resource_changes(EX.S1, last: third.__id__) ==
+      assert Ontogen.resource_changes(EX.S1, target: third.__id__) ==
                {:ok, resource_limited_merge([first, second, third], EX.S1)}
 
-      assert Ontogen.resource_changes(EX.S1, last: first.__id__) ==
+      assert Ontogen.resource_changes(EX.S1, target: first.__id__) ==
                {:ok, resource_limited_merge([first], EX.S1)}
     end
 
-    test "with a specified start and end commit" do
+    test "with a specified base and target commit" do
       [fourth, third, second, first] = init_resource_history()
 
-      assert Ontogen.resource_changes(EX.S1, first: second, last: third) ==
+      assert Ontogen.resource_changes(EX.S1, base: second, target: third) ==
                Changeset.new(third)
 
-      assert Ontogen.resource_changes(EX.S1, first: first, last: fourth) ==
+      assert Ontogen.resource_changes(EX.S1, base: first, target: fourth) ==
                {:ok, resource_limited_merge([second, third, fourth], EX.S1)}
     end
 
-    test "when the specified end commit comes later than the start commit" do
+    test "when the specified target commit comes later than the base commit" do
       [fourth, _third, _second, first] = init_resource_history()
 
-      assert Ontogen.resource_changes(EX.S1, first: fourth.__id__, last: first.__id__) ==
+      assert Ontogen.resource_changes(EX.S1, base: fourth.__id__, target: first.__id__) ==
                {:ok, nil}
     end
 

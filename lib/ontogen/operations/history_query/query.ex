@@ -15,8 +15,8 @@ defmodule Ontogen.Operations.HistoryQuery.Query do
     PREFIX rtc: <#{RTC.__base_iri__()}>
     CONSTRUCT { #{commit_statements_construct_pattern()} }
     WHERE {
-      <#{range.last}> og:parentCommit* ?commit .
-      #{filter_commits(range.first)}
+      <#{range.target}> og:parentCommit* ?commit .
+      #{filter_commits(range.base)}
       #{commit_statements_query_pattern(subject)}
     }
     """
@@ -24,8 +24,8 @@ defmodule Ontogen.Operations.HistoryQuery.Query do
 
   defp filter_commits(nil), do: ""
 
-  defp filter_commits(first_commit) do
-    "MINUS { <#{first_commit}> og:parentCommit* ?commit . }"
+  defp filter_commits(base_commit) do
+    "MINUS { <#{base_commit}> og:parentCommit* ?commit . }"
   end
 
   defp commit_statements_construct_pattern do
