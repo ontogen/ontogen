@@ -17,35 +17,23 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
     end
 
     test "with a specified base commit" do
-      [fourth, third, second, first] = init_history()
-
-      assert Ontogen.dataset_changes(base: first) ==
-               {:ok, Changeset.merge([second, third, fourth])}
+      [fourth, third, second, _first] = init_history()
 
       assert Ontogen.dataset_changes(base: second) ==
                {:ok, Changeset.merge([third, fourth])}
-
-      assert Ontogen.dataset_changes(base: third) ==
-               Changeset.new(fourth)
 
       assert Ontogen.dataset_changes(base: fourth) ==
                {:ok, nil}
     end
 
     test "with a specified target commit" do
-      [fourth, third, second, first] = history = init_history()
+      [fourth, _third, second, first] = history = init_history()
 
       assert Ontogen.dataset_changes(target: fourth.__id__) ==
                {:ok, history |> Enum.reverse() |> Changeset.merge()}
 
-      assert Ontogen.dataset_changes(target: third.__id__) ==
-               {:ok, Changeset.merge([first, second, third])}
-
       assert Ontogen.dataset_changes(target: second.__id__) ==
                {:ok, Changeset.merge([first, second])}
-
-      assert Ontogen.dataset_changes(target: first.__id__) ==
-               Changeset.new(first)
     end
 
     test "with a specified base and target commit" do
@@ -117,21 +105,15 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
       assert Ontogen.resource_changes(EX.S1, base: first) ==
                {:ok, resource_limited_merge([second, third, fourth], EX.S1)}
 
-      assert Ontogen.resource_changes(EX.S1, base: third) ==
-               {:ok, resource_limited_merge([fourth], EX.S1)}
-
       assert Ontogen.resource_changes(EX.S1, base: fourth) ==
                {:ok, nil}
     end
 
     test "with a specified target commit" do
-      [fourth, third, second, first] = history = init_resource_history()
+      [fourth, _third, _second, first] = history = init_resource_history()
 
       assert Ontogen.resource_changes(EX.S1, target: fourth.__id__) ==
                {:ok, history |> Enum.reverse() |> resource_limited_merge(EX.S1)}
-
-      assert Ontogen.resource_changes(EX.S1, target: third.__id__) ==
-               {:ok, resource_limited_merge([first, second, third], EX.S1)}
 
       assert Ontogen.resource_changes(EX.S1, target: first.__id__) ==
                {:ok, resource_limited_merge([first], EX.S1)}

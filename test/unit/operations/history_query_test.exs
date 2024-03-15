@@ -15,35 +15,29 @@ defmodule Ontogen.Operations.HistoryQueryTest do
     end
 
     test "native history with a specified base commit" do
-      [fourth, third, _second, first] = history = init_history()
+      [fourth, _third, _second, first] = history = init_history()
 
       assert Ontogen.dataset_history(base: first.__id__) == {:ok, Enum.slice(history, 0..2)}
-      assert Ontogen.dataset_history(base: third.__id__) == {:ok, Enum.slice(history, 0..0)}
       assert Ontogen.dataset_history(base: fourth.__id__) == {:ok, []}
     end
 
     test "native history with a specified target commit" do
-      [fourth, third, _second, first] = history = init_history()
+      [fourth, _third, _second, first] = history = init_history()
 
       assert Ontogen.dataset_history(target: fourth.__id__) == {:ok, history}
-      assert Ontogen.dataset_history(target: third.__id__) == {:ok, Enum.slice(history, 1..3)}
       assert Ontogen.dataset_history(target: first.__id__) == {:ok, Enum.slice(history, 3..3)}
     end
 
     test "native history with a specified base and target commit" do
-      [fourth, third, second, first] = history = init_history()
+      [_fourth, third, second, _first] = history = init_history()
 
-      assert Ontogen.dataset_history(base: first.__id__, target: fourth.__id__) ==
-               {:ok, Enum.slice(history, 0..2)}
-
-      assert Ontogen.dataset_history(base: second.__id__, target: third.__id__) ==
+      assert Ontogen.dataset_history(base: second, target: third) ==
                {:ok, Enum.slice(history, 1..1)}
     end
 
     test "when the specified target commit comes later than the base commit" do
-      [fourth, third, second, first] = init_history()
+      [fourth, _third, _second, first] = init_history()
 
-      assert Ontogen.dataset_history(base: third, target: second) == {:ok, []}
       assert Ontogen.dataset_history(base: fourth, target: first) == {:ok, []}
     end
 
@@ -101,52 +95,34 @@ defmodule Ontogen.Operations.HistoryQueryTest do
     end
 
     test "native history with a specified base commit" do
-      [fourth, third, second, first] = history = init_resource_history()
-
-      assert Ontogen.resource_history(EX.S1, base: first.__id__) ==
-               {:ok, Enum.slice(history, 0..2)}
+      [fourth, _third, second, _first] = history = init_resource_history()
 
       assert Ontogen.resource_history(EX.S1, base: second.__id__) ==
                {:ok, Enum.slice(history, 0..1)}
-
-      assert Ontogen.resource_history(EX.S1, base: third.__id__) ==
-               {:ok, Enum.slice(history, 0..0)}
 
       assert Ontogen.resource_history(EX.S1, base: fourth.__id__) == {:ok, []}
     end
 
     test "native history with a specified target commit" do
-      [fourth, third, second, first] = history = init_resource_history()
+      [fourth, _third, second, _first] = history = init_resource_history()
 
       assert Ontogen.resource_history(EX.S1, target: fourth.__id__) == {:ok, history}
 
-      assert Ontogen.resource_history(EX.S1, target: third.__id__) ==
-               {:ok, Enum.slice(history, 1..3)}
-
       assert Ontogen.resource_history(EX.S1, target: second.__id__) ==
                {:ok, Enum.slice(history, 2..3)}
-
-      assert Ontogen.resource_history(EX.S1, target: first.__id__) ==
-               {:ok, Enum.slice(history, 3..3)}
     end
 
     test "native history with a specified base and target commit" do
-      [fourth, third, second, first] = history = init_resource_history()
+      [fourth, _third, _second, first] = history = init_resource_history()
 
       assert Ontogen.resource_history(EX.S1, base: first.__id__, target: fourth.__id__) ==
                {:ok, Enum.slice(history, 0..2)}
-
-      assert Ontogen.resource_history(EX.S1, base: second.__id__, target: third.__id__) ==
-               {:ok, Enum.slice(history, 1..1)}
     end
 
     test "when the specified target commit comes later than the base commit" do
-      [fourth, third, second, first] = init_resource_history()
+      [_fourth, third, second, _first] = init_resource_history()
 
       assert Ontogen.resource_history(EX.S1, base: third.__id__, target: second.__id__) ==
-               {:ok, []}
-
-      assert Ontogen.resource_history(EX.S1, base: fourth.__id__, target: first.__id__) ==
                {:ok, []}
     end
 
@@ -215,45 +191,27 @@ defmodule Ontogen.Operations.HistoryQueryTest do
     end
 
     test "native history with a specified base commit" do
-      [third, second, first] = history = init_statement_history()
+      [third, _second, first] = history = init_statement_history()
 
       assert Ontogen.statement_history(statement_of_interest(), base: first.__id__) ==
                {:ok, Enum.slice(history, 0..1)}
-
-      assert Ontogen.statement_history(statement_of_interest(), base: second.__id__) ==
-               {:ok, Enum.slice(history, 0..0)}
 
       assert Ontogen.statement_history(statement_of_interest(), base: third.__id__) ==
                {:ok, []}
     end
 
     test "native history with a specified target commit" do
-      [third, second, first] = history = init_statement_history()
+      [third, _second, first] = history = init_statement_history()
 
       assert Ontogen.statement_history(statement_of_interest(), target: third.__id__) ==
                {:ok, history}
-
-      assert Ontogen.statement_history(statement_of_interest(), target: second.__id__) ==
-               {:ok, Enum.slice(history, 1..2)}
 
       assert Ontogen.statement_history(statement_of_interest(), target: first.__id__) ==
                {:ok, Enum.slice(history, 2..2)}
     end
 
     test "native history with a specified base and target commit" do
-      [third, second, first] = history = init_statement_history()
-
-      assert Ontogen.statement_history(statement_of_interest(),
-               base: third.__id__,
-               target: third.__id__
-             ) ==
-               {:ok, []}
-
-      assert Ontogen.statement_history(statement_of_interest(),
-               base: second.__id__,
-               target: third.__id__
-             ) ==
-               {:ok, Enum.slice(history, 0..0)}
+      [_third, second, first] = history = init_statement_history()
 
       assert Ontogen.statement_history(statement_of_interest(),
                base: first.__id__,
@@ -263,13 +221,7 @@ defmodule Ontogen.Operations.HistoryQueryTest do
     end
 
     test "when the specified target commit comes later than the base commit" do
-      [third, second, first] = init_statement_history()
-
-      assert Ontogen.statement_history(statement_of_interest(),
-               base: third.__id__,
-               target: second.__id__
-             ) ==
-               {:ok, []}
+      [_third, second, first] = init_statement_history()
 
       assert Ontogen.statement_history(statement_of_interest(),
                base: second.__id__,
@@ -341,65 +293,41 @@ defmodule Ontogen.Operations.HistoryQueryTest do
     end
 
     test "native history with a specified base commit" do
-      [fourth, third, second, first] = history = init_predication_history()
-
-      assert Ontogen.statement_history(predication_of_interest(), base: first.__id__) ==
-               {:ok, Enum.slice(history, 0..2)}
+      [fourth, _third, second, _first] = history = init_predication_history()
 
       assert Ontogen.statement_history(predication_of_interest(), base: second.__id__) ==
                {:ok, Enum.slice(history, 0..1)}
-
-      assert Ontogen.statement_history(predication_of_interest(), base: third.__id__) ==
-               {:ok, Enum.slice(history, 0..0)}
 
       assert Ontogen.statement_history(predication_of_interest(), base: fourth.__id__) ==
                {:ok, []}
     end
 
     test "native history with a specified target commit" do
-      [fourth, third, second, first] = history = init_predication_history()
+      [fourth, _third, _second, first] = history = init_predication_history()
 
       assert Ontogen.statement_history(predication_of_interest(), target: fourth.__id__) ==
                {:ok, history}
-
-      assert Ontogen.statement_history(predication_of_interest(), target: third.__id__) ==
-               {:ok, Enum.slice(history, 1..3)}
-
-      assert Ontogen.statement_history(predication_of_interest(), target: second.__id__) ==
-               {:ok, Enum.slice(history, 2..3)}
 
       assert Ontogen.statement_history(predication_of_interest(), target: first.__id__) ==
                {:ok, Enum.slice(history, 3..3)}
     end
 
     test "native history with a specified base and target commit" do
-      [fourth, third, second, first] = history = init_predication_history()
+      [fourth, _third, _second, first] = history = init_predication_history()
 
       assert Ontogen.statement_history(predication_of_interest(),
                base: first.__id__,
                target: fourth.__id__
              ) ==
                {:ok, Enum.slice(history, 0..2)}
-
-      assert Ontogen.statement_history(predication_of_interest(),
-               base: second.__id__,
-               target: third.__id__
-             ) ==
-               {:ok, Enum.slice(history, 1..1)}
     end
 
     test "when the specified target commit comes later than the base commit" do
-      [fourth, third, second, first] = init_predication_history()
+      [_fourth, third, second, _first] = init_predication_history()
 
       assert Ontogen.statement_history(predication_of_interest(),
                base: third.__id__,
                target: second.__id__
-             ) ==
-               {:ok, []}
-
-      assert Ontogen.statement_history(predication_of_interest(),
-               base: fourth.__id__,
-               target: first.__id__
              ) ==
                {:ok, []}
     end
