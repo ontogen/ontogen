@@ -144,6 +144,18 @@ defmodule Ontogen.Operations.EffectiveChangesetQueryTest do
                  overwrite: EX.S2 |> EX.p2("Foo")
                )
     end
+
+    test "when overwritten statements are removed explicitly" do
+      assert Ontogen.effective_changeset!(
+               replace: EX.S2 |> EX.p3("Foo"),
+               remove: EX.S2 |> EX.p2(42)
+             ) ==
+               Changeset.new!(
+                 replace: EX.S2 |> EX.p3("Foo"),
+                 remove: EX.S2 |> EX.p2(42),
+                 overwrite: EX.S2 |> EX.p2("Foo")
+               )
+    end
   end
 
   describe "combined adds and removes" do

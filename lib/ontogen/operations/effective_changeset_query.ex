@@ -60,10 +60,10 @@ defmodule Ontogen.Operations.EffectiveChangesetQuery do
            overwrite do
         Commit.Changeset.new(
           add: effective_add,
-          remove: effective_remove,
           update: effective_update,
           replace: effective_replace,
-          overwrite: overwrite
+          remove: effective_remove,
+          overwrite: overwrite && Graph.delete(overwrite, effective_remove || [])
         )
       else
         {:ok, :no_effective_changes}
