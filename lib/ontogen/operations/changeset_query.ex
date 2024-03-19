@@ -19,7 +19,10 @@ defmodule Ontogen.Operations.ChangesetQuery do
   end
 
   def new(subject, opts \\ []) do
-    history_opts = Keyword.put(opts, :type, :native)
+    history_opts =
+      opts
+      |> Keyword.put(:type, :native)
+      |> Keyword.put(:order, :asc)
 
     with {:ok, history_query} <- HistoryQuery.new(subject, history_opts),
          {:ok, history_query} <- validate_history_query(history_query) do
@@ -46,7 +49,6 @@ defmodule Ontogen.Operations.ChangesetQuery do
   defp changeset(history, subject_type, subject) do
     changeset =
       history
-      |> Enum.reverse()
       |> Enum.map(
         &(&1
           |> Commit.Changeset.new!()
