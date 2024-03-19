@@ -3,7 +3,7 @@ defmodule Ontogen.CommitTest do
 
   doctest Ontogen.Commit
 
-  alias Ontogen.{Commit, Proposition, InvalidChangesetError}
+  alias Ontogen.{Commit, Proposition, Config, InvalidChangesetError}
 
   describe "new/1" do
     test "with all required attributes" do
@@ -27,6 +27,14 @@ defmodule Ontogen.CommitTest do
       assert commit.time == datetime()
       refute commit.parent
       assert Commit.root?(commit)
+    end
+
+    test "uses proper defaults" do
+      assert {:ok, %Commit{} = commit} = Commit.new(add: graph(), speech_act: speech_act())
+
+      assert commit.add == proposition()
+      assert DateTime.diff(DateTime.utc_now(), commit.time, :second) <= 1
+      assert commit.committer == Config.agent()
     end
 
     test "implicit proposition creation" do

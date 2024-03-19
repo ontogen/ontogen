@@ -1,7 +1,7 @@
 defmodule Ontogen.Commit do
   use Grax.Schema
 
-  alias Ontogen.{Proposition, SpeechAct}
+  alias Ontogen.{Proposition, SpeechAct, Config}
   alias Ontogen.Commit.{Id, Changeset}
   alias Ontogen.NS.Og
   alias RDF.Graph
@@ -30,6 +30,11 @@ defmodule Ontogen.Commit do
   end
 
   def new(%Changeset{} = changeset, args) do
+    args =
+      args
+      |> Keyword.put_new_lazy(:committer, fn -> Config.agent() end)
+      |> Keyword.put_new_lazy(:time, fn -> DateTime.utc_now() end)
+
     with {:ok, commit} <- build(RDF.bnode(:tmp), args) do
       changeset
       |> copy_to_proposition_struct(commit)

@@ -12,7 +12,6 @@ defmodule Ontogen.Operations.CommitCommand do
     Commit,
     Changeset,
     SpeechAct,
-    Config,
     InvalidCommitError
   }
 
@@ -99,8 +98,6 @@ defmodule Ontogen.Operations.CommitCommand do
     |> Keyword.put(:speech_act, speech_act)
     |> Keyword.put(:changeset, changeset)
     |> Keyword.put(:parent, parent_commit)
-    |> Keyword.put_new(:committer, Config.agent())
-    |> Keyword.put_new(:time, DateTime.utc_now())
     |> Commit.new()
   end
 end
