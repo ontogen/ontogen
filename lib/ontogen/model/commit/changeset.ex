@@ -286,6 +286,16 @@ defmodule Ontogen.Commit.Changeset do
     |> Enum.reduce(changeset, &do_merge(&2, [&1]))
   end
 
+  def invert(%__MODULE__{} = changeset) do
+    %__MODULE__{
+      add: graph_add(changeset.remove, changeset.overwrite),
+      remove:
+        changeset.add
+        |> graph_add(changeset.update)
+        |> graph_add(changeset.replace)
+    }
+  end
+
   def limit(%__MODULE__{} = changeset, :dataset, nil) do
     changeset
   end
@@ -301,8 +311,10 @@ defmodule Ontogen.Commit.Changeset do
   end
 
   defp graph_add(nil, additions), do: graph_cleanup(additions)
+  defp graph_add(graph, nil), do: graph_cleanup(graph)
   defp graph_add(graph, additions), do: Graph.add(graph, additions)
   defp graph_delete(nil, _), do: nil
+  defp graph_delete(graph, nil), do: graph_cleanup(graph)
   defp graph_delete(graph, removals), do: graph |> Graph.delete(removals) |> graph_cleanup()
   defp graph_intersection(nil, _), do: Graph.new()
   defp graph_intersection(graph1, graph2), do: Graph.intersection(graph1, graph2)

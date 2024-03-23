@@ -296,6 +296,31 @@ defmodule Ontogen.Commit.ChangesetTest do
     end
   end
 
+  test "invert/1" do
+    assert Changeset.new!(
+             add: statement(1),
+             update: statement(2),
+             replace: statement(3),
+             remove: statement(4),
+             overwrite: statement(5)
+           )
+           |> Changeset.invert() ==
+             %Changeset{
+               add: graph([4, 5]),
+               remove: graph([1, 2, 3])
+             }
+
+    assert Changeset.new!(
+             replace: statement(1),
+             overwrite: statement(2)
+           )
+           |> Changeset.invert() ==
+             %Changeset{
+               add: graph([2]),
+               remove: graph([1])
+             }
+  end
+
   test "limit/3" do
     changeset = %Changeset{
       add: graph([1, {EX.S, EX.p1(), EX.O1}]),
