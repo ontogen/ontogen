@@ -19,14 +19,19 @@ defmodule Ontogen.Operations.ChangesetQuery do
   end
 
   def new(subject, opts \\ []) do
+    with {:ok, history_query} <- history_query(subject, opts) do
+      {:ok, %__MODULE__{history_query: history_query}}
+    end
+  end
+
+  def history_query(subject, opts) do
     history_opts =
       opts
       |> Keyword.put(:type, :native)
       |> Keyword.put(:order, :asc)
 
-    with {:ok, history_query} <- HistoryQuery.new(subject, history_opts),
-         {:ok, history_query} <- validate_history_query(history_query) do
-      {:ok, %__MODULE__{history_query: history_query}}
+    with {:ok, history_query} <- HistoryQuery.new(subject, history_opts) do
+      validate_history_query(history_query)
     end
   end
 

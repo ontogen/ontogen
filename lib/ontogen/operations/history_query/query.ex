@@ -50,8 +50,7 @@ defmodule Ontogen.Operations.HistoryQuery.Query do
     """
     ?commit
         ?commit_p ?commit_o ;
-        og:committer ?committer ;
-        og:speechAct ?speech_act .
+        og:committer ?committer .
 
       ?committer ?committer_p ?committer_o .
 
@@ -103,27 +102,31 @@ defmodule Ontogen.Operations.HistoryQuery.Query do
         ?committed_overwrite ?committed_overwrite_p ?committed_overwrite_o .
       }
 
-      ?speech_act
-        ?speech_act_p ?speech_act_o ;
-        og:speaker ?speaker .
+      OPTIONAL {
+        ?commit og:speechAct ?speech_act .
 
-      ?speaker ?speaker_p ?speaker_o .
+        ?speech_act
+          ?speech_act_p ?speech_act_o ;
+          og:speaker ?speaker .
 
-      OPTIONAL {
-        ?speech_act og:add ?add .
-        ?add ?add_p ?add_o .
-      }
-      OPTIONAL {
-        ?speech_act og:remove ?remove .
-        ?remove ?remove_p ?remove_o .
-      }
-      OPTIONAL {
-        ?speech_act og:update ?update .
-        ?update ?update_p ?update_o .
-      }
-      OPTIONAL {
-        ?speech_act og:replace ?replace .
-        ?replace ?replace_p ?replace_o .
+        ?speaker ?speaker_p ?speaker_o .
+
+        OPTIONAL {
+          ?speech_act og:add ?add .
+          ?add ?add_p ?add_o .
+        }
+        OPTIONAL {
+          ?speech_act og:remove ?remove .
+          ?remove ?remove_p ?remove_o .
+        }
+        OPTIONAL {
+          ?speech_act og:update ?update .
+          ?update ?update_p ?update_o .
+        }
+        OPTIONAL {
+          ?speech_act og:replace ?replace .
+          ?replace ?replace_p ?replace_o .
+        }
       }
     """
   end

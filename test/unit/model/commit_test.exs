@@ -74,6 +74,7 @@ defmodule Ontogen.CommitTest do
       shared_statements = [{EX.s(), EX.p(), EX.o()}]
 
       assert Commit.new(
+               speech_act: speech_act(),
                add: graph() |> Graph.add(shared_statements),
                remove: shared_statements,
                committer: agent(),
@@ -89,11 +90,22 @@ defmodule Ontogen.CommitTest do
 
     test "without statements" do
       assert Commit.new(
+               speech_act: speech_act(),
                committer: agent(),
                message: "without added and removed statements",
                time: datetime()
              ) ==
                {:error, InvalidChangesetError.exception(reason: :empty)}
+    end
+
+    test "without speech act" do
+      assert {:error, "missing speech_act in commit" <> _} =
+               Commit.new(
+                 add: graph(),
+                 committer: agent(),
+                 message: "without speech act",
+                 time: datetime()
+               )
     end
   end
 end

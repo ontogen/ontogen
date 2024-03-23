@@ -114,6 +114,21 @@ og:Commit a rdfs:Class
     .
 
 
+og:Revert a rdfs:Class
+    ; rdfs:subClassOf og:Commit
+    ; rdfs:label "Ontogen revert commit"
+    .
+
+    og:revertedBaseCommit a rdf:Property
+		; rdfs:domain rdfs:Revert
+		; rdfs:range rdfs:Commit
+    .
+
+    og:revertedTargetCommit a rdf:Property
+		; rdfs:domain rdfs:Revert
+		; rdfs:range rdfs:Commit
+    .
+
 
 og:Agent a rdfs:Class
     ; rdfs:subClassOf prov:Agent, foaf:Agent

@@ -3,6 +3,9 @@ defmodule Ontogen.Commit.Range do
 
   alias Ontogen.{Commit, Repository}
 
+  def new({base, target}), do: new(base, target)
+  def new(%__MODULE__{} = range), do: {:ok, range}
+
   def new(args) when is_list(args) do
     with {:ok, range, _} <- extract(args) do
       {:ok, range}
@@ -13,6 +16,13 @@ defmodule Ontogen.Commit.Range do
     with {:ok, base} <- normalize(:base, base),
          {:ok, target} <- normalize(:target, target) do
       {:ok, %__MODULE__{base: base, target: target}}
+    end
+  end
+
+  def new!(args) do
+    case new(args) do
+      {:ok, range} -> range
+      {:error, error} -> raise error
     end
   end
 
@@ -27,15 +37,21 @@ defmodule Ontogen.Commit.Range do
   def extract(args) when is_list(args) do
     {base, args} = Keyword.pop(args, :base)
     {target, args} = Keyword.pop(args, :target)
+    {range, args} = Keyword.pop(args, :range)
 
-    with {:ok, range} <- new(base, target) do
+    with {:ok, range} <-
+           (cond do
+              (base || target) && range -> {:error, "mutual exclusive arguments used"}
+              range -> new(range)
+              true -> new(base, target)
+            end) do
       {:ok, range, args}
     end
   end
 
-  def absolute(%__MODULE__{target: :head} = operation, repository) do
+  def absolute(%__MODULE__{target: :head} = range, repository) do
     if commit = Repository.head_id(repository) do
-      {:ok, %__MODULE__{operation | target: commit}}
+      {:ok, %__MODULE__{range | target: commit}}
     else
       {:error, :no_head}
     end

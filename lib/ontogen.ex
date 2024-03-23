@@ -10,6 +10,7 @@ defmodule Ontogen do
   include_api Ontogen.Operations.CreateRepositoryCommand
   include_api Ontogen.Operations.ClearRepositoryCommand
   include_api Ontogen.Operations.CommitCommand
+  include_api Ontogen.Operations.RevertCommand
   include_api Ontogen.Operations.EffectiveChangesetQuery
   include_api Ontogen.Operations.ChangesetQuery
   include_api Ontogen.Operations.HistoryQuery

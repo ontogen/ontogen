@@ -11,13 +11,15 @@ defmodule Ontogen.Commit do
   schema Og.Commit do
     link parent: Og.parentCommit(), type: Ontogen.Commit, depth: 0
 
-    link speech_act: Og.speechAct(), type: SpeechAct, required: true, depth: +1
-
     link add: Og.committedAdd(), type: Proposition, depth: +1
     link update: Og.committedUpdate(), type: Proposition, depth: +1
     link replace: Og.committedReplace(), type: Proposition, depth: +1
     link remove: Og.committedRemove(), type: Proposition, depth: +1
     link overwrite: Og.committedOverwrite(), type: Proposition, depth: +1
+
+    link speech_act: Og.speechAct(), type: SpeechAct, depth: +1
+    link reverted_base_commit: Og.revertedBaseCommit(), type: __MODULE__, depth: 0
+    link reverted_target_commit: Og.revertedTargetCommit(), type: __MODULE__, depth: 0
 
     link committer: Og.committer(),
          type: Ontogen.Agent,
@@ -36,9 +38,8 @@ defmodule Ontogen.Commit do
       |> Keyword.put_new_lazy(:time, fn -> DateTime.utc_now() end)
 
     with {:ok, commit} <- build(RDF.bnode(:tmp), args) do
-      changeset
-      |> copy_to_proposition_struct(commit)
-      |> Grax.reset_id(Id.generate(commit))
+      commit
+      |> init(changeset)
       |> validate()
     end
   end
@@ -56,8 +57,18 @@ defmodule Ontogen.Commit do
     end
   end
 
+  defp init(commit, changeset) do
+    changeset
+    |> copy_to_proposition_struct(commit)
+    |> Grax.reset_id(Id.generate(commit))
+  end
+
   def validate(commit) do
-    Grax.validate(commit)
+    if commit.speech_act || commit.reverted_base_commit || commit.reverted_target_commit do
+      Grax.validate(commit)
+    else
+      {:error, "missing speech_act in commit #{commit.__id__}"}
+    end
   end
 
   def root?(%__MODULE__{parent: nil}), do: true
