@@ -34,7 +34,7 @@ defmodule Ontogen.Commit do
   def new(%Changeset{} = changeset, args) do
     args =
       args
-      |> Keyword.put_new_lazy(:committer, fn -> Config.agent() end)
+      |> Keyword.put_new_lazy(:committer, fn -> Config.user() end)
       |> Keyword.put_new_lazy(:time, fn -> DateTime.utc_now() end)
 
     with {:ok, commit} <- build(RDF.bnode(:tmp), args) do

@@ -122,7 +122,7 @@ defmodule Ontogen.TestFactories do
 
   def local_config_attrs(attrs \\ []) do
     [
-      agent: Keyword.get(attrs, :agent, agent()),
+      user: Keyword.get(attrs, :user, agent()),
       store: Keyword.get(attrs, :store, store())
     ]
     |> Keyword.merge(attrs)

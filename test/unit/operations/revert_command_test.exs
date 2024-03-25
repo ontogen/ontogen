@@ -71,7 +71,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
 
       assert {:ok, %Commit{} = revert2} = Ontogen.revert(to: first)
 
-      assert revert2.committer == Config.agent()
+      assert revert2.committer == Config.user()
       assert DateTime.diff(DateTime.utc_now(), revert2.time, :second) <= 1
       assert revert2.reverted_base_commit == first.__id__
       refute revert2.reverted_target_commit
@@ -136,7 +136,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
                  time: datetime(1)
                )
 
-      assert revert1.committer == Config.agent()
+      assert revert1.committer == Config.user()
       assert revert1.time == datetime(1)
       assert revert1.reverted_base_commit == first.__id__
       assert revert1.reverted_target_commit == third.__id__

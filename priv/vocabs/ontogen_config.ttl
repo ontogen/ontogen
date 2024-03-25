@@ -7,7 +7,7 @@
     ; rdfs:label "Ontogen config"
 .
 
-    :agent a rdf:Property
+    :user a rdf:Property
         ; rdfs:domain :Config
         ; rdfs:range og:Agent
     .

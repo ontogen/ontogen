@@ -10,7 +10,7 @@ defmodule Ontogen.Config do
   alias Ontogen.NS.Ogc
 
   schema Ogc.Config do
-    link :agent, Ogc.agent(), type: Ontogen.Agent, required: true
+    link :user, Ogc.user(), type: Ontogen.Agent, required: true
     link :store, Ogc.store(), type: Ontogen.Store, required: true
   end
 
@@ -35,8 +35,8 @@ defmodule Ontogen.Config do
     Agent.get(__MODULE__, & &1)
   end
 
-  def agent do
-    Agent.get(__MODULE__, & &1.agent)
+  def user do
+    Agent.get(__MODULE__, & &1.user)
   end
 
   def store do

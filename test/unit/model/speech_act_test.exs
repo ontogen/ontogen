@@ -28,7 +28,7 @@ defmodule Ontogen.SpeechActTest do
 
       assert speech_act.add == proposition()
       assert DateTime.diff(DateTime.utc_now(), speech_act.time, :second) <= 1
-      assert speech_act.speaker == Config.agent()
+      assert speech_act.speaker == Config.user()
     end
 
     test "without statements" do

@@ -15,14 +15,14 @@ defmodule Ontogen.Config.LoaderTest do
     test "multiple config files" do
       assert [
                # This uses foaf:mbox instead of og:email
-               TestData.local_config("agent_config.ttl"),
+               TestData.local_config("user_config.ttl"),
                TestData.local_config("store_config.ttl")
              ]
              |> Loader.load_config() ==
                {:ok,
                 local_config(
                   store: store(~B"LocalOxigraph"),
-                  agent:
+                  user:
                     agent()
                     |> Grax.add_additional_statements(
                       {FOAF.mbox(), ~I<mailto:john.doe@example.com>}
