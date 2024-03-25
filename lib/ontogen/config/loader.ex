@@ -4,7 +4,7 @@ defmodule Ontogen.Config.Loader do
   alias Ontogen.{Config, ConfigError}
   alias RDF.Graph
 
-  @node RDF.bnode("_LocalConfig")
+  @node RDF.bnode("Config")
   def node, do: @node
 
   def load_config(load_paths) do
