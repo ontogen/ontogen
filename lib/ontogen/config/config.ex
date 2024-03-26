@@ -1,9 +1,19 @@
 defmodule Ontogen.Config do
-  @default_load_paths [
-    "~/.ontogen_config.ttl",
-    ".ontogen/config.ttl",
-    ".ontogen_config.ttl"
+  @local_config_dir Mix.Project.project_file() |> Path.dirname() |> Path.join("config")
+
+  @local_path Application.compile_env(
+                :ontogen,
+                :local_config_path,
+                "#{@local_config_dir}/#{Mix.env()}.ttl"
+              )
+
+  @paths [
+    system: "/etc/ontogen_config.ttl",
+    global: "~/.ontogen_config.ttl",
+    local: @local_path
   ]
+
+  @default_load_paths Keyword.keys(@paths)
 
   use Grax.Schema
 
@@ -21,9 +31,11 @@ defmodule Ontogen.Config do
   @doc """
   The list of paths from which the configuration is iteratively built.
 
-  #{Enum.map_join(@default_load_paths, "\n", &"- `#{&1}`")}
+  #{Enum.map_join(@default_load_paths, "\n", &"- `#{inspect(&1)}`")}
   """
   def default_load_paths, do: @default_load_paths
+
+  def path(name), do: @paths[name]
 
   def start_link(load_paths) do
     with {:ok, config} <- Loader.load_config(load_paths) do

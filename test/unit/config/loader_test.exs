@@ -12,6 +12,11 @@ defmodule Ontogen.Config.LoaderTest do
                {:ok, config(store: store(~B"LocalOxigraph"))}
     end
 
+    test "config path name" do
+      assert Loader.load_config(:local) ==
+               Loader.load_config("config/test.ttl")
+    end
+
     test "multiple config files" do
       assert [
                # This uses foaf:mbox instead of og:email
