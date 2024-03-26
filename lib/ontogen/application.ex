@@ -14,18 +14,18 @@ defmodule Ontogen.Application do
 
   defp children(:test, args) do
     [
-      {Ontogen.Config, local_config_load_paths(args)}
+      {Ontogen.Config, config_load_paths(args)}
     ]
   end
 
   defp children(_, args) do
     [
-      {Ontogen.Config, local_config_load_paths(args)},
+      {Ontogen.Config, config_load_paths(args)},
       {Ontogen, Keyword.get(args, :repo_args, [])}
     ]
   end
 
-  defp local_config_load_paths(args) do
+  defp config_load_paths(args) do
     Keyword.get(args, :config_load_paths) ||
       Application.get_env(:ontogen, :config_load_paths) ||
       Ontogen.Config.default_load_paths()

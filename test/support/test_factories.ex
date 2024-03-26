@@ -108,19 +108,19 @@ defmodule Ontogen.TestFactories do
             |> RDF.graph()
   def subgraph, do: @subgraph
 
-  def local_config(id \\ :config, attrs \\ [])
+  def config(id \\ :config, attrs \\ [])
 
-  def local_config(attrs, _) when is_list(attrs) do
-    Config.Loader.node() |> local_config(attrs)
+  def config(attrs, _) when is_list(attrs) do
+    Config.Loader.node() |> config(attrs)
   end
 
-  def local_config(id, attrs) do
+  def config(id, attrs) do
     id
     |> id()
-    |> Config.build!(local_config_attrs(attrs))
+    |> Config.build!(config_attrs(attrs))
   end
 
-  def local_config_attrs(attrs \\ []) do
+  def config_attrs(attrs \\ []) do
     [
       user: Keyword.get(attrs, :user, agent()),
       store: Keyword.get(attrs, :store, store())

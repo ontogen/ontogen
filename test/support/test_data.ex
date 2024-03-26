@@ -16,5 +16,5 @@ defmodule Ontogen.TestData do
     end
   end
 
-  def local_config(name), do: "local_config" |> Path.join(name) |> path
+  def config(name), do: "config" |> Path.join(name) |> path
 end
