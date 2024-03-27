@@ -10,6 +10,7 @@ defmodule Ontogen.Application do
     @mix_env
     |> children(args)
     |> Supervisor.start_link(strategy: :one_for_one, name: Ontogen.Supervisor)
+    |> handle_failure(Application.get_env(:ontogen, :allow_configless_mode, false))
   end
 
   defp children(:test, args) do
@@ -30,4 +31,13 @@ defmodule Ontogen.Application do
       Application.get_env(:ontogen, :config_load_paths) ||
       Ontogen.Config.default_load_paths()
   end
+
+  defp handle_failure(
+         {:error, {:shutdown, {:failed_to_start_child, Ontogen.Config, %Ontogen.ConfigError{}}}},
+         true
+       ) do
+    Supervisor.start_link([], strategy: :one_for_one, name: Ontogen.Supervisor)
+  end
+
+  defp handle_failure(result, _), do: result
 end
