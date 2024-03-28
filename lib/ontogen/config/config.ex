@@ -1,4 +1,7 @@
 defmodule Ontogen.Config do
+  @system_path Application.compile_env(:ontogen, :system_config_path, "/etc/ontogen_config.ttl")
+  @global_path Application.compile_env(:ontogen, :global_config_path, "~/.ontogen_config.ttl")
+
   @local_config_dir Mix.Project.project_file() |> Path.dirname() |> Path.join("config")
 
   @local_path Application.compile_env(
@@ -8,8 +11,8 @@ defmodule Ontogen.Config do
               )
 
   @paths [
-    system: "/etc/ontogen_config.ttl",
-    global: "~/.ontogen_config.ttl",
+    system: @system_path,
+    global: @global_path,
     local: @local_path
   ]
 
