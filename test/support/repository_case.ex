@@ -13,7 +13,7 @@ defmodule Ontogen.RepositoryCase do
 
       import unquote(__MODULE__)
 
-      import ExUnit.CaptureIO
+      import ExUnit.CaptureLog
 
       setup_all :start_repo
       setup :clean_repo!
@@ -21,7 +21,7 @@ defmodule Ontogen.RepositoryCase do
       def start_repo(_) do
         [repo: repo] = clean_repo!(:ok)
 
-        capture_io(fn -> {:ok, _} = start_supervised({Ontogen, [repo: repo.__id__]}) end)
+        capture_log(fn -> {:ok, _} = start_supervised({Ontogen, [repo: repo.__id__]}) end)
 
         :ok
       end

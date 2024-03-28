@@ -6,11 +6,11 @@ defmodule OntogenTest do
   alias Ontogen.Config
   alias Ontogen.Operations.CreateRepositoryCommand
   alias Ontogen.Repository.NotReadyError
-  import ExUnit.CaptureIO
+  import ExUnit.CaptureLog
 
   describe "init" do
     test "when no repo specified" do
-      assert capture_io(fn -> start_supervised(Ontogen) end) =~
+      assert capture_log(fn -> start_supervised(Ontogen) end) =~
                "Repo not specified"
 
       assert Ontogen.status() == :no_repo
@@ -20,7 +20,7 @@ defmodule OntogenTest do
     end
 
     test "when the repo does not exist" do
-      assert capture_io(fn -> start_supervised({Ontogen, [repo: id(:repo)]}) end) =~
+      assert capture_log(fn -> start_supervised({Ontogen, [repo: id(:repo)]}) end) =~
                "Repo not found"
 
       assert Ontogen.status() == :no_repo
@@ -33,7 +33,7 @@ defmodule OntogenTest do
       {:ok, command} = CreateRepositoryCommand.new(repository())
       {:ok, repository} = CreateRepositoryCommand.call(command, Config.store())
 
-      assert capture_io(fn -> start_supervised({Ontogen, [repo: repository.__id__]}) end) =~
+      assert capture_log(fn -> start_supervised({Ontogen, [repo: repository.__id__]}) end) =~
                "Connected to repo #{repository.__id__}"
 
       assert Ontogen.status() == :ready
@@ -45,7 +45,7 @@ defmodule OntogenTest do
 
   describe "create_repo/3" do
     test "when the repo does not exist" do
-      capture_io(fn -> {:ok, _} = start_supervised(Ontogen) end)
+      capture_log(fn -> {:ok, _} = start_supervised(Ontogen) end)
 
       repository = repository()
 
@@ -58,7 +58,7 @@ defmodule OntogenTest do
     end
 
     test "when the repo already exists" do
-      capture_io(fn -> {:ok, _} = start_supervised({Ontogen, [repo: id(:repository)]}) end)
+      capture_log(fn -> {:ok, _} = start_supervised({Ontogen, [repo: id(:repository)]}) end)
 
       {:ok, command} = CreateRepositoryCommand.new(repository())
       {:ok, _} = CreateRepositoryCommand.call(command, Config.store())
@@ -70,7 +70,7 @@ defmodule OntogenTest do
       {:ok, command} = CreateRepositoryCommand.new(repository())
       {:ok, _} = CreateRepositoryCommand.call(command, Config.store())
 
-      capture_io(fn -> {:ok, _} = start_supervised({Ontogen, [repo: id(:repository)]}) end)
+      capture_log(fn -> {:ok, _} = start_supervised({Ontogen, [repo: id(:repository)]}) end)
 
       assert Ontogen.create_repo(repository()) == {:error, :repo_already_connected}
     end
