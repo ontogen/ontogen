@@ -2,6 +2,8 @@ defmodule Ontogen do
   use Magma
   use GenServer
 
+  require Logger
+
   alias Ontogen.{Query, Command, Repository, Store, Config}
   alias Ontogen.Config.Repository.IdFile
 
@@ -59,15 +61,15 @@ defmodule Ontogen do
 
     with {:ok, repo_id} <- repo_id(opts),
          {:ok, repository} <- Store.repository(store, repo_id) do
-      IO.puts("Connected to repo #{repository.__id__}")
+      Logger.info("Connected to repo #{repository.__id__}")
       {:ok, %{repository: repository, store: store, status: :ready}}
     else
       {:error, :repo_not_defined} ->
-        IO.puts("Repo not specified, you'll have to create one first.")
+        Logger.warning("Repo not specified, you'll have to create one first.")
         {:ok, %{repository: nil, store: store, status: :no_repo}}
 
       {:error, :repo_not_found} ->
-        IO.puts("Repo not found, you'll have to create one first.")
+        Logger.warning("Repo not found, you'll have to create one first.")
         {:ok, %{repository: nil, store: store, status: :no_repo}}
 
       {:error, error} ->
