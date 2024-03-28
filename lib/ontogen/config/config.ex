@@ -16,17 +16,28 @@ defmodule Ontogen.Config do
   @default_load_paths Keyword.keys(@paths)
 
   use Grax.Schema
+  use Agent
+
+  import RDF.Sigils
 
   alias Ontogen.NS.Ogc
+  alias Ontogen.Config.Loader
 
   schema Ogc.Config do
     link :user, Ogc.user(), type: Ontogen.Agent, required: true
     link :store, Ogc.store(), type: Ontogen.Store, required: true
   end
 
-  use Agent
+  @id ~I<http://localhost/ontogen/config>
+  def id, do: @id
 
-  alias Ontogen.Config.Loader
+  def new(attrs) when is_list(attrs) do
+    build(id(), attrs)
+  end
+
+  def new!(attrs) when is_list(attrs) do
+    build!(id(), attrs)
+  end
 
   @doc """
   The list of paths from which the configuration is iteratively built.

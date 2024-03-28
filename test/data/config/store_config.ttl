@@ -1,7 +1,7 @@
 @prefix ogc: <https://w3id.org/ontogen/config#> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 
-_:Config a ogc:Config
+<http://localhost/ontogen/config> a ogc:Config
     ; ogc:store _:LocalOxigraph
 .
 

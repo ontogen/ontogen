@@ -4,12 +4,9 @@ defmodule Ontogen.Config.Loader do
   alias Ontogen.{Config, ConfigError}
   alias RDF.Graph
 
-  @node RDF.bnode("Config")
-  def node, do: @node
-
   def load_config(load_paths) do
     with {:ok, graph} <- load_config_graphs(load_paths) do
-      case Config.load(graph, @node) do
+      case Config.load(graph, Ontogen.Config.id()) do
         {:ok, _} = ok -> ok
         {:error, error} -> {:error, ConfigError.exception(reason: error)}
       end

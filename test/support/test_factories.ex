@@ -24,7 +24,6 @@ defmodule Ontogen.TestFactories do
   alias Ontogen.TestNamespaces.EX
   @compile {:no_warn_undefined, Ontogen.TestNamespaces.EX}
 
-  def id(:config), do: RDF.bnode("Config")
   def id(:agent), do: ~I<http://example.com/Agent>
   def id(:agent_john), do: ~I<http://example.com/Agent/john_doe>
   def id(:agent_jane), do: ~I<http://example.com/Agent/jane_doe>
@@ -108,16 +107,10 @@ defmodule Ontogen.TestFactories do
             |> RDF.graph()
   def subgraph, do: @subgraph
 
-  def config(id \\ :config, attrs \\ [])
-
-  def config(attrs, _) when is_list(attrs) do
-    Config.Loader.node() |> config(attrs)
-  end
-
-  def config(id, attrs) do
-    id
-    |> id()
-    |> Config.build!(config_attrs(attrs))
+  def config(attrs \\ []) when is_list(attrs) do
+    attrs
+    |> config_attrs()
+    |> Config.new!()
   end
 
   def config_attrs(attrs \\ []) do
