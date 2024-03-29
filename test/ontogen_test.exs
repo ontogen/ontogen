@@ -44,6 +44,10 @@ defmodule OntogenTest do
   end
 
   describe "create_repo/3" do
+    setup do
+      on_exit(fn -> File.rm(Config.Repository.IdFile.path()) end)
+    end
+
     test "when the repo does not exist" do
       capture_log(fn -> {:ok, _} = start_supervised(Ontogen) end)
 

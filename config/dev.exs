@@ -1,8 +1,5 @@
 import Config
 
-config :ontogen,
-  create_repo_id_file: :env
-
 config :magma,
   default_tags: ["magma-vault"]
 

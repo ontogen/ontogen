@@ -6,6 +6,10 @@ defmodule Ontogen.Operations.CreateRepositoryCommandTest do
   alias Ontogen.Operations.CreateRepositoryCommand
   alias Ontogen.{Dataset, ProvGraph, Store, Config}
 
+  setup do
+    on_exit(fn -> File.rm(Config.Repository.IdFile.path()) end)
+  end
+
   test "creates graphs for the given repo" do
     assert Store.repository(Config.store(), id(:repository)) ==
              {:error, :repo_not_found}
@@ -21,18 +25,20 @@ defmodule Ontogen.Operations.CreateRepositoryCommandTest do
 
   @tag :tmp_dir
   test "creates a repo id file", %{tmp_dir: tmp_dir} do
-    repo_id_file = Path.join(tmp_dir, "repo_id")
-    refute File.exists?(repo_id_file)
+    File.cd!(tmp_dir, fn ->
+      repo_id_file = Config.Repository.IdFile.path() |> Path.expand()
+      refute File.exists?(repo_id_file)
 
-    assert {:ok, %CreateRepositoryCommand{} = command} =
-             CreateRepositoryCommand.new(repository(),
-               create_repo_id_file: repo_id_file
-             )
+      assert {:ok, %CreateRepositoryCommand{} = command} =
+               CreateRepositoryCommand.new(repository())
 
-    assert {:ok, _} =
-             CreateRepositoryCommand.call(command, Config.store())
+      assert {:ok, _} =
+               CreateRepositoryCommand.call(command, Config.store())
 
-    assert File.exists?(repo_id_file)
+      assert File.exists?(repo_id_file)
+    end)
+  after
+    File.rm_rf(tmp_dir)
   end
 
   test "creates graphs with the specified custom ids" do

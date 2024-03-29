@@ -2,7 +2,7 @@ defmodule Ontogen.Operations.CreateRepositoryCommand do
   use Ontogen.Command,
     params: [
       repository: nil,
-      repo_id_file_opts: []
+      create_repo_id_file: true
     ]
 
   alias Ontogen.{Repository, Dataset, ProvGraph, Store, InvalidRepoSpecError}
@@ -17,13 +17,13 @@ defmodule Ontogen.Operations.CreateRepositoryCommand do
     end
   end
 
-  def new(repository_spec, repo_id_file_opts \\ [])
+  def new(repository_spec, opts \\ [])
 
-  def new(%Repository{} = repository, repo_id_file_opts) do
+  def new(%Repository{} = repository, opts) do
     {:ok,
      %__MODULE__{
        repository: repository,
-       repo_id_file_opts: repo_id_file_opts
+       create_repo_id_file: Keyword.get(opts, :create_repo_id_file, true)
      }}
   end
 
@@ -105,14 +105,10 @@ defmodule Ontogen.Operations.CreateRepositoryCommand do
   end
 
   @impl true
-  def call(
-        %__MODULE__{repository: repository, repo_id_file_opts: repo_id_file_opts},
-        store,
-        _ \\ nil
-      ) do
+  def call(%__MODULE__{repository: repository} = command, store, _ \\ nil) do
     with :ok <- check_not_exists(store, repository),
          :ok <- init_repo_store(store, repository) do
-      IdFile.create(repository, repo_id_file_opts)
+      if command.create_repo_id_file, do: IdFile.create(repository)
 
       {:ok, repository}
     end
