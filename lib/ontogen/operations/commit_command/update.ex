@@ -2,13 +2,12 @@ defmodule Ontogen.Operations.CommitCommand.Update do
   @moduledoc false
 
   alias Ontogen.{Proposition, Repository}
-  alias Ontogen.NS.Og
-  alias RDF.NTriples
+  alias RDF.{NTriples, PrefixMap}
 
   def build(repo, commit) do
     {:ok,
      """
-     PREFIX og: <#{Og.__base_iri__()}>
+     #{[:og] |> Ontogen.NS.prefixes() |> PrefixMap.to_sparql()}
      DELETE DATA {
        #{head(repo, commit.parent)}
        #{dataset_changes(repo, commit.remove)}

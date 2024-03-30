@@ -22,4 +22,18 @@ defmodule Ontogen.NS do
     base_iri: "https://w3id.org/ontogen/config#",
     file: "ontogen_config.ttl",
     case_violations: :fail
+
+  @prefixes RDF.prefix_map(
+              og: Ontogen.NS.Og,
+              ogc: Ontogen.NS.Ogc,
+              rtc: RTC,
+              prov: PROV,
+              dcat: DCAT,
+              SKOS: SKOS,
+              foaf: FOAF
+            )
+
+  def prefixes, do: @prefixes
+
+  def prefixes(filter), do: RDF.PrefixMap.limit(@prefixes, filter)
 end

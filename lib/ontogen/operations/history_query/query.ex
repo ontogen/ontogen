@@ -1,7 +1,7 @@
 defmodule Ontogen.Operations.HistoryQuery.Query do
   @moduledoc false
 
-  alias Ontogen.NS.Og
+  alias RDF.PrefixMap
 
   import Ontogen.QueryUtils
 
@@ -11,8 +11,7 @@ defmodule Ontogen.Operations.HistoryQuery.Query do
 
   defp query(subject, range) do
     """
-    PREFIX og: <#{Og.__base_iri__()}>
-    PREFIX rtc: <#{RTC.__base_iri__()}>
+    #{[:og, :rtc] |> Ontogen.NS.prefixes() |> PrefixMap.to_sparql()}
     CONSTRUCT { #{commit_statements_construct_pattern()} }
     WHERE {
       <#{range.target}> og:parentCommit* ?commit .
