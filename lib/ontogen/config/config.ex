@@ -18,6 +18,8 @@ defmodule Ontogen.Config do
 
   @default_load_paths Keyword.keys(@paths)
 
+  @prefixes Ontogen.NS.prefixes(~w[og ogc foaf]a)
+
   use Grax.Schema
   use Agent
 
@@ -40,6 +42,11 @@ defmodule Ontogen.Config do
 
   def new!(attrs) when is_list(attrs) do
     build!(id(), attrs)
+  end
+
+  def to_rdf(%__MODULE__{} = config, opts \\ []) do
+    opts = Keyword.put_new(opts, :prefixes, @prefixes)
+    Grax.to_rdf(config, opts)
   end
 
   @doc """
