@@ -6,6 +6,8 @@ defmodule Ontogen.Store.Adapter do
   alias Ontogen.Store
   alias RDF.{Graph, IRI}
 
+  @type type :: module
+
   @type query :: String.t()
   @type update :: String.t()
   @type graph :: IRI.coercible()
@@ -45,4 +47,36 @@ defmodule Ontogen.Store.Adapter do
 
   @callback drop(Store.t(), graph() | :all | :default | :named, Keyword.t()) ::
               :ok | {:error, any}
+
+  @doc """
+  Returns the `Ontogen.Store.Adapter` module for the given string.
+
+  ## Example
+
+      iex> Ontogen.Store.Adapter.type("Oxigraph")
+      Ontogen.Store.Oxigraph
+
+      iex> Ontogen.Store.Adapter.type("Commit")
+      nil
+
+      iex> Ontogen.Store.Adapter.type("NonExisting")
+      nil
+
+  """
+  @spec type(binary) :: type() | nil
+  def type(string) when is_binary(string) do
+    module = Module.concat(Ontogen.Store, string)
+
+    if type?(module) do
+      module
+    end
+  end
+
+  @doc """
+  Checks if the given `module` is a `Ontogen.Store.Adapter` module.
+  """
+  @spec type?(module) :: boolean
+  def type?(module) do
+    Code.ensure_loaded?(module) and function_exported?(module, :insert_data, 4)
+  end
 end
