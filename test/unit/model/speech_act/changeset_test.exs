@@ -76,4 +76,44 @@ defmodule Ontogen.SpeechAct.ChangesetTest do
                }
     end
   end
+
+  test "to_rdf/1" do
+    assert Changeset.new!(
+             add: statement(1),
+             update: statement(2),
+             replace: statement(3),
+             remove: statement(4)
+           )
+           |> Changeset.to_rdf() ==
+             RDF.Dataset.new()
+             |> RDF.Dataset.add(statement(1), graph: Og.Addition)
+             |> RDF.Dataset.add(statement(2), graph: Og.Update)
+             |> RDF.Dataset.add(statement(3), graph: Og.Replacement)
+             |> RDF.Dataset.add(statement(4), graph: Og.Removal)
+
+    assert Changeset.new!(add: statement(1))
+           |> Changeset.to_rdf() ==
+             RDF.Dataset.new()
+             |> RDF.Dataset.add(statement(1), graph: Og.Addition)
+  end
+
+  test "from_rdf/1" do
+    assert RDF.Dataset.new()
+           |> RDF.Dataset.add(statement(1), graph: Og.Addition)
+           |> RDF.Dataset.add(statement(2), graph: Og.Update)
+           |> RDF.Dataset.add(statement(3), graph: Og.Replacement)
+           |> RDF.Dataset.add(statement(4), graph: Og.Removal)
+           |> Changeset.from_rdf() ==
+             Changeset.new!(
+               add: statement(1),
+               update: statement(2),
+               replace: statement(3),
+               remove: statement(4)
+             )
+
+    assert RDF.Dataset.new()
+           |> RDF.Dataset.add(statement(1), graph: Og.Addition)
+           |> Changeset.from_rdf() ==
+             Changeset.new!(add: statement(1))
+  end
 end

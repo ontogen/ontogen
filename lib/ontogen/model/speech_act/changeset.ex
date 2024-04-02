@@ -76,4 +76,7 @@ defmodule Ontogen.SpeechAct.Changeset do
   def validate(%__MODULE__{} = changeset) do
     Validation.validate(changeset)
   end
+
+  def to_rdf(%__MODULE__{} = changeset), do: Helper.to_rdf(changeset)
+  def from_rdf(%RDF.Dataset{} = dataset), do: Helper.from_rdf(dataset, __MODULE__)
 end

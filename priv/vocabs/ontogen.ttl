@@ -176,3 +176,10 @@ og:ProvGraph a rdfs:Class
     ; rdfs:subClassOf prov:Bundle
     ; rdfs:label "Ontogen provenance graph"
 .
+
+
+og:Addition rdfs:comment "Graph name for additions in a RDF encoded changeset".
+og:Removal rdfs:comment "Graph name for removals in a RDF encoded changeset".
+og:Update rdfs:comment "Graph name for updates in a RDF encoded changeset".
+og:Replacement rdfs:comment "Graph name for replacements in a RDF encoded changeset".
+og:Overwrite rdfs:comment "Graph name for overwrites in a RDF encoded changeset".

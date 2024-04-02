@@ -337,4 +337,48 @@ defmodule Ontogen.Commit.ChangesetTest do
                overwrite: graph([{EX.S, EX.p2(), EX.O2}])
              }
   end
+
+  test "to_rdf/1" do
+    assert Changeset.new!(
+             add: statement(1),
+             update: statement(2),
+             replace: statement(3),
+             remove: statement(4),
+             overwrite: statement(5)
+           )
+           |> Changeset.to_rdf() ==
+             RDF.Dataset.new()
+             |> RDF.Dataset.add(statement(1), graph: Og.Addition)
+             |> RDF.Dataset.add(statement(2), graph: Og.Update)
+             |> RDF.Dataset.add(statement(3), graph: Og.Replacement)
+             |> RDF.Dataset.add(statement(4), graph: Og.Removal)
+             |> RDF.Dataset.add(statement(5), graph: Og.Overwrite)
+
+    assert Changeset.new!(add: statement(1))
+           |> Changeset.to_rdf() ==
+             RDF.Dataset.new()
+             |> RDF.Dataset.add(statement(1), graph: Og.Addition)
+  end
+
+  test "from_rdf/1" do
+    assert RDF.Dataset.new()
+           |> RDF.Dataset.add(statement(1), graph: Og.Addition)
+           |> RDF.Dataset.add(statement(2), graph: Og.Update)
+           |> RDF.Dataset.add(statement(3), graph: Og.Replacement)
+           |> RDF.Dataset.add(statement(4), graph: Og.Removal)
+           |> RDF.Dataset.add(statement(5), graph: Og.Overwrite)
+           |> Changeset.from_rdf() ==
+             Changeset.new!(
+               add: statement(1),
+               update: statement(2),
+               replace: statement(3),
+               remove: statement(4),
+               overwrite: statement(5)
+             )
+
+    assert RDF.Dataset.new()
+           |> RDF.Dataset.add(statement(1), graph: Og.Addition)
+           |> Changeset.from_rdf() ==
+             Changeset.new!(add: statement(1))
+  end
 end

@@ -3,7 +3,8 @@ defmodule Ontogen.Changeset.Helper do
 
   alias Ontogen.{Proposition, InvalidChangesetError}
   alias Ontogen.Changeset.Action
-  alias RDF.Graph
+  alias Ontogen.NS.Og
+  alias RDF.{Graph, Dataset}
 
   def to_graph(nil), do: nil
   def to_graph([]), do: nil
@@ -54,4 +55,34 @@ defmodule Ontogen.Changeset.Helper do
 
     struct(struct, with_propositions)
   end
+
+  def to_rdf(%_type{overwrite: overwrite} = changeset) do
+    changeset
+    |> Map.delete(:overwrite)
+    |> to_rdf()
+    |> dataset_add(overwrite, graph: Og.Overwrite)
+  end
+
+  def to_rdf(%_type{} = changeset) do
+    Dataset.new()
+    |> dataset_add(changeset.add, graph: Og.Addition)
+    |> dataset_add(changeset.remove, graph: Og.Removal)
+    |> dataset_add(changeset.update, graph: Og.Update)
+    |> dataset_add(changeset.replace, graph: Og.Replacement)
+  end
+
+  def from_rdf(%Dataset{} = dataset, type) do
+    type.new!(%{
+      add: dataset |> Dataset.graph(Og.Addition) |> reset_name(),
+      update: dataset |> Dataset.graph(Og.Update) |> reset_name(),
+      replace: dataset |> Dataset.graph(Og.Replacement) |> reset_name(),
+      remove: dataset |> Dataset.graph(Og.Removal) |> reset_name(),
+      overwrite: dataset |> Dataset.graph(Og.Overwrite) |> reset_name()
+    })
+  end
+
+  defp dataset_add(dataset, nil, _), do: dataset
+  defp dataset_add(dataset, additions, opts), do: Dataset.add(dataset, additions, opts)
+  defp reset_name(nil), do: nil
+  defp reset_name(graph), do: Graph.change_name(graph, nil)
 end
