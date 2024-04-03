@@ -4,9 +4,11 @@ defmodule Ontogen.SpeechAct.Changeset do
   alias RDF.Graph
 
   import Action, only: [is_action_map: 1]
-  import Helper, only: [to_graph: 1]
+  import Helper
 
-  defstruct Action.fields() -- [:overwrite]
+  @fields Action.fields() -- [:overwrite]
+
+  defstruct @fields
 
   @type t :: %__MODULE__{
           add: Graph.t() | nil,
@@ -14,6 +16,14 @@ defmodule Ontogen.SpeechAct.Changeset do
           replace: Graph.t() | nil,
           remove: Graph.t() | nil
         }
+
+  def fields, do: @fields
+
+  @doc """
+  Creates the empty changeset.
+  """
+  @spec empty :: t()
+  def empty, do: %__MODULE__{}
 
   @doc """
   Creates a new valid changeset.
@@ -79,4 +89,49 @@ defmodule Ontogen.SpeechAct.Changeset do
 
   def to_rdf(%__MODULE__{} = changeset), do: Helper.to_rdf(changeset)
   def from_rdf(%RDF.Dataset{} = dataset), do: Helper.from_rdf(dataset, __MODULE__)
+
+  @doc """
+  Updates the changes of a speech act changeset.
+  """
+  def update(%__MODULE__{} = changeset, changes) do
+    do_update(changeset, changes)
+  end
+
+  def update(changeset, changes) do
+    with {:ok, changeset} <- new(changeset) do
+      do_update(changeset, changes)
+    else
+      {:error, error} -> raise error
+    end
+  end
+
+  defp do_update(changeset, [{action, update}]) do
+    update = to_graph(update)
+
+    if update && not Graph.empty?(update) do
+      Enum.reduce(
+        @fields -- [action],
+        Map.update!(changeset, action, &graph_add(&1, update)),
+        fn other_actions, changeset ->
+          Map.update!(changeset, other_actions, &graph_delete(&1, update))
+        end
+      )
+    else
+      changeset
+    end
+  end
+
+  defp do_update(changeset, %SpeechAct{} = speech_act) do
+    do_update(changeset, new!(speech_act))
+  end
+
+  defp do_update(changeset, %_{} = change_struct) do
+    do_update(changeset, Map.from_struct(change_struct))
+  end
+
+  defp do_update(changeset, changes) when is_list(changes) or is_map(changeset) do
+    changes
+    |> Enum.filter(fn {action, _} -> action in @fields end)
+    |> Enum.reduce(changeset, &do_update(&2, [&1]))
+  end
 end

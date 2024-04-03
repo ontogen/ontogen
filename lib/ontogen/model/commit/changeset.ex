@@ -4,7 +4,7 @@ defmodule Ontogen.Commit.Changeset do
   alias RDF.Graph
 
   import Action, only: [is_action_map: 1]
-  import Helper, only: [to_graph: 1]
+  import Helper
 
   defstruct Action.fields()
 
@@ -312,17 +312,6 @@ defmodule Ontogen.Commit.Changeset do
       overwrite: graph_take(changeset.overwrite, resource)
     }
   end
-
-  defp graph_add(nil, additions), do: graph_cleanup(additions)
-  defp graph_add(graph, nil), do: graph_cleanup(graph)
-  defp graph_add(graph, additions), do: Graph.add(graph, additions)
-  defp graph_delete(nil, _), do: nil
-  defp graph_delete(graph, nil), do: graph_cleanup(graph)
-  defp graph_delete(graph, removals), do: graph |> Graph.delete(removals) |> graph_cleanup()
-  defp graph_intersection(nil, _), do: Graph.new()
-  defp graph_intersection(graph1, graph2), do: Graph.intersection(graph1, graph2)
-  defp graph_cleanup(nil), do: nil
-  defp graph_cleanup(graph), do: unless(Graph.empty?(graph), do: graph)
 
   defp graph_take(nil, _), do: nil
 

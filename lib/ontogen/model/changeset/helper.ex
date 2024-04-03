@@ -81,6 +81,17 @@ defmodule Ontogen.Changeset.Helper do
     })
   end
 
+  def graph_add(nil, additions), do: graph_cleanup(additions)
+  def graph_add(graph, nil), do: graph_cleanup(graph)
+  def graph_add(graph, additions), do: Graph.add(graph, additions)
+  def graph_delete(nil, _), do: nil
+  def graph_delete(graph, nil), do: graph_cleanup(graph)
+  def graph_delete(graph, removals), do: graph |> Graph.delete(removals) |> graph_cleanup()
+  def graph_intersection(nil, _), do: Graph.new()
+  def graph_intersection(graph1, graph2), do: Graph.intersection(graph1, graph2)
+  def graph_cleanup(nil), do: nil
+  def graph_cleanup(graph), do: unless(Graph.empty?(graph), do: graph)
+
   defp dataset_add(dataset, nil, _), do: dataset
   defp dataset_add(dataset, additions, opts), do: Dataset.add(dataset, additions, opts)
   defp reset_name(nil), do: nil
