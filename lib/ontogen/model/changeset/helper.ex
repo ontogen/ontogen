@@ -17,13 +17,13 @@ defmodule Ontogen.Changeset.Helper do
 
     case Keyword.pop(keywords, :changeset) do
       {nil, keywords} ->
-        with {:ok, changeset} <- type.new(actions) do
+        with {:ok, changeset} <- type.new(actions, keywords) do
           {:ok, changeset, keywords}
         end
 
       {changeset, keywords} ->
         if Action.empty?(actions) do
-          with {:ok, changeset} <- to_changeset(type, changeset) do
+          with {:ok, changeset} <- to_changeset(type, changeset, keywords) do
             {:ok, changeset, keywords}
           end
         else
@@ -35,13 +35,13 @@ defmodule Ontogen.Changeset.Helper do
     end
   end
 
-  defp to_changeset(type, %type{} = changeset), do: type.validate(changeset)
+  defp to_changeset(type, %type{} = changeset, opts), do: type.validate(changeset, opts)
 
-  defp to_changeset(type, changeset) do
+  defp to_changeset(type, changeset, opts) do
     type
     |> struct!(changeset)
     |> Map.from_struct()
-    |> type.new()
+    |> type.new(opts)
   end
 
   def copy_to_proposition_struct(changeset, struct) do
@@ -71,14 +71,17 @@ defmodule Ontogen.Changeset.Helper do
     |> dataset_add(changeset.replace, graph: Og.Replacement)
   end
 
-  def from_rdf(%Dataset{} = dataset, type) do
-    type.new!(%{
-      add: dataset |> Dataset.graph(Og.Addition) |> reset_name(),
-      update: dataset |> Dataset.graph(Og.Update) |> reset_name(),
-      replace: dataset |> Dataset.graph(Og.Replacement) |> reset_name(),
-      remove: dataset |> Dataset.graph(Og.Removal) |> reset_name(),
-      overwrite: dataset |> Dataset.graph(Og.Overwrite) |> reset_name()
-    })
+  def from_rdf(%Dataset{} = dataset, type, opts \\ []) do
+    type.new!(
+      %{
+        add: dataset |> Dataset.graph(Og.Addition) |> reset_name(),
+        update: dataset |> Dataset.graph(Og.Update) |> reset_name(),
+        replace: dataset |> Dataset.graph(Og.Replacement) |> reset_name(),
+        remove: dataset |> Dataset.graph(Og.Removal) |> reset_name(),
+        overwrite: dataset |> Dataset.graph(Og.Overwrite) |> reset_name()
+      },
+      opts
+    )
   end
 
   def graph_add(nil, additions), do: graph_cleanup(additions)

@@ -25,12 +25,14 @@ defmodule Ontogen.Commit.Changeset do
   @doc """
   Creates a new valid changeset.
   """
-  @spec new(t() | Commit.t() | keyword) :: {:ok, t()} | {:error, any()}
-  def new(%__MODULE__{} = changeset) do
-    validate(changeset)
+  @spec new(t() | Commit.t() | keyword, keyword) :: {:ok, t()} | {:error, any()}
+  def new(changes, opts \\ [])
+
+  def new(%__MODULE__{} = changeset, opts) do
+    validate(changeset, opts)
   end
 
-  def new(%Commit{} = commit) do
+  def new(%Commit{} = commit, opts) do
     %__MODULE__{
       add: to_graph(commit.add),
       update: to_graph(commit.update),
@@ -38,10 +40,10 @@ defmodule Ontogen.Commit.Changeset do
       remove: to_graph(commit.remove),
       overwrite: to_graph(commit.overwrite)
     }
-    |> validate()
+    |> validate(opts)
   end
 
-  def new(%{} = action_map) when is_action_map(action_map) do
+  def new(%{} = action_map, opts) when is_action_map(action_map) do
     %__MODULE__{
       add: to_graph(Map.get(action_map, :add)),
       update: to_graph(Map.get(action_map, :update)),
@@ -49,11 +51,11 @@ defmodule Ontogen.Commit.Changeset do
       remove: to_graph(Map.get(action_map, :remove)),
       overwrite: to_graph(Map.get(action_map, :overwrite))
     }
-    |> validate()
+    |> validate(opts)
   end
 
-  def new(args) when is_list(args) do
-    with {:ok, changeset, _} <- extract(args) do
+  def new(args, opts) when is_list(args) do
+    with {:ok, changeset, _} <- extract(args ++ opts) do
       {:ok, changeset}
     end
   end
@@ -63,9 +65,9 @@ defmodule Ontogen.Commit.Changeset do
 
   As opposed to `new/1` this function fails in error cases.
   """
-  @spec new!(t() | Commit.t() | keyword) :: t()
-  def new!(args) do
-    case new(args) do
+  @spec new!(t() | Commit.t() | keyword, keyword) :: t()
+  def new!(args, opts \\ []) do
+    case new(args, opts) do
       {:ok, changeset} -> changeset
       {:error, error} -> raise error
     end
@@ -84,8 +86,8 @@ defmodule Ontogen.Commit.Changeset do
   If valid, the given structure is returned unchanged in an `:ok` tuple.
   Otherwise, an `:error` tuple is returned.
   """
-  def validate(%__MODULE__{} = changeset) do
-    Validation.validate(changeset)
+  def validate(%__MODULE__{} = changeset, opts \\ []) do
+    Validation.validate(changeset, opts)
   end
 
   @doc """
@@ -97,8 +99,9 @@ defmodule Ontogen.Commit.Changeset do
   def empty?(%__MODULE__{}), do: false
 
   def to_rdf(%__MODULE__{} = changeset), do: Helper.to_rdf(changeset)
-  def from_rdf(%RDF.Dataset{} = dataset), do: Helper.from_rdf(dataset, __MODULE__)
 
+  def from_rdf(%RDF.Dataset{} = dataset, opts \\ []),
+    do: Helper.from_rdf(dataset, __MODULE__, opts)
   @merge_limitations_warning """
   > #### Warning {: .warning}
   >

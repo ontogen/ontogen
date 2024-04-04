@@ -28,33 +28,35 @@ defmodule Ontogen.SpeechAct.Changeset do
   @doc """
   Creates a new valid changeset.
   """
-  @spec new(t() | SpeechAct.t() | keyword) :: {:ok, t()} | {:error, any()}
-  def new(%__MODULE__{} = changeset) do
-    validate(changeset)
+  @spec new(t() | SpeechAct.t() | keyword, keyword) :: {:ok, t()} | {:error, any()}
+  def new(changes, opts \\ [])
+
+  def new(%__MODULE__{} = changeset, opts) do
+    validate(changeset, opts)
   end
 
-  def new(%SpeechAct{} = speech_act) do
+  def new(%SpeechAct{} = speech_act, opts) do
     %__MODULE__{
       add: to_graph(speech_act.add),
       update: to_graph(speech_act.update),
       replace: to_graph(speech_act.replace),
       remove: to_graph(speech_act.remove)
     }
-    |> validate()
+    |> validate(opts)
   end
 
-  def new(%{} = action_map) when is_action_map(action_map) do
+  def new(%{} = action_map, opts) when is_action_map(action_map) do
     %__MODULE__{
       add: to_graph(Map.get(action_map, :add)),
       update: to_graph(Map.get(action_map, :update)),
       replace: to_graph(Map.get(action_map, :replace)),
       remove: to_graph(Map.get(action_map, :remove))
     }
-    |> validate()
+    |> validate(opts)
   end
 
-  def new(args) when is_list(args) do
-    with {:ok, changeset, _} <- extract(args) do
+  def new(args, opts) when is_list(args) do
+    with {:ok, changeset, _} <- extract(args ++ opts) do
       {:ok, changeset}
     end
   end
@@ -64,9 +66,9 @@ defmodule Ontogen.SpeechAct.Changeset do
 
   As opposed to `new/1` this function fails in error cases.
   """
-  @spec new!(t() | SpeechAct.t() | keyword) :: t()
-  def new!(args) do
-    case new(args) do
+  @spec new!(t() | SpeechAct.t() | keyword, keyword) :: t()
+  def new!(args, opts \\ []) do
+    case new(args, opts) do
       {:ok, changeset} -> changeset
       {:error, error} -> raise error
     end
@@ -83,12 +85,20 @@ defmodule Ontogen.SpeechAct.Changeset do
   If valid, the given structure is returned unchanged in an `:ok` tuple.
   Otherwise, an `:error` tuple is returned.
   """
-  def validate(%__MODULE__{} = changeset) do
-    Validation.validate(changeset)
+  def validate(%__MODULE__{} = changeset, opts \\ []) do
+    Validation.validate(changeset, opts)
   end
 
+  @doc """
+  Returns if the given changeset is empty.
+  """
+  def empty?(%__MODULE__{add: nil, update: nil, replace: nil, remove: nil}), do: true
+  def empty?(%__MODULE__{}), do: false
+
   def to_rdf(%__MODULE__{} = changeset), do: Helper.to_rdf(changeset)
-  def from_rdf(%RDF.Dataset{} = dataset), do: Helper.from_rdf(dataset, __MODULE__)
+
+  def from_rdf(%RDF.Dataset{} = dataset, opts \\ []),
+    do: Helper.from_rdf(dataset, __MODULE__, opts)
 
   @doc """
   Updates the changes of a speech act changeset.

@@ -2,13 +2,26 @@ defmodule Ontogen.Changeset.ValidationTest do
   use OntogenCase
 
   alias Ontogen.Changeset.Validation
-  alias Ontogen.InvalidChangesetError
-  alias Ontogen.Commit
+  alias Ontogen.{Commit, SpeechAct, InvalidChangesetError}
 
   doctest Ontogen.Changeset.Validation
 
   test "valid changeset" do
     assert Validation.validate(commit_changeset()) == {:ok, commit_changeset()}
+  end
+
+  test "empty changeset" do
+    assert Validation.validate(SpeechAct.Changeset.empty()) ==
+             {:error, InvalidChangesetError.exception(reason: :empty)}
+
+    assert Validation.validate(Commit.Changeset.empty()) ==
+             {:error, InvalidChangesetError.exception(reason: :empty)}
+
+    assert Validation.validate(SpeechAct.Changeset.empty(), allow_empty: true) ==
+             {:ok, SpeechAct.Changeset.empty()}
+
+    assert Validation.validate(Commit.Changeset.empty(), allow_empty: true) ==
+             {:ok, Commit.Changeset.empty()}
   end
 
   test "overlapping add and remove statements" do

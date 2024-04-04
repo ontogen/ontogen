@@ -8,9 +8,13 @@ defmodule Ontogen.Changeset.Validation do
   If valid, the given structure is returned unchanged in an `:ok` tuple.
   Otherwise, an `:error` tuple is returned.
   """
-  def validate(%{add: add, update: update, replace: replace, remove: remove} = changeset) do
+  def validate(
+        %{add: add, update: update, replace: replace, remove: remove} = changeset,
+        opts \\ []
+      ) do
     with :ok <-
            check_statements_presence(
+             Keyword.get(opts, :allow_empty, false),
              add,
              update,
              replace,
@@ -25,10 +29,10 @@ defmodule Ontogen.Changeset.Validation do
     end
   end
 
-  defp check_statements_presence(nil, nil, nil, nil, nil),
+  defp check_statements_presence(false, nil, nil, nil, nil, nil),
     do: {:error, InvalidChangesetError.exception(reason: :empty)}
 
-  defp check_statements_presence(_, _, _, _, _), do: :ok
+  defp check_statements_presence(_, _, _, _, _, _), do: :ok
 
   defp check_no_add_remove_overlap(add, update, replace, remove) do
     overlapping_statements =

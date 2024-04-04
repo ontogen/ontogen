@@ -39,6 +39,15 @@ defmodule Ontogen.SpeechAct.ChangesetTest do
     test "without statements" do
       assert Changeset.new(add: nil) ==
                {:error, InvalidChangesetError.exception(reason: :empty)}
+
+      assert Changeset.new(allow_empty: true) ==
+               {:ok, Changeset.empty()}
+
+      assert Changeset.new([add: nil], allow_empty: true) ==
+               {:ok, Changeset.empty()}
+
+      assert Changeset.new([changeset: []], allow_empty: true) ==
+               {:ok, Changeset.empty()}
     end
 
     test "validates the changeset" do
