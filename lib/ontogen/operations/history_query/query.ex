@@ -51,7 +51,9 @@ defmodule Ontogen.Operations.HistoryQuery.Query do
         ?commit_p ?commit_o ;
         og:committer ?committer .
 
-      ?committer ?committer_p ?committer_o .
+      OPTIONAL {
+        ?committer ?committer_p ?committer_o .
+      }
 
       {
         {
@@ -108,7 +110,9 @@ defmodule Ontogen.Operations.HistoryQuery.Query do
           ?speech_act_p ?speech_act_o ;
           og:speaker ?speaker .
 
-        ?speaker ?speaker_p ?speaker_o .
+        OPTIONAL {
+          ?speaker ?speaker_p ?speaker_o .
+        }
 
         OPTIONAL {
           ?speech_act og:add ?add .

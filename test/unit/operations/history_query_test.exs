@@ -72,7 +72,8 @@ defmodule Ontogen.Operations.HistoryQueryTest do
         [
           # this leads to a different effective change
           add: [{EX.S4, EX.p4(), EX.O4}, {EX.S3, EX.p3(), "foo"}],
-          message: "Third commit"
+          message: "Third commit",
+          committer: id(:agent_john)
         ],
         [
           # this leads to a different effective change
