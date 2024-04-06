@@ -2,9 +2,9 @@ defmodule Ontogen.Operations.CommitCommand.Update do
   @moduledoc false
 
   alias Ontogen.{Proposition, Repository}
-  alias RDF.{NTriples, PrefixMap}
+  alias RDF.{NTriples, Graph, PrefixMap}
 
-  def build(repo, commit) do
+  def build(repo, commit, additional_prov_metadata) do
     {:ok,
      """
      #{[:og] |> Ontogen.NS.prefixes() |> PrefixMap.to_sparql()}
@@ -20,6 +20,7 @@ defmodule Ontogen.Operations.CommitCommand.Update do
        #{dataset_changes(repo, commit.replace)}
        #{provenance(repo, commit)}
        #{provenance(repo, commit.speech_act)}
+       #{provenance(repo, additional_prov_metadata)}
      }
      """}
   end
@@ -42,8 +43,12 @@ defmodule Ontogen.Operations.CommitCommand.Update do
 
   defp provenance(_, nil), do: ""
 
-  defp provenance(repo, element) do
-    "GRAPH <#{Repository.prov_graph_id(repo)}> { #{element |> Grax.to_rdf!() |> triples()} }"
+  defp provenance(repo, %Graph{} = graph) do
+    "GRAPH <#{Repository.prov_graph_id(repo)}> { #{triples(graph)} }"
+  end
+
+  defp provenance(repo, %_grax_schema{__id__: _} = element) do
+    provenance(repo, Grax.to_rdf!(element))
   end
 
   defp triples(nil), do: ""

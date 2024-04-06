@@ -93,6 +93,58 @@ defmodule Ontogen.Operations.CommitCommandTest do
               )}
   end
 
+  test "additional prov metadata" do
+    refute Ontogen.head()
+
+    expected_add = Proposition.new!(graph())
+    message = "Initial commit"
+
+    data_source = dataset() |> Grax.add_additional_statements({EX.p2(), EX.O2})
+    speaker = agent() |> Grax.add_additional_statements({EX.p3(), EX.O3})
+
+    speech_act =
+      speech_act(
+        add: graph(),
+        data_source: data_source,
+        speaker: speaker,
+        time: datetime(-1)
+      )
+      |> Grax.add_additional_statements({EX.p1(), EX.O1})
+
+    committer = agent(:agent_jane) |> Grax.add_additional_statements({EX.p4(), EX.O4})
+
+    assert {:ok, %Ontogen.Commit{} = commit} =
+             Ontogen.commit(
+               speech_act: speech_act,
+               committer: committer,
+               time: datetime(),
+               message: message,
+               additional_prov_metadata: graph([1])
+             )
+
+    assert commit.parent == nil
+    assert commit.speech_act == speech_act
+    assert commit.committer == committer
+    assert commit.add == expected_add
+
+    assert_repo_state(
+      commit,
+      graph(),
+      [
+        graph([1])
+        | [
+            commit,
+            speech_act,
+            expected_add,
+            data_source,
+            speaker,
+            committer
+          ]
+          |> Enum.map(&Grax.to_rdf!/1)
+      ]
+    )
+  end
+
   describe "defaults" do
     # TODO: This is a flaky test on Oxigraph due to this issue: https://github.com/oxigraph/oxigraph/issues/524
     test "with implicit speech_act" do

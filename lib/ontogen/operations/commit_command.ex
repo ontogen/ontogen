@@ -2,6 +2,7 @@ defmodule Ontogen.Operations.CommitCommand do
   use Ontogen.Command,
     params: [
       changes: nil,
+      additional_prov_metadata: nil,
       on_no_effective_changes: :error,
       commit_attrs: nil
     ]
@@ -28,9 +29,16 @@ defmodule Ontogen.Operations.CommitCommand do
 
   def new(args) do
     {no_effective_change_handler, args} = extract_no_effective_change_handler(args)
+    {additional_prov_metadata, args} = Keyword.pop(args, :additional_prov_metadata)
 
     with {:ok, command} <- do_new(extract_speech_act(args), Keyword.pop(args, :revert)) do
-      {:ok, %__MODULE__{command | on_no_effective_changes: no_effective_change_handler}}
+      {:ok,
+       %__MODULE__{
+         command
+         | additional_prov_metadata:
+             additional_prov_metadata && RDF.graph(additional_prov_metadata),
+           on_no_effective_changes: no_effective_change_handler
+       }}
     end
   end
 
@@ -98,7 +106,7 @@ defmodule Ontogen.Operations.CommitCommand do
 
     with {:ok, effective_changeset} <- effective_changeset(command, store, repo),
          {:ok, commit} <- build_commit(command, effective_changeset, parent_commit) do
-      apply_commit(commit, store, repo)
+      apply_commit(commit, command.additional_prov_metadata, store, repo)
     end
   end
 
@@ -126,8 +134,8 @@ defmodule Ontogen.Operations.CommitCommand do
     |> Commit.new()
   end
 
-  defp apply_commit(commit, store, repo) do
-    with {:ok, update} <- Update.build(repo, commit),
+  defp apply_commit(commit, additional_prov_metadata, store, repo) do
+    with {:ok, update} <- Update.build(repo, commit, additional_prov_metadata),
          :ok <- Store.update(store, nil, update),
          {:ok, new_repo} <- Repository.set_head(repo, commit) do
       {:ok, new_repo, commit}
