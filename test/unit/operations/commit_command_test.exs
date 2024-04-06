@@ -33,30 +33,17 @@ defmodule Ontogen.Operations.CommitCommandTest do
     assert commit.time == time
     assert commit.message == message
 
-    # updates the head in the repo
-    assert Ontogen.head() == commit
-
-    # updates the repo graph in the store
-    assert Ontogen.repository() |> flatten_property(:head) == stored_repo()
-
-    # inserts the statements
-    assert Ontogen.dataset() == {:ok, graph()}
-
-    # inserts the provenance
-    assert Ontogen.prov_graph() ==
-             {:ok,
-              RDF.graph(
-                [
-                  [
-                    commit,
-                    speech_act,
-                    expected_add,
-                    committer
-                  ]
-                  |> Enum.map(&Grax.to_rdf!/1)
-                ],
-                prefixes: ProvGraph.prefixes()
-              )}
+    assert_repo_state(
+      commit,
+      graph(),
+      [
+        commit,
+        speech_act,
+        expected_add,
+        committer
+      ]
+      |> Enum.map(&Grax.to_rdf!/1)
+    )
   end
 
   test "initial commit with explicit speech_act" do
@@ -85,28 +72,17 @@ defmodule Ontogen.Operations.CommitCommandTest do
                message: message
              )
 
-    # updates the head in the dataset of the repo
-    assert Ontogen.head() == commit
-
-    # updates the repo graph in the store
-    assert Ontogen.repository() |> flatten_property(:head) == stored_repo()
-
-    # inserts the uttered statements
-    assert Ontogen.dataset() == {:ok, graph()}
-
-    # inserts the provenance
-    assert Ontogen.prov_graph() ==
-             {:ok,
-              RDF.graph(
-                [
-                  commit,
-                  expected_add,
-                  committer,
-                  speech_act()
-                ]
-                |> Enum.map(&Grax.to_rdf!/1),
-                prefixes: ProvGraph.prefixes()
-              )}
+    assert_repo_state(
+      commit,
+      graph(),
+      [
+        commit,
+        speech_act,
+        expected_add,
+        committer
+      ]
+      |> Enum.map(&Grax.to_rdf!/1)
+    )
   end
 
   test "when direct changes and a speech_act given" do
@@ -173,19 +149,17 @@ defmodule Ontogen.Operations.CommitCommandTest do
 
       assert commit.speech_act == speech_act()
 
-      # inserts the provenance
-      assert Ontogen.prov_graph() ==
-               {:ok,
-                RDF.graph(
-                  [
-                    commit,
-                    expected_add,
-                    committer,
-                    speech_act()
-                  ]
-                  |> Enum.map(&Grax.to_rdf!/1),
-                  prefixes: ProvGraph.prefixes()
-                )}
+      assert_repo_state(
+        commit,
+        graph(),
+        [
+          commit,
+          expected_add,
+          committer,
+          speech_act()
+        ]
+        |> Enum.map(&Grax.to_rdf!/1)
+      )
     end
   end
 
@@ -208,32 +182,20 @@ defmodule Ontogen.Operations.CommitCommandTest do
     assert second_commit.add == Proposition.new!(add)
     assert second_commit.remove == Proposition.new!(remove)
 
-    # updates the head in the dataset of the repo
-    assert Ontogen.head() == second_commit
-
-    # updates the repo graph in the store
-    assert Ontogen.repository() |> flatten_property(:head) == stored_repo()
-
-    # applies the changes
-    assert Ontogen.dataset() ==
-             {:ok, graph() |> Graph.add(add) |> Graph.delete(remove)}
-
-    # inserts the provenance
-    assert Ontogen.prov_graph() ==
-             {:ok,
-              RDF.graph(
-                [
-                  first_commit,
-                  second_commit,
-                  Proposition.new!(graph()),
-                  Proposition.new!(add),
-                  Proposition.new!(remove),
-                  Config.user(),
-                  agent(:agent_jane)
-                ]
-                |> Enum.map(&Grax.to_rdf!/1),
-                prefixes: ProvGraph.prefixes()
-              )}
+    assert_repo_state(
+      second_commit,
+      graph() |> Graph.add(add) |> Graph.delete(remove),
+      [
+        first_commit,
+        second_commit,
+        Proposition.new!(graph()),
+        Proposition.new!(add),
+        Proposition.new!(remove),
+        Config.user(),
+        agent(:agent_jane)
+      ]
+      |> Enum.map(&Grax.to_rdf!/1)
+    )
   end
 
   test "update" do
@@ -265,33 +227,23 @@ defmodule Ontogen.Operations.CommitCommandTest do
     assert new_commit.overwrite == expected_remove_proposition
     assert new_commit.remove == nil
 
-    # updates the head in the dataset of the repo
-    assert Ontogen.head() == new_commit
-
-    # applies the changes
-    assert Ontogen.dataset() ==
-             {:ok,
-              graph()
-              |> Graph.add(expected_update)
-              |> Graph.delete(expected_remove)}
-
-    # inserts the provenance
-    assert Ontogen.prov_graph() ==
-             {:ok,
-              RDF.graph(
-                [
-                  last_commit,
-                  new_commit,
-                  Proposition.new!(graph()),
-                  expected_update_proposition,
-                  expected_remove_proposition,
-                  original_update,
-                  Config.user(),
-                  agent(:agent_jane)
-                ]
-                |> Enum.map(&Grax.to_rdf!/1),
-                prefixes: ProvGraph.prefixes()
-              )}
+    assert_repo_state(
+      new_commit,
+      graph()
+      |> Graph.add(expected_update)
+      |> Graph.delete(expected_remove),
+      [
+        last_commit,
+        new_commit,
+        Proposition.new!(graph()),
+        expected_update_proposition,
+        expected_remove_proposition,
+        original_update,
+        Config.user(),
+        agent(:agent_jane)
+      ]
+      |> Enum.map(&Grax.to_rdf!/1)
+    )
   end
 
   test "replace (with speech_act)" do
@@ -332,35 +284,25 @@ defmodule Ontogen.Operations.CommitCommandTest do
     assert new_commit.replace == replace_proposition
     assert new_commit.overwrite == overwrite_proposition
 
-    # updates the head in the dataset of the repo
-    assert Ontogen.head() == new_commit
-
-    # applies the changes
-    assert Ontogen.dataset() ==
-             {:ok,
-              graph()
-              |> Graph.add(add)
-              |> Graph.add(replace)
-              |> Graph.delete(expected_remove)}
-
-    # inserts the provenance
-    assert Ontogen.prov_graph() ==
-             {:ok,
-              RDF.graph(
-                [
-                  last_commit,
-                  new_commit,
-                  Proposition.new!(graph()),
-                  add_proposition,
-                  replace_proposition,
-                  overwrite_proposition,
-                  speech_act,
-                  Config.user(),
-                  agent(:agent_jane)
-                ]
-                |> Enum.map(&Grax.to_rdf!/1),
-                prefixes: ProvGraph.prefixes()
-              )}
+    assert_repo_state(
+      new_commit,
+      graph()
+      |> Graph.add(add)
+      |> Graph.add(replace)
+      |> Graph.delete(expected_remove),
+      [
+        last_commit,
+        new_commit,
+        Proposition.new!(graph()),
+        add_proposition,
+        replace_proposition,
+        overwrite_proposition,
+        speech_act,
+        Config.user(),
+        agent(:agent_jane)
+      ]
+      |> Enum.map(&Grax.to_rdf!/1)
+    )
   end
 
   describe "handling of changes that already apply" do
@@ -408,33 +350,23 @@ defmodule Ontogen.Operations.CommitCommandTest do
       assert new_commit.remove == expected_remove_proposition
       assert new_commit.speech_act == speech_act
 
-      # updates the head in the dataset of the repo
-      assert Ontogen.head() == new_commit
-
-      # applies the changes
-      assert Ontogen.dataset() ==
-               {:ok,
-                graph()
-                |> Graph.add(expected_add)
-                |> Graph.delete(expected_remove)}
-
-      # inserts the provenance
-      assert Ontogen.prov_graph() ==
-               {:ok,
-                RDF.graph(
-                  [
-                    last_commit,
-                    new_commit,
-                    speech_act,
-                    Proposition.new!(graph()),
-                    expected_add_proposition,
-                    expected_remove_proposition,
-                    Config.user(),
-                    agent(:agent_jane)
-                  ]
-                  |> Enum.map(&Grax.to_rdf!/1),
-                  prefixes: ProvGraph.prefixes()
-                )}
+      assert_repo_state(
+        new_commit,
+        graph()
+        |> Graph.add(add)
+        |> Graph.delete(expected_remove),
+        [
+          last_commit,
+          new_commit,
+          speech_act,
+          Proposition.new!(graph()),
+          expected_add_proposition,
+          expected_remove_proposition,
+          Config.user(),
+          agent(:agent_jane)
+        ]
+        |> Enum.map(&Grax.to_rdf!/1)
+      )
     end
 
     test "with speech_act" do
@@ -481,37 +413,27 @@ defmodule Ontogen.Operations.CommitCommandTest do
       assert new_commit.add == expected_add_proposition
       assert new_commit.remove == expected_remove_proposition
 
-      # updates the head in the dataset of the repo
-      assert Ontogen.head() == new_commit
-
-      # applies the changes
-      assert Ontogen.dataset() ==
-               {:ok,
-                graph()
-                |> Graph.add(expected_add)
-                |> Graph.delete(expected_remove)}
-
-      # inserts the provenance
-      assert Ontogen.prov_graph() ==
-               {:ok,
-                RDF.graph(
-                  [
-                    last_commit,
-                    new_commit,
-                    Proposition.new!(graph()),
-                    expected_add_proposition,
-                    expected_remove_proposition,
-                    SpeechAct.new!(
-                      add: add,
-                      remove: remove,
-                      time: datetime()
-                    ),
-                    Config.user(),
-                    agent(:agent_jane)
-                  ]
-                  |> Enum.map(&Grax.to_rdf!/1),
-                  prefixes: ProvGraph.prefixes()
-                )}
+      assert_repo_state(
+        new_commit,
+        graph()
+        |> Graph.add(add)
+        |> Graph.delete(expected_remove),
+        [
+          last_commit,
+          new_commit,
+          Proposition.new!(graph()),
+          expected_add_proposition,
+          expected_remove_proposition,
+          SpeechAct.new!(
+            add: add,
+            remove: remove,
+            time: datetime()
+          ),
+          Config.user(),
+          agent(:agent_jane)
+        ]
+        |> Enum.map(&Grax.to_rdf!/1)
+      )
     end
 
     test "when there are no remaining changes; with on_no_effective_changes: :error" do
@@ -528,14 +450,21 @@ defmodule Ontogen.Operations.CommitCommandTest do
              ) ==
                {:error, :no_effective_changes}
 
-      # does not change the head in the dataset of the repo
-      assert Ontogen.head() == last_commit
-
-      # does not change the dataset
-      assert Ontogen.dataset() == {:ok, last_dataset}
-
-      # does not change the provenance graph
-      assert Ontogen.prov_graph() == {:ok, last_prov_graph}
+      assert_repo_state(last_commit, last_dataset, last_prov_graph)
     end
+  end
+
+  defp assert_repo_state(head, dataset, prov_graph) do
+    # updates the head in the repo
+    assert Ontogen.head() == head
+
+    # updates the repo graph in the store
+    assert Ontogen.repository() |> flatten_property(:head) == stored_repo()
+
+    # inserts the statements
+    assert Ontogen.dataset() == {:ok, dataset}
+
+    # inserts the provenance
+    assert Ontogen.prov_graph() == {:ok, RDF.graph(prov_graph, prefixes: ProvGraph.prefixes())}
   end
 end
