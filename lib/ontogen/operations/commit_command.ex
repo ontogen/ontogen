@@ -13,7 +13,8 @@ defmodule Ontogen.Operations.CommitCommand do
     Commit,
     Changeset,
     SpeechAct,
-    InvalidCommitError
+    InvalidCommitError,
+    NoEffectiveChanges
   }
 
   alias Ontogen.Operations.EffectiveChangesetQuery
@@ -122,8 +123,8 @@ defmodule Ontogen.Operations.CommitCommand do
     end
   end
 
-  defp handle_no_effective_changes({:ok, :no_effective_changes}, :error),
-    do: {:error, :no_effective_changes}
+  defp handle_no_effective_changes({:ok, %NoEffectiveChanges{} = no_effective_changes}, :error),
+    do: {:error, no_effective_changes}
 
   defp handle_no_effective_changes(effective_changes, _), do: effective_changes
 

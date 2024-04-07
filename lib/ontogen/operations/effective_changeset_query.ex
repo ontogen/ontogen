@@ -4,7 +4,7 @@ defmodule Ontogen.Operations.EffectiveChangesetQuery do
       changeset: nil
     ]
 
-  alias Ontogen.{SpeechAct, Commit, Store, Repository}
+  alias Ontogen.{SpeechAct, Commit, Store, Repository, NoEffectiveChanges}
   alias RDF.{Graph, Description}
 
   import Ontogen.QueryUtils
@@ -66,7 +66,7 @@ defmodule Ontogen.Operations.EffectiveChangesetQuery do
           overwrite: overwrite && Graph.delete(overwrite, effective_remove || [])
         )
       else
-        {:ok, :no_effective_changes}
+        {:ok, %NoEffectiveChanges{}}
       end
     end
   end

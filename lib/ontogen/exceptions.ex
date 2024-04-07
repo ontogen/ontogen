@@ -92,3 +92,14 @@ defmodule Ontogen.Repository.NotReadyError do
     "Unable to perform #{inspect(operation)}. Repository not ready."
   end
 end
+
+defmodule Ontogen.NoEffectiveChanges do
+  @moduledoc """
+  Raised when some changes wouldn't have any effects against the current repository.
+  """
+  defexception []
+
+  def message(%__MODULE__{}) do
+    "No effective changes."
+  end
+end

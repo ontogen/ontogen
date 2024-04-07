@@ -4,6 +4,7 @@ defmodule Ontogen.Operations.EffectiveChangesetQueryTest do
   doctest Ontogen.Operations.EffectiveChangesetQuery
 
   alias Ontogen.Commit.Changeset
+  alias Ontogen.NoEffectiveChanges
 
   setup do
     init_commit_history()
@@ -28,7 +29,7 @@ defmodule Ontogen.Operations.EffectiveChangesetQueryTest do
     end
 
     test "ineffective (when all of the added statements already exist)" do
-      assert Ontogen.effective_changeset!(add: graph()) == :no_effective_changes
+      assert Ontogen.effective_changeset!(add: graph()) == %NoEffectiveChanges{}
     end
   end
 
@@ -51,7 +52,7 @@ defmodule Ontogen.Operations.EffectiveChangesetQueryTest do
       statements = EX.Foo |> EX.bar(EX.Baz)
 
       assert Ontogen.effective_changeset!(remove: statements) ==
-               :no_effective_changes
+               %NoEffectiveChanges{}
     end
   end
 
@@ -72,7 +73,7 @@ defmodule Ontogen.Operations.EffectiveChangesetQueryTest do
     end
 
     test "ineffective (when all of the updated statements already exist)" do
-      assert Ontogen.effective_changeset!(update: graph()) == :no_effective_changes
+      assert Ontogen.effective_changeset!(update: graph()) == %NoEffectiveChanges{}
     end
 
     test "removes existing statements to the same subject-predicate" do
@@ -118,7 +119,7 @@ defmodule Ontogen.Operations.EffectiveChangesetQueryTest do
     end
 
     test "ineffective (when all of the replaced statements already exist)" do
-      assert Ontogen.effective_changeset!(replace: graph()) == :no_effective_changes
+      assert Ontogen.effective_changeset!(replace: graph()) == %NoEffectiveChanges{}
     end
 
     test "removes existing statements to the same subject" do
@@ -185,7 +186,7 @@ defmodule Ontogen.Operations.EffectiveChangesetQueryTest do
       statements = EX.Foo |> EX.bar(EX.Baz)
 
       assert Ontogen.effective_changeset!(add: graph(), remove: statements) ==
-               :no_effective_changes
+               %NoEffectiveChanges{}
     end
   end
 end

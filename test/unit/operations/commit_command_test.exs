@@ -3,7 +3,14 @@ defmodule Ontogen.Operations.CommitCommandTest do
 
   doctest Ontogen.Operations.CommitCommand
 
-  alias Ontogen.{Config, ProvGraph, SpeechAct, Proposition, InvalidCommitError}
+  alias Ontogen.{
+    Config,
+    ProvGraph,
+    SpeechAct,
+    Proposition,
+    InvalidCommitError,
+    NoEffectiveChanges
+  }
 
   test "initial commit with implicit speech_act" do
     refute Ontogen.head()
@@ -500,7 +507,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
                time: datetime(),
                on_no_effective_changes: :error
              ) ==
-               {:error, :no_effective_changes}
+               {:error, %NoEffectiveChanges{}}
 
       assert_repo_state(last_commit, last_dataset, last_prov_graph)
     end
