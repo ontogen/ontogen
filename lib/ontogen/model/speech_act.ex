@@ -19,7 +19,10 @@ defmodule Ontogen.SpeechAct do
     link remove: Og.remove(), type: Proposition, depth: +1
 
     property time: PROV.endedAtTime(), type: :date_time, required: true
-    link speaker: Og.speaker(), type: Ontogen.Agent, depth: +1
+    link speaker: Og.speaker(),
+         type: Ontogen.Agent,
+         depth: +1,
+         on_missing_description: :use_rdf_node
     link data_source: Og.dataSource(), type: DCAT.Dataset, depth: 0
   end
 
