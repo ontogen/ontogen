@@ -48,9 +48,9 @@ defmodule Ontogen.Changeset.Helper do
     with_propositions =
       changeset
       |> Map.from_struct()
-      |> Enum.flat_map(fn
-        {action, %Graph{} = graph} -> [{action, Proposition.new!(graph)}]
-        _ -> []
+      |> Enum.map(fn
+        {action, %Graph{} = graph} -> {action, Proposition.new!(graph)}
+        {_, nil} = empty -> empty
       end)
 
     struct(struct, with_propositions)

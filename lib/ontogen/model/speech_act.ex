@@ -42,10 +42,7 @@ defmodule Ontogen.SpeechAct do
       )
 
     with {:ok, speech_act} <- build(RDF.bnode(:tmp), args) do
-      changeset
-      |> copy_to_proposition_struct(speech_act)
-      |> Grax.reset_id(Id.generate(speech_act))
-      |> validate()
+      update_changeset(speech_act, changeset)
     end
   end
 
@@ -79,6 +76,13 @@ defmodule Ontogen.SpeechAct do
 
   defp extract_args(args) do
     Utils.extract_args(args, @args_keys, @shared_args)
+  end
+
+  def update_changeset(%__MODULE__{} = speech_act, %Changeset{} = changeset) do
+    changeset
+    |> copy_to_proposition_struct(speech_act)
+    |> Grax.reset_id(Id.generate(speech_act))
+    |> validate()
   end
 
   def validate(speech_act) do
