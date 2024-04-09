@@ -1,8 +1,11 @@
 defmodule Ontogen.Operation do
   @type t :: struct
 
+  @default_timeout 10_000
+
   defmacro __using__(opts) do
     params = Keyword.fetch!(opts, :params)
+    timeout = Keyword.get(opts, :timeout, @default_timeout)
 
     quote do
       defstruct unquote(params)
@@ -10,7 +13,7 @@ defmodule Ontogen.Operation do
       import unquote(__MODULE__), only: [api: 1]
 
       def __do_call__(%__MODULE__{} = operation) do
-        GenServer.call(Ontogen, operation)
+        GenServer.call(Ontogen, operation, unquote(timeout))
       end
 
       def __do_call__({:ok, operation}), do: __do_call__(operation)
