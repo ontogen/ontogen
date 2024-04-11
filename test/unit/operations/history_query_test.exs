@@ -3,6 +3,8 @@ defmodule Ontogen.Operations.HistoryQueryTest do
 
   doctest Ontogen.Operations.HistoryQuery
 
+  alias Ontogen.InvalidCommitRangeError
+
   describe "Ontogen.dataset_history/1" do
     test "on a clean repo without commits" do
       assert Ontogen.dataset_history() == {:error, :no_head}
@@ -17,15 +19,15 @@ defmodule Ontogen.Operations.HistoryQueryTest do
     test "native history with a specified base commit" do
       [fourth, _third, _second, first] = history = init_history()
 
-      assert Ontogen.dataset_history(base: first.__id__) == {:ok, Enum.slice(history, 0..2)}
-      assert Ontogen.dataset_history(base: fourth.__id__) == {:ok, []}
+      assert Ontogen.dataset_history(base: first) == {:ok, Enum.slice(history, 0..2)}
+      assert Ontogen.dataset_history(base: fourth) == {:ok, []}
     end
 
     test "native history with a specified target commit" do
       [fourth, _third, _second, first] = history = init_history()
 
       assert Ontogen.dataset_history(target: fourth.__id__) == {:ok, history}
-      assert Ontogen.dataset_history(target: first.__id__) == {:ok, Enum.slice(history, 3..3)}
+      assert Ontogen.dataset_history(target: first) == {:ok, Enum.slice(history, 3..3)}
     end
 
     test "native history with a specified base and target commit" do
@@ -33,12 +35,29 @@ defmodule Ontogen.Operations.HistoryQueryTest do
 
       assert Ontogen.dataset_history(base: second, target: third) ==
                {:ok, Enum.slice(history, 1..1)}
+
+      assert Ontogen.dataset_history(range: {second, third}) ==
+               {:ok, Enum.slice(history, 1..1)}
     end
 
     test "when the specified target commit comes later than the base commit" do
       [fourth, _third, _second, first] = init_history()
 
-      assert Ontogen.dataset_history(base: fourth, target: first) == {:ok, []}
+      assert Ontogen.dataset_history(base: fourth, target: first) ==
+               {:error, %InvalidCommitRangeError{reason: :out_of_range}}
+    end
+
+    test "out of range errors" do
+      history = init_history()
+      independent_commit = commit()
+
+      assert independent_commit not in history
+
+      assert Ontogen.dataset_history(target: independent_commit) ==
+               {:error, %InvalidCommitRangeError{reason: :out_of_range}}
+
+      assert Ontogen.dataset_history(base: independent_commit) ==
+               {:error, %InvalidCommitRangeError{reason: :out_of_range}}
     end
 
     test "raw history" do
@@ -96,12 +115,10 @@ defmodule Ontogen.Operations.HistoryQueryTest do
     end
 
     test "native history with a specified base commit" do
-      [fourth, _third, second, _first] = history = init_resource_history()
+      [_fourth, _third, second, _first] = history = init_resource_history()
 
       assert Ontogen.resource_history(EX.S1, base: second.__id__) ==
                {:ok, Enum.slice(history, 0..1)}
-
-      assert Ontogen.resource_history(EX.S1, base: fourth.__id__) == {:ok, []}
     end
 
     test "native history with a specified target commit" do
@@ -124,7 +141,7 @@ defmodule Ontogen.Operations.HistoryQueryTest do
       [_fourth, third, second, _first] = init_resource_history()
 
       assert Ontogen.resource_history(EX.S1, base: third.__id__, target: second.__id__) ==
-               {:ok, []}
+               {:error, %InvalidCommitRangeError{reason: :out_of_range}}
     end
 
     test "raw history" do
@@ -192,13 +209,10 @@ defmodule Ontogen.Operations.HistoryQueryTest do
     end
 
     test "native history with a specified base commit" do
-      [third, _second, first] = history = init_statement_history()
+      [_third, _second, first] = history = init_statement_history()
 
       assert Ontogen.statement_history(statement_of_interest(), base: first.__id__) ==
                {:ok, Enum.slice(history, 0..1)}
-
-      assert Ontogen.statement_history(statement_of_interest(), base: third.__id__) ==
-               {:ok, []}
     end
 
     test "native history with a specified target commit" do
@@ -228,7 +242,7 @@ defmodule Ontogen.Operations.HistoryQueryTest do
                base: second.__id__,
                target: first.__id__
              ) ==
-               {:ok, []}
+               {:error, %InvalidCommitRangeError{reason: :out_of_range}}
     end
 
     test "raw history" do
@@ -294,13 +308,10 @@ defmodule Ontogen.Operations.HistoryQueryTest do
     end
 
     test "native history with a specified base commit" do
-      [fourth, _third, second, _first] = history = init_predication_history()
+      [_fourth, _third, second, _first] = history = init_predication_history()
 
       assert Ontogen.statement_history(predication_of_interest(), base: second.__id__) ==
                {:ok, Enum.slice(history, 0..1)}
-
-      assert Ontogen.statement_history(predication_of_interest(), base: fourth.__id__) ==
-               {:ok, []}
     end
 
     test "native history with a specified target commit" do
@@ -330,7 +341,7 @@ defmodule Ontogen.Operations.HistoryQueryTest do
                base: third.__id__,
                target: second.__id__
              ) ==
-               {:ok, []}
+               {:error, %InvalidCommitRangeError{reason: :out_of_range}}
     end
 
     test "raw history" do

@@ -252,7 +252,7 @@ defmodule Ontogen.TestFactories do
 
     changeset =
       if Action.empty?(changeset) do
-        commit_changeset()
+        commit_changeset() |> Map.from_struct()
       else
         changeset
       end

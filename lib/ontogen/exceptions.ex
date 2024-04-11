@@ -51,6 +51,25 @@ defmodule Ontogen.InvalidSpeechActError do
   end
 end
 
+defmodule Ontogen.InvalidCommitRangeError do
+  @moduledoc """
+  Raised on invalid `Ontogen.Commit.Range` specs or when a commit is not in the specified range.
+  """
+  defexception [:reason]
+
+  def message(%{reason: :out_of_range}) do
+    "Invalid commit range: out of range"
+  end
+
+  def message(%{reason: nil}) do
+    "Invalid commit range"
+  end
+
+  def message(%{reason: reason}) do
+    "Invalid commit range: #{reason}"
+  end
+end
+
 defmodule Ontogen.InvalidChangesetError do
   @moduledoc """
   Raised on invalid `Ontogen.Changeset` args.

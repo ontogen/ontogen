@@ -19,7 +19,7 @@ defmodule Ontogen.RepositoryCase do
       setup :clean_repo!
 
       def start_repo(_) do
-        [repo: repo] = clean_repo!(:ok)
+        [{:repo, repo} | _] = clean_repo!(:ok)
 
         capture_log(fn -> {:ok, _} = start_supervised({Ontogen, [repo: repo.__id__]}) end)
 
@@ -27,15 +27,17 @@ defmodule Ontogen.RepositoryCase do
       end
 
       def clean_repo!(_) do
+        store = Config.store()
+
         {:ok, repo} =
           ClearRepositoryCommand.new!()
-          |> ClearRepositoryCommand.call(Config.store(), base_repo())
+          |> ClearRepositoryCommand.call(store, base_repo())
 
         if Process.whereis(Ontogen) do
           {:ok, ^repo} = Ontogen.reload()
         end
 
-        [repo: repo]
+        [repo: repo, store: store]
       end
 
       def base_repo, do: repository()

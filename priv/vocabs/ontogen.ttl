@@ -113,6 +113,14 @@ og:Commit a rdfs:Class
         ; rdfs:range  rdfs:Literal
     .
 
+og:RootCommit a owl:Class
+    ; rdfs:subClassOf og:Commit
+    ; rdfs:subClassOf
+        [ a owl:Restriction
+            ; owl:onProperty og:parentCommit
+            ; owl:maxCardinality 0
+        ]
+.
 
 og:Revert a rdfs:Class
     ; rdfs:subClassOf og:Commit

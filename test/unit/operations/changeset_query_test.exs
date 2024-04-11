@@ -4,6 +4,7 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
   doctest Ontogen.Operations.ChangesetQuery
 
   alias Ontogen.Commit.Changeset
+  alias Ontogen.InvalidCommitRangeError
 
   describe "Ontogen.dataset_changes/1" do
     test "on a clean repo without commits" do
@@ -50,7 +51,7 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
       [_fourth, third, second, _first] = init_history()
 
       assert Ontogen.dataset_changes(base: third.__id__, target: second.__id__) ==
-               {:ok, nil}
+               {:error, %InvalidCommitRangeError{reason: :out_of_range}}
     end
 
     defp init_history do
@@ -133,7 +134,7 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
       [fourth, _third, _second, first] = init_resource_history()
 
       assert Ontogen.resource_changes(EX.S1, base: fourth.__id__, target: first.__id__) ==
-               {:ok, nil}
+               {:error, %InvalidCommitRangeError{reason: :out_of_range}}
     end
 
     defp resource_limited_merge(commits, subject) do

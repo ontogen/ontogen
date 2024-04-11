@@ -1,7 +1,7 @@
 defmodule Ontogen.Commit.Range do
   defstruct [:base, :target]
 
-  alias Ontogen.{Commit, Repository}
+  alias Ontogen.{Commit, Repository, InvalidCommitRangeError}
 
   def new({base, target}), do: new(base, target)
   def new(%__MODULE__{} = range), do: {:ok, range}
@@ -32,7 +32,11 @@ defmodule Ontogen.Commit.Range do
   defp normalize(:target, head) when head in [:head, nil], do: {:ok, :head}
 
   defp normalize(type, invalid),
-    do: {:error, "invalid commit range value for #{type}: #{inspect(invalid)}"}
+    do:
+      {:error,
+       InvalidCommitRangeError.exception(
+         reason: "#{inspect(invalid)} is not a valid value for #{type}"
+       )}
 
   def extract(args) when is_list(args) do
     {base, args} = Keyword.pop(args, :base)
@@ -41,9 +45,15 @@ defmodule Ontogen.Commit.Range do
 
     with {:ok, range} <-
            (cond do
-              (base || target) && range -> {:error, "mutual exclusive arguments used"}
-              range -> new(range)
-              true -> new(base, target)
+              (base || target) && range ->
+                {:error,
+                 InvalidCommitRangeError.exception(reason: "mutual exclusive arguments used")}
+
+              range ->
+                new(range)
+
+              true ->
+                new(base, target)
             end) do
       {:ok, range, args}
     end

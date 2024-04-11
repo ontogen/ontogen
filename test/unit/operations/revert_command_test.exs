@@ -3,7 +3,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
 
   doctest Ontogen.Operations.RevertCommand
 
-  alias Ontogen.{Commit, Config, InvalidChangesetError}
+  alias Ontogen.{Commit, Config, InvalidChangesetError, InvalidCommitRangeError}
   import Ontogen.IdUtils
 
   describe "Ontogen.revert/1" do
@@ -12,9 +12,10 @@ defmodule Ontogen.Operations.RevertCommandTest do
     end
 
     test "when nothing to revert" do
-      [head, _third, _second, _first] = init_history()
+      [head, _third, _second, first] = init_history()
 
       assert Ontogen.revert(to: head) == {:error, "no commits to revert"}
+      assert Ontogen.revert(range: {first, first}) == {:error, "no commits to revert"}
     end
 
     test "when nothing to revert effectively" do
@@ -195,6 +196,19 @@ defmodule Ontogen.Operations.RevertCommandTest do
       refute revert2.reverted_target_commit
 
       assert Ontogen.dataset() == original_dataset
+    end
+
+    test "with commit not part of the history" do
+      history = init_history()
+      independent_commit = commit()
+
+      assert independent_commit not in history
+
+      assert Ontogen.revert(commit: independent_commit) ==
+               {:error, %InvalidCommitRangeError{reason: :out_of_range}}
+
+      assert Ontogen.revert(to: independent_commit) ==
+               {:error, %InvalidCommitRangeError{reason: :out_of_range}}
     end
 
     defp init_history do

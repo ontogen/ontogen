@@ -4,11 +4,12 @@ defmodule Ontogen.Operations.HistoryQuery do
       subject_type: nil,
       subject: nil,
       range: nil,
+      ids_only: false,
       history_type_opts: nil
     ]
 
   alias Ontogen.Operations.HistoryQuery.Query
-  alias Ontogen.{Commit, Store, Repository, HistoryType}
+  alias Ontogen.{Commit, Store, Repository, HistoryType, CommitIdChain}
   alias RDF.{Triple, Statement}
 
   import RDF.Guards
@@ -26,6 +27,8 @@ defmodule Ontogen.Operations.HistoryQuery do
   end
 
   def new(subject, args \\ []) do
+    {ids_only, args} = Keyword.pop(args, :ids_only, false)
+
     with {:ok, subject_type, subject} <- normalize_subject(subject),
          {:ok, range, args} <- Commit.Range.extract(args) do
       {:ok,
@@ -33,6 +36,7 @@ defmodule Ontogen.Operations.HistoryQuery do
          subject_type: subject_type,
          subject: subject,
          range: range,
+         ids_only: ids_only,
          history_type_opts: args
        }}
     end
@@ -59,8 +63,16 @@ defmodule Ontogen.Operations.HistoryQuery do
     do: {Statement.coerce_subject(s), Statement.coerce_predicate(p)}
 
   @impl true
-  def call(%__MODULE__{} = operation, store, repository) do
+  def call(%__MODULE__{ids_only: ids_only?} = operation, store, repository) do
     with {:ok, operation} <- finish_range(operation, repository),
+         # Attention: Besides fetching the commit chain for ordering the result, this has the
+         # side-effect of validating the requested range, which is important because we
+         # need to protect against one problem in particular: when a base commit is specified
+         # that is not part of the history, the filter_commits clause in our query misses the mark
+         # and we get the whole history back to the root, leading to a complete revert of everything
+         # in case of the revert use case.
+         {:ok, _commit_id_chain} when not ids_only? <-
+           CommitIdChain.fetch(operation.range, store, repository),
          {:ok, query} <- Query.build(operation),
          {:ok, history_graph} <-
            Store.construct(store, Repository.prov_graph_id(repository), query, raw_mode: true) do
