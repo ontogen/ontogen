@@ -40,6 +40,24 @@ defmodule Ontogen.Operations.HistoryQueryTest do
                {:ok, Enum.slice(history, 1..1)}
     end
 
+    test "commits are ordered according to parent chain" do
+      history =
+        init_commit_history([
+          [
+            add: statement(1),
+            message: "First commit",
+            time: datetime(2)
+          ],
+          [
+            add: statement(2),
+            message: "Second commit",
+            time: datetime(1)
+          ]
+        ])
+
+      assert Ontogen.dataset_history() == {:ok, history}
+    end
+
     test "when the specified target commit comes later than the base commit" do
       [fourth, _third, _second, first] = init_history()
 

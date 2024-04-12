@@ -71,7 +71,7 @@ defmodule Ontogen.Operations.HistoryQuery do
          # that is not part of the history, the filter_commits clause in our query misses the mark
          # and we get the whole history back to the root, leading to a complete revert of everything
          # in case of the revert use case.
-         {:ok, _commit_id_chain} when not ids_only? <-
+         {:ok, commit_id_chain} when not ids_only? <-
            CommitIdChain.fetch(operation.range, store, repository),
          {:ok, query} <- Query.build(operation),
          {:ok, history_graph} <-
@@ -80,7 +80,7 @@ defmodule Ontogen.Operations.HistoryQuery do
         history_graph,
         operation.subject_type,
         operation.subject,
-        operation.history_type_opts
+        history_order(operation.history_type_opts, commit_id_chain)
       )
     end
   end
@@ -89,5 +89,13 @@ defmodule Ontogen.Operations.HistoryQuery do
     with {:ok, absolute_range} <- Commit.Range.absolute(operation.range, repository) do
       {:ok, %__MODULE__{operation | range: absolute_range}}
     end
+  end
+
+  defp history_order(opts, commit_id_chain) do
+    Keyword.update(opts, :order, {:desc, :parent, commit_id_chain}, fn
+      :asc -> {:asc, :parent, commit_id_chain}
+      :desc -> {:desc, :parent, commit_id_chain}
+      other -> other
+    end)
   end
 end

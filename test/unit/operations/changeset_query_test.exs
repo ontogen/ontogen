@@ -54,6 +54,45 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
                {:error, %InvalidCommitRangeError{reason: :out_of_range}}
     end
 
+    test "parent commit chain is used for ordering" do
+      graph = [
+        EX.S1 |> EX.p1(EX.O1),
+        EX.S2 |> EX.p2(42, "Foo")
+      ]
+
+      [fourth, third, second, first] =
+        init_commit_history([
+          [
+            add: graph,
+            message: "Initial commit",
+            time: datetime(4)
+          ],
+          [
+            # this leads to a different effective change
+            add: [{EX.S3, EX.p3(), "foo"}],
+            remove: EX.S1 |> EX.p1(EX.O1),
+            committer: agent(:agent_jane),
+            message: "Second commit",
+            time: datetime(3)
+          ],
+          [
+            # this leads to a different effective change
+            add: [{EX.S4, EX.p4(), EX.O4}, {EX.S3, EX.p3(), "foo"}],
+            message: "Third commit",
+            time: datetime(2)
+          ],
+          [
+            # this leads to a different effective change
+            update: [{EX.S5, EX.p5(), EX.O5}, graph],
+            message: "Fourth commit",
+            time: datetime(1)
+          ]
+        ])
+
+      assert Ontogen.dataset_changes() ==
+               {:ok, Changeset.merge([first, second, third, fourth])}
+    end
+
     defp init_history do
       graph = [
         EX.S1 |> EX.p1(EX.O1),
