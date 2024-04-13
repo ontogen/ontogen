@@ -100,6 +100,13 @@ og:Commit a rdfs:Class
     og:parentCommit a rdf:Property
         ; rdfs:domain og:Commit
         ; rdfs:range  og:Commit
+        ; owl:inverseOf og:childCommit
+    .
+
+    og:childCommit a rdf:Property
+        ; rdfs:domain og:Commit
+        ; rdfs:range  og:Commit
+        ; owl:inverseOf og:parentCommit
     .
 
     og:committer a rdf:Property
