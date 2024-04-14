@@ -47,6 +47,22 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
                Changeset.new(third)
     end
 
+    test "with relative base commit" do
+      [fourth, third, second, first] = history = init_history()
+
+      assert Ontogen.dataset_changes(base: 1) ==
+               Changeset.new(fourth)
+
+      assert Ontogen.dataset_changes(base: 4) ==
+               {:ok, Changeset.merge(Enum.reverse(history))}
+
+      assert Ontogen.dataset_changes(target: third, base: 1) ==
+               Changeset.new(third)
+
+      assert Ontogen.dataset_changes(target: second, base: 2) ==
+               {:ok, Changeset.merge([second, first])}
+    end
+
     test "when the specified target commit comes later than the base commit" do
       [_fourth, third, second, _first] = init_history()
 

@@ -40,6 +40,22 @@ defmodule Ontogen.Operations.HistoryQueryTest do
                {:ok, Enum.slice(history, 1..1)}
     end
 
+    test "native history with relative base commit" do
+      [_fourth, third, second, _first] = history = init_history()
+
+      assert Ontogen.dataset_history(base: 1) ==
+               {:ok, Enum.slice(history, 0..0)}
+
+      assert Ontogen.dataset_history(base: 4) ==
+               {:ok, history}
+
+      assert Ontogen.dataset_history(target: third, base: 1) ==
+               {:ok, Enum.slice(history, 1..1)}
+
+      assert Ontogen.dataset_history(target: second, base: 2) ==
+               {:ok, Enum.slice(history, 2..3)}
+    end
+
     test "commits are ordered according to parent chain" do
       history =
         init_commit_history([
@@ -75,6 +91,9 @@ defmodule Ontogen.Operations.HistoryQueryTest do
                {:error, %InvalidCommitRangeError{reason: :out_of_range}}
 
       assert Ontogen.dataset_history(base: independent_commit) ==
+               {:error, %InvalidCommitRangeError{reason: :out_of_range}}
+
+      assert Ontogen.dataset_history(base: 99) ==
                {:error, %InvalidCommitRangeError{reason: :out_of_range}}
     end
 
@@ -146,6 +165,20 @@ defmodule Ontogen.Operations.HistoryQueryTest do
 
       assert Ontogen.resource_history(EX.S1, target: second.__id__) ==
                {:ok, Enum.slice(history, 2..3)}
+    end
+
+    test "native history with relative base commit" do
+      [_fourth, _third, second, _first] = history = init_resource_history()
+
+      assert Ontogen.resource_history(EX.S1, base: 1) ==
+               {:ok, Enum.slice(history, 0..0)}
+
+      # the other commits are out of range because irrelevant commits are in between
+      assert Ontogen.resource_history(EX.S1, base: 4) ==
+               {:ok, Enum.slice(history, 0..1)}
+
+      assert Ontogen.resource_history(EX.S1, target: second, base: 2) ==
+               {:ok, Enum.slice(history, 2..2)}
     end
 
     test "native history with a specified base and target commit" do

@@ -9,7 +9,7 @@ defmodule Ontogen.Operations.HistoryQuery do
     ]
 
   alias Ontogen.Operations.HistoryQuery.Query
-  alias Ontogen.{Commit, Store, Repository, HistoryType, CommitIdChain}
+  alias Ontogen.{Commit, Store, Repository, HistoryType}
   alias RDF.{Triple, Statement}
 
   import RDF.Guards
@@ -63,16 +63,26 @@ defmodule Ontogen.Operations.HistoryQuery do
     do: {Statement.coerce_subject(s), Statement.coerce_predicate(p)}
 
   @impl true
-  def call(%__MODULE__{ids_only: ids_only?} = operation, store, repository) do
-    with {:ok, operation} <- finish_range(operation, repository),
-         # Attention: Besides fetching the commit chain for ordering the result, this has the
-         # side-effect of validating the requested range, which is important because we
-         # need to protect against one problem in particular: when a base commit is specified
-         # that is not part of the history, the filter_commits clause in our query misses the mark
-         # and we get the whole history back to the root, leading to a complete revert of everything
-         # in case of the revert use case.
-         {:ok, commit_id_chain} when not ids_only? <-
-           CommitIdChain.fetch(operation.range, store, repository),
+  def call(%__MODULE__{range: %Commit.Range{commit_ids: nil}} = operation, store, repository) do
+    # Attention: Besides fetching the commit chain for ordering the result, this has
+    # the side-effect of validating the requested range, which is important because we
+    # need to protect against one problem: when a base commit is specified that is not
+    # part of the history, the filter_commits clause in our query misses the mark
+    # and we get the whole history back to the root, leading to a complete revert of
+    # everything in case of the revert use case.
+    with {:ok, range} <- Commit.Range.fetch(operation.range, store, repository) do
+      %__MODULE__{operation | range: range}
+      |> call(store, repository)
+    end
+  end
+
+  # empty range, return an empty history
+  def call(%__MODULE__{range: %Commit.Range{commit_ids: []}} = operation, _, _) do
+    HistoryType.history(RDF.graph(), operation.subject_type, operation.subject)
+  end
+
+  def call(%__MODULE__{} = operation, store, repository) do
+    with {:ok, operation} <- with_absolute_range(operation),
          {:ok, query} <- Query.build(operation),
          {:ok, history_graph} <-
            Store.construct(store, Repository.prov_graph_id(repository), query, raw_mode: true) do
@@ -80,13 +90,13 @@ defmodule Ontogen.Operations.HistoryQuery do
         history_graph,
         operation.subject_type,
         operation.subject,
-        history_order(operation.history_type_opts, commit_id_chain)
+        history_order(operation.history_type_opts, operation.range.commit_ids)
       )
     end
   end
 
-  defp finish_range(%__MODULE__{} = operation, repository) do
-    with {:ok, absolute_range} <- Commit.Range.absolute(operation.range, repository) do
+  def with_absolute_range(%__MODULE__{} = operation) do
+    with {:ok, absolute_range} <- Commit.Range.absolute(operation.range) do
       {:ok, %__MODULE__{operation | range: absolute_range}}
     end
   end

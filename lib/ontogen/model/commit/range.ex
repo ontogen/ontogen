@@ -1,4 +1,10 @@
 defmodule Ontogen.Commit.Range do
+  @moduledoc """
+  Struct for the specification of commit ranges ...
+
+  Note: the commit specified as `:base` is interpreted exclusive, i.e. won't be included ...
+  """
+
   defstruct [:base, :target, :commit_ids]
 
   alias Ontogen.{Commit, InvalidCommitRangeError}
@@ -29,9 +35,9 @@ defmodule Ontogen.Commit.Range do
 
   defp normalize(_, %Commit{__id__: id}), do: {:ok, id}
   defp normalize(_, %RDF.IRI{} = iri), do: {:ok, iri}
+  defp normalize(:target, :head), do: {:ok, :head}
   defp normalize(:base, :root), do: {:ok, Commit.root()}
-  defp normalize(:base, nil), do: {:ok, Commit.root()}
-  defp normalize(:target, head) when head in [:head, nil], do: {:ok, :head}
+  defp normalize(:base, relative) when is_integer(relative) and relative > 0, do: {:ok, relative}
 
   defp normalize(type, invalid),
     do:
@@ -41,9 +47,9 @@ defmodule Ontogen.Commit.Range do
        )}
 
   def extract(args) when is_list(args) do
-    {base, args} = Keyword.pop(args, :base)
-    {target, args} = Keyword.pop(args, :target)
     {range, args} = Keyword.pop(args, :range)
+    {base, args} = Keyword.pop(args, :base, !range && :root)
+    {target, args} = Keyword.pop(args, :target, !range && :head)
 
     with {:ok, range} <-
            (cond do
@@ -61,13 +67,19 @@ defmodule Ontogen.Commit.Range do
     end
   end
 
-  def absolute(%__MODULE__{target: :head} = range, repository) do
-    if commit = Repository.head_id(repository) do
-      {:ok, %__MODULE__{range | target: commit}}
-    else
-      {:error, :no_head}
-    end
+  def absolute(%__MODULE__{target: :head, commit_ids: commit_ids}) when commit_ids in [nil, []] do
+    {:error, InvalidCommitRangeError.exception(reason: :no_head)}
   end
 
-  def absolute(%__MODULE__{} = range, _), do: {:ok, range}
+  def absolute(%__MODULE__{target: :head, commit_ids: [head | _]} = range) do
+    {:ok, %__MODULE__{range | target: head}}
+  end
+
+  def absolute(%__MODULE__{} = range), do: {:ok, range}
+
+  def fetch(%__MODULE__{} = range, store, repository) do
+    with {:ok, commit_ids, base} <- Fetcher.fetch(range, store, repository) do
+      {:ok, %__MODULE__{range | commit_ids: commit_ids, base: base}}
+    end
+  end
 end

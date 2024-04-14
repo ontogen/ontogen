@@ -61,6 +61,10 @@ defmodule Ontogen.InvalidCommitRangeError do
     "Invalid commit range: out of range"
   end
 
+  def message(%{reason: :no_head}) do
+    "Invalid commit range: unable to fetch head from empty commit id chain"
+  end
+
   def message(%{reason: nil}) do
     "Invalid commit range"
   end

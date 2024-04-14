@@ -1,7 +1,11 @@
-defmodule Ontogen.CommitIdChain do
+defmodule Ontogen.Commit.Range.Fetcher do
+  @moduledoc false
+
   alias Ontogen.{Commit, Store, Repository, InvalidCommitRangeError}
   alias Ontogen.NS.Og
   alias RDF.{IRI, Graph, Description, PrefixMap}
+
+  import RDF.Namespace.IRI
 
   def fetch(%Commit.Range{} = range, store, repository) do
     with {:ok, chain} <- fetch(range.target, store, repository) do
@@ -12,7 +16,9 @@ defmodule Ontogen.CommitIdChain do
   def fetch(%Commit{__id__: id}, store, repository), do: fetch(id, store, repository)
 
   def fetch(:head, store, repository) do
-    if head = Repository.head_id(repository) do
+    head = Repository.head_id(repository)
+
+    if head != Commit.root() do
       fetch(head, store, repository)
     else
       {:error, :no_head}
@@ -33,19 +39,10 @@ defmodule Ontogen.CommitIdChain do
     #{[:og] |> Ontogen.NS.prefixes() |> PrefixMap.to_sparql()}
     CONSTRUCT {
       ?commit og:parentCommit ?parent .
-      ?root_commit a og:RootCommit .
     }
     WHERE {
-      {
-        <#{commit_id}> og:parentCommit* ?commit .
-        ?commit og:parentCommit ?parent .
-      }
-    UNION
-      {
-        BIND (<#{commit_id}> AS ?root_commit)
-        ?root_commit og:committer ?committer .
-        FILTER NOT EXISTS { ?root_commit og:parentCommit ?parent . }
-      }
+      <#{commit_id}> og:parentCommit* ?commit .
+      ?commit og:parentCommit ?parent .
     }
     """
   end
@@ -53,30 +50,31 @@ defmodule Ontogen.CommitIdChain do
   defp chain(history_graph, current, acc \\ [])
 
   defp chain(_, nil, acc), do: {:ok, acc}
+  defp chain(_, term_to_iri(Og.CommitRoot), acc), do: {:ok, Enum.reverse(acc)}
 
   defp chain(%Graph{descriptions: commits}, next, []) when not is_map_key(commits, next),
     do: {:error, InvalidCommitRangeError.exception(reason: :out_of_range)}
-
-  defp chain(%Graph{descriptions: commits}, next, acc) when not is_map_key(commits, next),
-    do: {:ok, Enum.reverse([next | acc])}
 
   defp chain(commit_graph, next, acc) do
     chain(commit_graph, Description.first(commit_graph[next], Og.parentCommit()), [next | acc])
   end
 
-  def to_base(chain, nil), do: {:ok, chain}
+  def to_base(chain, term_to_iri(Og.CommitRoot)), do: {:ok, chain, Commit.root()}
+
+  def to_base(chain, relative) when is_integer(relative) and relative > length(chain),
+    do: {:error, InvalidCommitRangeError.exception(reason: :out_of_range)}
+
+  def to_base(chain, relative) when is_integer(relative) do
+    case Enum.split(chain, relative) do
+      {chain_to_base, []} -> {:ok, chain_to_base, Commit.root()}
+      {chain_to_base, [base | _]} -> {:ok, chain_to_base, base}
+    end
+  end
 
   def to_base(chain, %RDF.IRI{} = base) do
     case Enum.split_while(chain, &(&1 != base)) do
       {_, []} -> {:error, InvalidCommitRangeError.exception(reason: :out_of_range)}
-      {chain_to_base, _} -> {:ok, chain_to_base}
-    end
-  end
-
-  def to_base!(chain, base) do
-    case to_base(chain, base) do
-      {:ok, result} -> result
-      {:error, error} -> error
+      {chain_to_base, _} -> {:ok, chain_to_base, base}
     end
   end
 end

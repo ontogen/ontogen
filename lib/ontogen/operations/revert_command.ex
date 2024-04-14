@@ -1,17 +1,19 @@
 defmodule Ontogen.Operations.RevertCommand do
   use Ontogen.Command,
     params: [
-      history_query: nil,
+      range: nil,
       commit_attrs: nil
     ]
 
-  alias Ontogen.{Commit, Repository, IdUtils}
+  alias Ontogen.{Repository, Commit, IdUtils}
 
   alias Ontogen.Operations.{
     HistoryQuery,
     ChangesetQuery,
     CommitCommand
   }
+
+  alias RDF.IRI
 
   api do
     def revert(args) do
@@ -22,42 +24,45 @@ defmodule Ontogen.Operations.RevertCommand do
   end
 
   def new(args) do
-    with {:ok, range, commit_attrs} <- extract_range(args),
-         {:ok, history_query} <- ChangesetQuery.history_query(:dataset, range: range) do
-      {:ok, %__MODULE__{history_query: history_query, commit_attrs: commit_attrs}}
+    with {:ok, range, commit_attrs} <- extract_range(args) do
+      {:ok, %__MODULE__{range: range, commit_attrs: commit_attrs}}
     end
   end
 
   defp extract_range(args) do
+    args =
+      Keyword.new(args, fn
+        {:to, value} -> {:base, value}
+        unchanged -> unchanged
+      end)
+
     {commit, args} = Keyword.pop(args, :commit)
+    range_args_present? = Keyword.take(args, [:base, :target]) != []
 
-    args
-    |> Keyword.new(fn
-      {:to, value} -> {:base, value}
-      unchanged -> unchanged
-    end)
-    |> Commit.Range.extract()
-    |> case do
-      {:ok, %Commit.Range{base: nil, target: :head}, remaining_args} ->
-        with {:ok, range} <- commit_range(commit) do
-          {:ok, range, remaining_args}
-        end
-
-      {:ok, %Commit.Range{}, _} when not is_nil(commit) ->
+    cond do
+      commit && range_args_present? ->
         {:error, "mutual exclusive use of :commit and commit range specification"}
 
-      ok_or_error ->
-        ok_or_error
+      commit ->
+        with {:ok, range} <- commit_range(commit) do
+          {:ok, range, args}
+        end
+
+      true ->
+        Commit.Range.extract(args)
     end
   end
 
   defp commit_range(%Commit{} = commit), do: Commit.Range.new(commit.parent, commit)
-  defp commit_range(nil), do: {:error, "no commits to revert specified"}
+  defp commit_range(%IRI{} = commit_id), do: Commit.Range.new(1, commit_id)
   defp commit_range(invalid), do: {:error, "invalid commit spec: #{inspect(invalid)}"}
 
   @impl true
   def call(%__MODULE__{} = command, store, %Repository{} = repo) do
-    with {:ok, commits} <- HistoryQuery.call(command.history_query, store, repo),
+    with {:ok, range} <- Commit.Range.fetch(command.range, store, repo),
+         command = %__MODULE__{command | range: range},
+         {:ok, history_query} <- ChangesetQuery.history_query(:dataset, range: range),
+         {:ok, commits} <- HistoryQuery.call(history_query, store, repo),
          {:ok, changeset} <- changeset(commits),
          {:ok, commit_command} <-
            command
@@ -69,16 +74,16 @@ defmodule Ontogen.Operations.RevertCommand do
 
   defp changeset([]), do: {:error, "no commits to revert"}
 
-  defp changeset(history) do
+  defp changeset(commits) do
     {:ok,
-     history
+     commits
      |> Commit.Changeset.merge()
      |> Commit.Changeset.invert()}
   end
 
   defp commit_args(%__MODULE__{} = command, changeset, commits, head) do
     commit_attrs = command.commit_attrs
-    range = command.history_query.range
+    range = command.range
 
     cond do
       range.target in [:head, head] ->

@@ -8,7 +8,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
 
   describe "Ontogen.revert/1" do
     test "when no commits specified" do
-      assert Ontogen.revert(foo: :bar) == {:error, "no commits to revert specified"}
+      assert Ontogen.revert(foo: :bar) == {:error, :no_head}
     end
 
     test "when nothing to revert" do
@@ -126,6 +126,23 @@ defmodule Ontogen.Operations.RevertCommandTest do
       # inserts the provenance
       assert Ontogen.dataset_history() ==
                {:ok, [revert3, revert2, revert1 | history]}
+
+      ############# another revert: revert all ################
+
+      assert {:ok, %Commit{} = revert4} = Ontogen.revert(to: :root)
+
+      assert revert4.reverted_base_commit == Commit.root()
+      refute revert3.reverted_target_commit
+
+      # updates the head in the dataset of the repo
+      assert Ontogen.head() == revert4
+
+      # inserts the uttered statements
+      assert Ontogen.dataset() == {:ok, RDF.graph()}
+
+      # inserts the provenance
+      assert Ontogen.dataset_history() ==
+               {:ok, [revert4, revert3, revert2, revert1 | history]}
     end
 
     test "a non-head relative range" do
@@ -181,6 +198,49 @@ defmodule Ontogen.Operations.RevertCommandTest do
       refute revert.reverted_target_commit
     end
 
+    test "base-relative range" do
+      [fourth, third, _second, _first] = history = init_history()
+
+      assert {:ok, %Commit{} = revert1} =
+               Ontogen.revert(
+                 to: 1,
+                 time: datetime(1)
+               )
+
+      assert revert1.reverted_base_commit == third.__id__
+      refute revert1.reverted_target_commit
+
+      assert {:ok, %Commit{} = revert2} =
+               Ontogen.revert(
+                 to: 5,
+                 time: datetime(2)
+               )
+
+      assert revert2.reverted_base_commit == Commit.root()
+      refute revert2.reverted_target_commit
+
+      assert {:ok, %Commit{} = revert3} =
+               Ontogen.revert(
+                 to: 3,
+                 time: datetime(3)
+               )
+
+      assert revert3.reverted_base_commit == third.__id__
+      refute revert3.reverted_target_commit
+
+      assert revert3.message ==
+               """
+               Revert of commits:
+
+               - #{hash_from_iri(fourth.__id__)}
+               - #{hash_from_iri(revert1.__id__)}
+               - #{hash_from_iri(revert2.__id__)}
+               """
+
+      assert Ontogen.dataset_history() ==
+               {:ok, [revert3, revert2, revert1 | history]}
+    end
+
     test "a directly given commit" do
       [_fourth, third, _second, _first] = init_history()
       original_dataset = Ontogen.dataset()
@@ -190,7 +250,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
       refute revert1.reverted_base_commit
       assert revert1.reverted_target_commit == third.__id__
 
-      assert {:ok, %Commit{} = revert2} = Ontogen.revert(commit: revert1)
+      assert {:ok, %Commit{} = revert2} = Ontogen.revert(commit: revert1.__id__)
 
       assert revert2.reverted_base_commit == revert1.parent
       refute revert2.reverted_target_commit
@@ -202,13 +262,23 @@ defmodule Ontogen.Operations.RevertCommandTest do
       history = init_history()
       independent_commit = commit()
 
-      assert independent_commit not in history
+      refute independent_commit in history
 
       assert Ontogen.revert(commit: independent_commit) ==
                {:error, %InvalidCommitRangeError{reason: :out_of_range}}
 
       assert Ontogen.revert(to: independent_commit) ==
                {:error, %InvalidCommitRangeError{reason: :out_of_range}}
+    end
+
+    test "nil is not allowed as base" do
+      init_history()
+
+      assert Ontogen.revert(to: nil) ==
+               {:error, %InvalidCommitRangeError{reason: "nil is not a valid value for base"}}
+
+      assert Ontogen.revert(base: nil) ==
+               {:error, %InvalidCommitRangeError{reason: "nil is not a valid value for base"}}
     end
 
     defp init_history do
