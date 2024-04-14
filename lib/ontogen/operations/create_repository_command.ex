@@ -5,7 +5,7 @@ defmodule Ontogen.Operations.CreateRepositoryCommand do
       create_repo_id_file: true
     ]
 
-  alias Ontogen.{Repository, Dataset, ProvGraph, Store, InvalidRepoSpecError}
+  alias Ontogen.{Repository, Dataset, ProvGraph, Store, Commit, InvalidRepoSpecError}
   alias Ontogen.Config.Repository.IdFile
   alias RDF.IRI
 
@@ -97,6 +97,7 @@ defmodule Ontogen.Operations.CreateRepositoryCommand do
       spec
       |> Keyword.put(:dataset, dataset)
       |> Keyword.put(:prov_graph, prov_graph)
+      |> Keyword.put(:head, Commit.root())
 
     case Keyword.pop(spec, :id) do
       {nil, spec} -> Repository.build(spec)

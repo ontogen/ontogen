@@ -9,7 +9,7 @@ defmodule Ontogen.Commit.Id do
 
   def content(commit) do
     [
-      if(commit.parent, do: "parent #{to_hash(commit.parent)}"),
+      unless(Commit.root?(commit), do: "parent #{to_hash(commit.parent)}"),
       if(commit.add, do: "add #{to_hash(commit.add)}"),
       if(commit.update, do: "update #{to_hash(commit.update)}"),
       if(commit.replace, do: "replace #{to_hash(commit.replace)}"),

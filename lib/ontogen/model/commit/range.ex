@@ -1,7 +1,8 @@
 defmodule Ontogen.Commit.Range do
-  defstruct [:base, :target]
+  defstruct [:base, :target, :commit_ids]
 
-  alias Ontogen.{Commit, Repository, InvalidCommitRangeError}
+  alias Ontogen.{Commit, InvalidCommitRangeError}
+  alias Ontogen.Commit.Range.Fetcher
 
   def new({base, target}), do: new(base, target)
   def new(%__MODULE__{} = range), do: {:ok, range}
@@ -28,7 +29,8 @@ defmodule Ontogen.Commit.Range do
 
   defp normalize(_, %Commit{__id__: id}), do: {:ok, id}
   defp normalize(_, %RDF.IRI{} = iri), do: {:ok, iri}
-  defp normalize(:base, nil), do: {:ok, nil}
+  defp normalize(:base, :root), do: {:ok, Commit.root()}
+  defp normalize(:base, nil), do: {:ok, Commit.root()}
   defp normalize(:target, head) when head in [:head, nil], do: {:ok, :head}
 
   defp normalize(type, invalid),

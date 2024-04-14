@@ -4,6 +4,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
   doctest Ontogen.Operations.CommitCommand
 
   alias Ontogen.{
+    Commit,
     Config,
     ProvGraph,
     SpeechAct,
@@ -13,7 +14,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
   }
 
   test "initial commit with implicit speech_act" do
-    refute Ontogen.head()
+    assert Ontogen.head() == Commit.root()
 
     expected_add = Proposition.new!(graph())
     committer = agent(:agent_jane)
@@ -33,7 +34,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
                message: message
              )
 
-    assert commit.parent == nil
+    assert commit.parent == Commit.root()
     assert commit.speech_act == speech_act
     assert commit.add == expected_add
     assert commit.committer == committer
@@ -54,7 +55,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
   end
 
   test "initial commit with explicit speech_act" do
-    refute Ontogen.head()
+    assert Ontogen.head() == Commit.root()
 
     speech_act = speech_act()
 
@@ -65,7 +66,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
 
     assert {:ok,
             %Ontogen.Commit{
-              parent: nil,
+              parent: term_to_iri(Og.CommitRoot),
               speech_act: ^speech_act,
               add: ^expected_add,
               committer: ^committer,
@@ -101,7 +102,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
   end
 
   test "additional prov metadata" do
-    refute Ontogen.head()
+    assert Ontogen.head() == Commit.root()
 
     expected_add = Proposition.new!(graph())
     message = "Initial commit"
@@ -129,7 +130,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
                additional_prov_metadata: graph([1])
              )
 
-    assert commit.parent == nil
+    assert commit.parent == Commit.root()
     assert commit.speech_act == speech_act
     assert commit.committer == committer
     assert commit.add == expected_add
@@ -155,7 +156,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
   describe "defaults" do
     # TODO: This is a flaky test on Oxigraph due to this issue: https://github.com/oxigraph/oxigraph/issues/524
     test "with implicit speech_act" do
-      refute Ontogen.head()
+      assert Ontogen.head() == Commit.root()
 
       expected_add = Proposition.new!(graph())
 
@@ -184,7 +185,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
     end
 
     test "with explicit speech_act" do
-      refute Ontogen.head()
+      assert Ontogen.head() == Commit.root()
 
       expected_add = speech_act().add
       committer = agent(:agent_jane)
@@ -193,7 +194,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
 
       assert {:ok,
               %Ontogen.Commit{
-                parent: nil,
+                parent: term_to_iri(Og.CommitRoot),
                 add: ^expected_add,
                 committer: ^committer,
                 time: ^time,

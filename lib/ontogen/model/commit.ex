@@ -9,7 +9,11 @@ defmodule Ontogen.Commit do
   import Ontogen.Changeset.Helper, only: [copy_to_proposition_struct: 2]
 
   schema Og.Commit do
-    link parent: Og.parentCommit(), type: Ontogen.Commit, depth: 0
+    link parent: Og.parentCommit(),
+         type: Ontogen.Commit,
+         required: true,
+         depth: 0,
+         on_missing_description: :use_rdf_node
 
     link add: Og.committedAdd(), type: Proposition, depth: +1
     link update: Og.committedUpdate(), type: Proposition, depth: +1
@@ -31,9 +35,13 @@ defmodule Ontogen.Commit do
     property message: Og.commitMessage(), type: :string
   end
 
+  @root RDF.iri(Og.CommitRoot)
+  def root, do: @root
+
   def new(%Changeset{} = changeset, args) do
     args =
       args
+      |> Keyword.put_new(:parent, @root)
       |> Keyword.put_new_lazy(:committer, fn -> Config.user() end)
       |> Keyword.put_new_lazy(:time, fn -> DateTime.utc_now() end)
 
@@ -71,7 +79,7 @@ defmodule Ontogen.Commit do
     end
   end
 
-  def root?(%__MODULE__{parent: nil}), do: true
+  def root?(%__MODULE__{parent: @root}), do: true
   def root?(%__MODULE__{}), do: false
 
   def on_to_rdf(%__MODULE__{__id__: id}, graph, _opts) do

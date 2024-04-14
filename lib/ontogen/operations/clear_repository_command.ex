@@ -29,7 +29,7 @@ defmodule Ontogen.Operations.ClearRepositoryCommand do
   def call(%__MODULE__{}, store, repository) do
     delete_repo(store, repository)
 
-    with {:ok, repository} <- Repository.set_head(repository, nil),
+    with {:ok, repository} <- Repository.set_head(repository, :root),
          {:ok, command} = CreateRepositoryCommand.new(repository, create_repo_id_file: false) do
       CreateRepositoryCommand.call(command, store)
     end

@@ -4,7 +4,7 @@ defmodule Ontogen.Operations.CreateRepositoryCommandTest do
   doctest Ontogen.Operations.CreateRepositoryCommand
 
   alias Ontogen.Operations.CreateRepositoryCommand
-  alias Ontogen.{Dataset, ProvGraph, Store, Config}
+  alias Ontogen.{Dataset, ProvGraph, Store, Commit, Config}
 
   setup do
     on_exit(fn -> File.rm(Config.Repository.IdFile.path()) end)
@@ -50,7 +50,8 @@ defmodule Ontogen.Operations.CreateRepositoryCommandTest do
     expected_repo =
       Ontogen.Repository.build!(repo_id,
         dataset: Dataset.build!(base_uri <> "/custom_dataset_id"),
-        prov_graph: ProvGraph.build!(base_uri <> "/custom_prov_graph_id")
+        prov_graph: ProvGraph.build!(base_uri <> "/custom_prov_graph_id"),
+        head: Commit.root()
       )
 
     assert {:ok, %CreateRepositoryCommand{} = command} =

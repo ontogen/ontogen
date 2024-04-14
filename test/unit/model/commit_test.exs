@@ -25,7 +25,7 @@ defmodule Ontogen.CommitTest do
       assert commit.committer == agent()
       assert commit.message == message
       assert commit.time == datetime()
-      refute commit.parent
+      assert commit.parent == Commit.root()
       assert Commit.root?(commit)
     end
 

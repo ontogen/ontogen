@@ -125,8 +125,12 @@ og:RootCommit a owl:Class
     ; rdfs:subClassOf
         [ a owl:Restriction
             ; owl:onProperty og:parentCommit
-            ; owl:maxCardinality 0
+            ; owl:hasValue og:CommitRoot
         ]
+.
+
+og:CommitRoot a og:Commit, owl:NamedIndividual
+    ; rdfs:comment "Sentinel node for the og:parentCommit chain"
 .
 
 og:Revert a rdfs:Class

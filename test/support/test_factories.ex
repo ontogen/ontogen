@@ -154,7 +154,8 @@ defmodule Ontogen.TestFactories do
   def repository_attrs(attrs \\ []) do
     [
       dataset: Keyword.get(attrs, :dataset, dataset()),
-      prov_graph: Keyword.get(attrs, :prov_graph, prov_graph())
+      prov_graph: Keyword.get(attrs, :prov_graph, prov_graph()),
+      head: Commit.root()
     ]
     |> Keyword.merge(attrs)
   end
