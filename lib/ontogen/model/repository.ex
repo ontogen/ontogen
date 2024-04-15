@@ -14,6 +14,19 @@ defmodule Ontogen.Repository do
          on_missing_description: :use_rdf_node
   end
 
+  def new(id, attrs) do
+    attrs = Keyword.put_new(attrs, :head, Commit.root())
+
+    build(id, attrs)
+  end
+
+  def new!(id, attrs) do
+    case new(id, attrs) do
+      {:ok, result} -> result
+      {:error, error} -> raise error
+    end
+  end
+
   def head_id(%__MODULE__{head: %Commit{__id__: id}}), do: id
   def head_id(%__MODULE__{head: head}), do: head
 
