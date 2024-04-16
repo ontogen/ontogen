@@ -79,8 +79,9 @@ defmodule Ontogen.SpeechAct do
   end
 
   def update_changeset(%__MODULE__{} = speech_act, %Changeset{} = changeset) do
-    changeset
-    |> copy_to_proposition_struct(speech_act)
+    speech_act = copy_to_proposition_struct(changeset, speech_act)
+
+    speech_act
     |> Grax.reset_id(Id.generate(speech_act))
     |> validate()
   end

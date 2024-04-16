@@ -66,9 +66,8 @@ defmodule Ontogen.Commit do
   end
 
   defp init(commit, changeset) do
-    changeset
-    |> copy_to_proposition_struct(commit)
-    |> Grax.reset_id(Id.generate(commit))
+    commit = copy_to_proposition_struct(changeset, commit)
+    Grax.reset_id(commit, Id.generate(commit))
   end
 
   def validate(commit) do

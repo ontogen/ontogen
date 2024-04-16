@@ -5,6 +5,62 @@ defmodule Ontogen.CommitTest do
 
   alias Ontogen.{Commit, Proposition, Config, InvalidChangesetError}
 
+  test "id stability" do
+    assert {:ok,
+            %Commit{
+              __id__: %IRI{
+                value:
+                  "urn:hash::sha256:0db70c636f5b2e0a8271fc94ad9319ae5e2645fc68008a3d1cd6436a0126efd5"
+              }
+            }} =
+             Commit.new(
+               speech_act: speech_act(),
+               add: proposition(1),
+               update: proposition(2),
+               replace: proposition(3),
+               remove: proposition(4),
+               overwrite: proposition(5),
+               committer: agent(),
+               message: "Initial commit",
+               time: datetime()
+             )
+
+    assert {:ok,
+            %Commit{
+              __id__: %IRI{
+                value:
+                  "urn:hash::sha256:c6fa7aecf65d0b862552e61c5987c13eb9c1ee552698801b28051808d6a405d9"
+              }
+            }} =
+             Commit.new(
+               speech_act: speech_act(),
+               add: proposition(1),
+               committer: agent(),
+               message: "Initial commit",
+               time: datetime()
+             )
+
+    assert {:ok,
+            %Commit{
+              __id__: %IRI{
+                value:
+                  "urn:hash::sha256:f2a583167b850ea127fd0628d5b18445b51879bf2481e9a1590b7937dfeb4c4d"
+              }
+            }} =
+             Commit.new(
+               parent: commit(),
+               speech_act: speech_act(),
+               add: proposition(1),
+               update: proposition(2),
+               replace: proposition(3),
+               remove: proposition(4),
+               overwrite: proposition(5),
+               committer: agent(),
+               message: "Initial commit",
+               time: datetime()
+             )
+  end
+
   describe "new/1" do
     test "with all required attributes" do
       message = "Initial commit"

@@ -101,6 +101,10 @@ defmodule Ontogen.TestFactories do
     statements |> statements() |> RDF.graph()
   end
 
+  def graph(other) do
+    RDF.graph(other)
+  end
+
   @subgraph [
               EX.S1 |> EX.p1(EX.O1)
             ]
@@ -207,7 +211,7 @@ defmodule Ontogen.TestFactories do
 
   def proposition(graph \\ graph()) do
     graph
-    |> RDF.graph()
+    |> graph()
     |> Proposition.new!()
   end
 

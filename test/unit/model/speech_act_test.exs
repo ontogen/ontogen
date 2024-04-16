@@ -5,6 +5,53 @@ defmodule Ontogen.SpeechActTest do
 
   alias Ontogen.{SpeechAct, Config, InvalidChangesetError}
 
+  test "id stability" do
+    assert {:ok,
+            %SpeechAct{
+              __id__: %IRI{
+                value:
+                  "urn:hash::sha256:7db02c9a3d9a65a3272cfeb8dc7a1df97d3dbfb6db832f96f50fe3a79c5e6d1e"
+              }
+            }} =
+             SpeechAct.new(
+               add: graph(1),
+               update: graph(2),
+               replace: graph(3),
+               remove: graph(4),
+               speaker: agent(),
+               time: datetime()
+             )
+
+    assert {:ok,
+            %SpeechAct{
+              __id__: %IRI{
+                value:
+                  "urn:hash::sha256:0ccd1c7cda0f51664fe1932a7f020df62dadbd15180f774e381d0e5748f24d5e"
+              }
+            }} =
+             SpeechAct.new(
+               add: graph(1),
+               speaker: agent(),
+               time: datetime()
+             )
+
+    assert {:ok,
+            %SpeechAct{
+              __id__: %IRI{
+                value:
+                  "urn:hash::sha256:86cf12f6a217af987fd86dd0b332c6af0cfb80fe2c32a7dd485e75d4379cd15e"
+              }
+            }} =
+             SpeechAct.new(
+               add: graph(1),
+               update: graph(2),
+               replace: graph(3),
+               remove: graph(4),
+               data_source: dataset(),
+               time: datetime()
+             )
+  end
+
   describe "new/1" do
     test "with all required attributes" do
       assert {:ok, %SpeechAct{} = speech_act} =

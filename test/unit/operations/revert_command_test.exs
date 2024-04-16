@@ -29,7 +29,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
 
     # TODO: This is a flaky test on Oxigraph due to this issue: https://github.com/oxigraph/oxigraph/issues/524
     test "head-relative" do
-      [fourth, third, _second, first] = history = init_history()
+      [fourth, third, second, first] = history = init_history()
       original_dataset = Ontogen.dataset()
 
       message = "Revert commit 1"
@@ -81,10 +81,10 @@ defmodule Ontogen.Operations.RevertCommandTest do
                """
                Revert of commits:
 
-               - 8806b0d970677c1826ab00e6c8d64e96c7039e0a34296b3e81066052490c84b8
-               - 8edcb85143fd1adee3f201ed78e0f2dc0437373d7865cce33675c0cc4270ec98
-               - 2a78b53e5b0fe4e493776af840a8613bcbe7f37e91092e44ec13ff85f844c286
-               - 8855cfb8509d8f4c9519f8163f94d7153c26aa03616f53c19fea32f04447ab7e
+               - #{hash_from_iri(second.__id__)}
+               - #{hash_from_iri(third.__id__)}
+               - #{hash_from_iri(fourth.__id__)}
+               - #{hash_from_iri(revert1.__id__)}
                """
 
       # updates the head in the dataset of the repo
