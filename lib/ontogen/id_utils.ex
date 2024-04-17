@@ -1,11 +1,15 @@
 defmodule Ontogen.IdUtils do
+  @moduledoc false
+
   use RDF
 
   alias RDF.{Dataset, IRI}
   alias Ontogen.IdGenerationError
+  alias Ontogen.NS.Og
+
+  @short_hash_length 10
 
   @sha_iri_prefix "urn:hash::sha256:"
-
   def sha_iri_prefix, do: @sha_iri_prefix
 
   def hash_iri(value) do
@@ -17,8 +21,14 @@ defmodule Ontogen.IdUtils do
     |> Base.encode16(case: :lower)
   end
 
+  def short_hash(hash), do: String.slice(hash, 0, @short_hash_length)
+
+  def hash_from_iri(term_to_iri(Og.CommitRoot)), do: "commit-root"
   def hash_from_iri(%IRI{value: @sha_iri_prefix <> hash}), do: hash
   def hash_from_iri(_), do: nil
+
+  def short_hash_from_iri(%IRI{value: @sha_iri_prefix <> hash}), do: short_hash(hash)
+  def short_hash_from_iri(_), do: nil
 
   def dataset_hash(%RDF.Dataset{} = dataset) do
     if Dataset.empty?(dataset) do
@@ -52,6 +62,9 @@ defmodule Ontogen.IdUtils do
 
     hash_iri("#{type} #{byte_size(content)}\0#{content}")
   end
+
+  def to_iri(%{__id__: id}), do: to_iri(id)
+  def to_iri(%IRI{} = iri), do: iri
 
   def to_id(%{__id__: id}), do: to_id(id)
   def to_id(%IRI{} = iri), do: to_string(iri)

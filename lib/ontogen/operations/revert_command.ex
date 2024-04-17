@@ -102,7 +102,7 @@ defmodule Ontogen.Operations.RevertCommand do
     |> Keyword.put(:on_no_effective_changes, :error)
   end
 
-  defp default_message(commits) do
+  def default_message(commits) do
     """
     Revert of commits:
 

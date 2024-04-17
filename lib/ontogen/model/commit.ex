@@ -3,6 +3,7 @@ defmodule Ontogen.Commit do
 
   alias Ontogen.{Proposition, SpeechAct, Config}
   alias Ontogen.Commit.{Id, Changeset}
+  alias Ontogen.HistoryType.Formatter.CommitFormatter
   alias Ontogen.NS.Og
   alias RDF.Graph
 
@@ -81,11 +82,19 @@ defmodule Ontogen.Commit do
   def root?(%__MODULE__{parent: @root}), do: true
   def root?(%__MODULE__{}), do: false
 
+  def revert?(%__MODULE__{} = commit),
+    do: !!(commit.reverted_base_commit || commit.reverted_target_commit)
+
   def on_to_rdf(%__MODULE__{__id__: id}, graph, _opts) do
     {
       :ok,
       graph
       |> Graph.delete({id, RDF.type(), Og.Commit})
     }
+  end
+
+  def format(commit, opts \\ []) do
+    {format, opts} = Keyword.pop(opts, :format, :default)
+    CommitFormatter.format(commit, format, opts)
   end
 end

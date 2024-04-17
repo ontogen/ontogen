@@ -164,4 +164,12 @@ defmodule Ontogen.CommitTest do
                )
     end
   end
+
+  test "format/2" do
+    assert Commit.format(commit(), color: false) =~
+             ~r"af0f05affb - Test commit \(\d+ .+\) <John Doe john\.doe@example\.com>$"
+
+    assert Commit.format(commit(), format: :oneline, color: false) ==
+             "af0f05affbb433c0d2e881712909aafc2664c8d42b2d74951f026db32e653417 Test commit"
+  end
 end

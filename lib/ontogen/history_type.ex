@@ -1,4 +1,5 @@
 defmodule Ontogen.HistoryType do
+  alias __MODULE__
   alias RDF.{IRI, Statement, Graph}
 
   @type subject_type :: :dataset | :graph | :resource | :statement
@@ -7,7 +8,7 @@ defmodule Ontogen.HistoryType do
   @callback history(history_graph :: Graph.t(), subject_type, subject, opts :: keyword) ::
               {:ok, list} | {:error, any}
 
-  @default_history_type Ontogen.HistoryType.Native
+  @default_history_type HistoryType.Native
 
   def history(history_graph, subject_type, subject, opts \\ []) do
     with {:ok, history_type, opts} <- history_type(opts) do
@@ -16,10 +17,14 @@ defmodule Ontogen.HistoryType do
   end
 
   defp history_type(opts) do
+    has_format? = Keyword.has_key?(opts, :format)
+
     case Keyword.pop(opts, :type) do
+      {nil, opts} when has_format? -> {:ok, HistoryType.Formatter, opts}
       {nil, opts} -> {:ok, @default_history_type, opts}
-      {:native, opts} -> {:ok, Ontogen.HistoryType.Native, opts}
-      {:raw, opts} -> {:ok, Ontogen.HistoryType.Raw, opts}
+      {:native, opts} -> {:ok, HistoryType.Native, opts}
+      {:raw, opts} -> {:ok, HistoryType.Raw, opts}
+      {:formatted, opts} -> {:ok, HistoryType.Formatter, opts}
       {history_type, opts} when is_atom(history_type) -> {:ok, history_type, opts}
       {invalid, _} -> {:error, "invalid history type: #{inspect(invalid)}"}
     end

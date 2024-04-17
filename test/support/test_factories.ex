@@ -24,6 +24,8 @@ defmodule Ontogen.TestFactories do
   alias Ontogen.TestNamespaces.EX
   @compile {:no_warn_undefined, Ontogen.TestNamespaces.EX}
 
+  import Ontogen.IdUtils
+
   def id(:agent), do: ~I<http://example.com/Agent>
   def id(:agent_john), do: ~I<http://example.com/Agent/john_doe>
   def id(:agent_jane), do: ~I<http://example.com/Agent/jane_doe>
@@ -266,6 +268,63 @@ defmodule Ontogen.TestFactories do
     |> Keyword.put_new(:time, datetime())
     |> Keyword.put_new(:message, "Test commit")
     |> Keyword.put_new(:speech_act, changeset |> Keyword.new() |> speech_act())
+    |> Keyword.put_new(:changeset, changeset)
+    |> Commit.new!()
+  end
+
+  def commits(commits_attrs, root \\ nil) do
+    {commits, _} =
+      Enum.reduce(commits_attrs, {[], root || Commit.root()}, fn attrs, {commits, parent} ->
+        commit = attrs |> Keyword.put(:parent, parent) |> commit()
+        {[commit | commits], commit.__id__}
+      end)
+
+    commits
+  end
+
+  def revert(attrs \\ []) do
+    {commits, attrs} = Keyword.pop(attrs, :commits, :head)
+
+    {reverted_base_commit, reverted_target_commit, commits} =
+      case List.wrap(commits) do
+        [] ->
+          {nil, nil, []}
+
+        [:head] ->
+          head = commit()
+          {to_iri(head.parent), nil, [head]}
+
+        [:head, head] ->
+          {to_iri(head.parent), nil, [head]}
+
+        [:head, head | rest] ->
+          {to_iri(List.last(List.wrap(rest)).parent), nil, [head | rest]}
+
+        [single] ->
+          {nil, to_iri(single), [single]}
+
+        [first | rest] ->
+          {to_iri(List.last(List.wrap(rest)).parent), to_iri(first), [first | rest]}
+      end
+
+    {changeset, attrs} = Action.extract(attrs)
+
+    changeset =
+      if Action.empty?(changeset) do
+        commit_changeset() |> Map.from_struct()
+      else
+        commits
+        |> Enum.reverse()
+        |> Commit.Changeset.merge()
+        |> Commit.Changeset.invert()
+      end
+
+    attrs
+    |> Keyword.put_new(:committer, agent())
+    |> Keyword.put_new(:time, datetime())
+    |> Keyword.put_new(:message, Ontogen.Operations.RevertCommand.default_message(commits))
+    |> Keyword.put_new(:reverted_base_commit, reverted_base_commit)
+    |> Keyword.put_new(:reverted_target_commit, reverted_target_commit)
     |> Keyword.put_new(:changeset, changeset)
     |> Commit.new!()
   end

@@ -107,6 +107,19 @@ defmodule Ontogen.Operations.HistoryQueryTest do
                 |> Graph.add_prefixes(og: Og, rtc: RTC)}
     end
 
+    test "formatted history" do
+      [fourth, third, second, first] = init_history()
+
+      assert Ontogen.dataset_history(format: :oneline, color: false) ==
+               {:ok,
+                """
+                #{hash_from_iri(fourth.__id__)} #{first_line(fourth.message)}
+                #{hash_from_iri(third.__id__)} #{first_line(third.message)}
+                #{hash_from_iri(second.__id__)} #{first_line(second.message)}
+                #{hash_from_iri(first.__id__)} #{first_line(first.message)}
+                """}
+    end
+
     defp init_history do
       graph = [
         EX.S1 |> EX.p1(EX.O1),
