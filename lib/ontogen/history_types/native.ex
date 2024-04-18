@@ -7,6 +7,7 @@ defmodule Ontogen.HistoryType.Native do
 
   import RDF.Utils, only: [map_while_ok: 2]
 
+  # Note, that this default is in practice always overwritten by the default ordering set in the HistoryQuery
   @default_order {:desc, DateTime}
 
   @impl true

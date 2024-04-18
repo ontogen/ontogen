@@ -1,5 +1,6 @@
 defmodule Ontogen.HistoryType.Formatter.CommitFormatter do
   alias Ontogen.{Commit, SpeechAct, Agent}
+  alias Ontogen.HistoryType.Formatter.ChangesetFormatter
   alias RDF.IRI
   alias IO.ANSI
 
@@ -18,9 +19,24 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatter do
 
   def hash_formats, do: @hash_formats
 
-  def format(commit, format, opts \\ [])
+  def format(%Commit{} = commit, format, opts \\ []) do
+    change_formats = Keyword.get(opts, :changes, []) |> List.wrap()
 
-  def format(%Commit{} = commit, :default, opts) do
+    [
+      do_format(commit, format, opts),
+      if Enum.empty?(change_formats) do
+        []
+      else
+        [
+          if(one_line_format?(format), do: "\n", else: "\n\n")
+          | changes(commit, change_formats, opts)
+        ]
+      end
+    ]
+    |> IO.iodata_to_binary()
+  end
+
+  defp do_format(commit, :default, opts) do
     colorize = Keyword.get(opts, :color, ANSI.enabled?())
     hash_format = Keyword.get(opts, :hash_format, :short)
 
@@ -36,10 +52,9 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatter do
       " ",
       ANSI.format([:bright, :blue, "<", agent(commit.committer, false), ">"], colorize)
     ]
-    |> IO.iodata_to_binary()
   end
 
-  def format(%Commit{} = commit, :oneline, opts) do
+  defp do_format(commit, :oneline, opts) do
     colorize = Keyword.get(opts, :color, ANSI.enabled?())
     hash_format = Keyword.get(opts, :hash_format, :full)
 
@@ -51,10 +66,9 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatter do
         else: summary(commit.message)
       )
     ]
-    |> IO.iodata_to_binary()
   end
 
-  def format(%Commit{} = commit, :short, opts) do
+  defp do_format(commit, :short, opts) do
     colorize = Keyword.get(opts, :color, ANSI.enabled?())
     hash_format = Keyword.get(opts, :hash_format, :full)
 
@@ -66,13 +80,11 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatter do
         else: author_or_source(commit.speech_act)
       ),
       "\n",
-      summary(commit.message),
-      "\n"
+      summary(commit.message)
     ]
-    |> IO.iodata_to_binary()
   end
 
-  def format(%Commit{} = commit, :medium, opts) do
+  defp do_format(commit, :medium, opts) do
     colorize = Keyword.get(opts, :color, ANSI.enabled?())
     hash_format = Keyword.get(opts, :hash_format, :full)
 
@@ -98,13 +110,11 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatter do
         ]
       end,
       "\n",
-      commit.message,
-      "\n"
+      commit.message
     ]
-    |> IO.iodata_to_binary()
   end
 
-  def format(%Commit{} = commit, :full, opts) do
+  defp do_format(commit, :full, opts) do
     colorize = Keyword.get(opts, :color, ANSI.enabled?())
     hash_format = Keyword.get(opts, :hash_format, :full)
     padding = if Commit.revert?(commit), do: 14, else: 12
@@ -135,27 +145,29 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatter do
       [String.pad_trailing("Commit:", padding), agent(commit.committer), "\n"],
       [String.pad_trailing("CommitDate:", padding), time(commit.time), "\n"],
       "\n",
-      commit.message,
-      "\n"
+      commit.message
     ]
-    |> IO.iodata_to_binary()
   end
 
-  def format(%Commit{} = commit, :raw, opts) do
+  defp do_format(commit, :raw, opts) do
     colorize = Keyword.get(opts, :color, ANSI.enabled?())
 
     [
       ANSI.format([:yellow, "commit ", hash(commit, :full)], colorize),
       "\n",
-      Commit.Id.content(commit),
-      "\n"
+      Commit.Id.content(commit)
     ]
-    |> IO.iodata_to_binary()
   end
 
-  def format(%Commit{}, invalid, _opts) do
+  defp do_format(_, invalid, _opts) do
     raise ArgumentError,
           "invalid format: #{inspect(invalid)}. Possible formats: #{Enum.join(@formats, ", ")}"
+  end
+
+  defp changes(commit, change_formats, opts) do
+    change_formats
+    |> Enum.map(&ChangesetFormatter.format(commit, &1, opts))
+    |> Enum.intersperse("\n\n")
   end
 
   defp hash(%Commit{__id__: iri}, format), do: hash(iri, format)

@@ -31,6 +31,15 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
       assert CommitFormatter.format(revert(), :default) =~
                "\e[33m0f6be19cfb\e[0m - \e[3mRevert of commits:"
     end
+
+    test "with changes" do
+      assert CommitFormatter.format(commit(), :default, color: false, changes: :short_stat) <>
+               "\n" =~
+               ~r"""
+               af0f05affb - Test commit \(\d+ .+\) <John Doe john\.doe@example\.com>
+                3 resources changed, 3 insertions\(\+\), 1 deletions\(\-\)
+               """
+    end
   end
 
   describe "oneline format" do
@@ -58,6 +67,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
 
                First commit
                """
+               |> String.trim_trailing()
     end
 
     test "commit with speech act without speaker" do
@@ -72,6 +82,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
 
                First commit
                """
+               |> String.trim_trailing()
     end
 
     test "revert" do
@@ -82,6 +93,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
 
                Revert of commits:
                """
+               |> String.trim_trailing()
 
       commits = commit_history()
 
@@ -93,6 +105,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
 
                Revert of commits:
                """
+               |> String.trim_trailing()
 
       assert revert(commits: Enum.slice(commits, 1..2))
              |> CommitFormatter.format(:short) ==
@@ -103,6 +116,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
 
                Revert of commits:
                """
+               |> String.trim_trailing()
     end
   end
 
@@ -120,6 +134,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
                First commit
                with description
                """
+               |> String.trim_trailing()
     end
 
     test "commit with speech act without speaker or source" do
@@ -136,6 +151,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
                First commit
                with description
                """
+               |> String.trim_trailing()
 
       assert commit(
                message: "First commit\nwith description",
@@ -150,6 +166,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
                First commit
                with description
                """
+               |> String.trim_trailing()
     end
 
     test "revert" do
@@ -167,7 +184,6 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
 
                - #{hash_from_iri(third.__id__)}
                - #{hash_from_iri(second.__id__)}
-
                """
     end
   end
@@ -188,6 +204,31 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
                First commit
                with description
                """
+               |> String.trim_trailing()
+    end
+
+    test "with changes" do
+      commit = commit(message: "First commit\nwith description")
+
+      assert CommitFormatter.format(commit, :full, changes: [:resource_only, :short_stat]) ==
+               """
+               \e[33mcommit fc376678c4decae97dda5fd4ecf174d5f51c4a07fb26220b6e73719f04f63f0b\e[0m
+               Source:     <http://example.com/test/dataset>
+               Author:     John Doe <john.doe@example.com>
+               AuthorDate: Fri May 26 13:02:02 2023 +0000
+               Commit:     John Doe <john.doe@example.com>
+               CommitDate: Fri May 26 13:02:02 2023 +0000
+
+               First commit
+               with description
+
+               http://example.com/Foo
+               http://example.com/S1
+               http://example.com/S2
+
+                3 resources changed, 3 insertions(+), 1 deletions(-)
+               """
+               |> String.trim_trailing()
     end
 
     test "flat agents" do
@@ -206,6 +247,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
 
                Test commit
                """
+               |> String.trim_trailing()
     end
 
     test "commit with speech act without speaker or source" do
@@ -225,6 +267,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
                First commit
                with description
                """
+               |> String.trim_trailing()
 
       assert commit(
                message: "First commit\nwith description",
@@ -242,6 +285,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
                First commit
                with description
                """
+               |> String.trim_trailing()
     end
 
     test "revert" do
@@ -260,7 +304,6 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
 
                - #{hash_from_iri(second.__id__)}
                - #{hash_from_iri(first.__id__)}
-
                """
     end
   end
@@ -279,6 +322,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
                First commit
                with description
                """
+               |> String.trim_trailing()
     end
 
     test "revert" do
@@ -292,7 +336,6 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
                Revert of commits:
 
                - af0f05affbb433c0d2e881712909aafc2664c8d42b2d74951f026db32e653417
-
                """
     end
   end

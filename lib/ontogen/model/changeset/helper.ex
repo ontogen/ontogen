@@ -12,6 +12,24 @@ defmodule Ontogen.Changeset.Helper do
   def to_graph(%Proposition{} = proposition), do: Proposition.graph(proposition)
   def to_graph(statements), do: Graph.new(statements)
 
+  def inserts(%{add: add, update: update, replace: replace}) do
+    [add, update, replace]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.sort_by(&Graph.subject_count/1)
+    |> case do
+      [] -> Graph.new()
+      [graph] -> graph
+      [largest | rest] -> Enum.reduce(rest, largest, &Graph.add(&2, &1))
+    end
+  end
+
+  def deletes(%{remove: nil}), do: Graph.new()
+  def deletes(%{remove: remove}), do: remove
+
+  def overwrites(%{overwrite: nil}), do: Graph.new()
+  def overwrites(%{overwrite: overwrite}), do: overwrite
+  def overwrites(%{}), do: Graph.new()
+
   def extract(type, keywords) when is_list(keywords) do
     {actions, keywords} = Action.extract(keywords)
 

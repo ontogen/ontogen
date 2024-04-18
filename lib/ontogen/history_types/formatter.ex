@@ -25,11 +25,17 @@ defmodule Ontogen.HistoryType.Formatter do
 
   defp stream(commits, opts) do
     {format, opts} = Keyword.pop(opts, :format, :default)
+    change_formats = Keyword.get(opts, :changes, []) |> List.wrap()
 
-    Stream.map(commits, &format_commit(&1, format, opts))
-  end
+    splitter =
+      if CommitFormatter.one_line_format?(format) and Enum.empty?(change_formats) do
+        "\n"
+      else
+        "\n\n"
+      end
 
-  defp format_commit(commit, format, opts) do
-    CommitFormatter.format(commit, format, opts) <> "\n"
+    commits
+    |> Stream.map(&CommitFormatter.format(&1, format, opts))
+    |> Stream.intersperse(splitter)
   end
 end

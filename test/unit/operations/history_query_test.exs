@@ -117,7 +117,8 @@ defmodule Ontogen.Operations.HistoryQueryTest do
                 #{hash_from_iri(third.__id__)} #{first_line(third.message)}
                 #{hash_from_iri(second.__id__)} #{first_line(second.message)}
                 #{hash_from_iri(first.__id__)} #{first_line(first.message)}
-                """}
+                """
+                |> String.trim_trailing()}
     end
 
     defp init_history do

@@ -1,0 +1,150 @@
+defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
+  use OntogenCase
+
+  doctest Ontogen.HistoryType.Formatter.ChangesetFormatter
+
+  alias Ontogen.HistoryType.Formatter.ChangesetFormatter
+
+  describe "short_stat" do
+    test "commit" do
+      assert ChangesetFormatter.format(commit(), :short_stat) ==
+               " 3 resources changed, 3 insertions(+), 1 deletions(-)"
+
+      assert ChangesetFormatter.format(commit(changeset: [overwrite: graph()]), :short_stat) ==
+               " 2 resources changed, 3 overwrites(~)"
+    end
+
+    test "speech act" do
+      assert ChangesetFormatter.format(speech_act(), :short_stat) ==
+               " 2 resources changed, 3 insertions(+)"
+    end
+
+    test "changeset" do
+      assert ChangesetFormatter.format(commit_changeset(), :short_stat) ==
+               " 3 resources changed, 3 insertions(+), 1 deletions(-)"
+
+      assert ChangesetFormatter.format(speech_act_changeset(), :short_stat) ==
+               " 3 resources changed, 3 insertions(+), 1 deletions(-)"
+    end
+
+    test "revert commit" do
+      assert ChangesetFormatter.format(revert(), :short_stat) ==
+               " 3 resources changed, 3 insertions(+), 1 deletions(-)"
+    end
+  end
+
+  describe "resource_only" do
+    test "commit" do
+      assert ChangesetFormatter.format(commit(), :resource_only) ==
+               """
+               http://example.com/Foo
+               http://example.com/S1
+               http://example.com/S2
+               """
+               |> String.trim_trailing()
+    end
+
+    test "speech act" do
+      assert ChangesetFormatter.format(speech_act(), :resource_only) ==
+               """
+               http://example.com/S1
+               http://example.com/S2
+               """
+               |> String.trim_trailing()
+    end
+
+    test "changeset" do
+      assert ChangesetFormatter.format(commit_changeset(), :resource_only) ==
+               """
+               http://example.com/Foo
+               http://example.com/S1
+               http://example.com/S2
+               """
+               |> String.trim_trailing()
+
+      assert ChangesetFormatter.format(speech_act_changeset(), :resource_only) ==
+               """
+               http://example.com/Foo
+               http://example.com/S1
+               http://example.com/S2
+               """
+               |> String.trim_trailing()
+    end
+  end
+
+  describe "stat" do
+    test "commit" do
+      assert ChangesetFormatter.format(commit(), :stat) ==
+               """
+                http://example.com/Foo | 1 \e[32m\e[0m\e[31m-\e[0m\e[91m\e[0m
+                http://example.com/S1  | 1 \e[32m+\e[0m\e[31m\e[0m\e[91m\e[0m
+                http://example.com/S2  | 2 \e[32m++\e[0m\e[31m\e[0m\e[91m\e[0m
+                3 resources changed, 3 insertions(+), 1 deletions(-)
+               """
+               |> String.trim_trailing()
+    end
+
+    test "speech act" do
+      assert ChangesetFormatter.format(speech_act(), :stat) ==
+               """
+                http://example.com/S1 | 1 \e[32m+\e[0m\e[31m\e[0m\e[91m\e[0m
+                http://example.com/S2 | 2 \e[32m++\e[0m\e[31m\e[0m\e[91m\e[0m
+                2 resources changed, 3 insertions(+)
+               """
+               |> String.trim_trailing()
+    end
+
+    test "changeset" do
+      assert ChangesetFormatter.format(commit_changeset(), :stat, color: false) ==
+               """
+                http://example.com/Foo | 1 -
+                http://example.com/S1  | 1 +
+                http://example.com/S2  | 2 ++
+                3 resources changed, 3 insertions(+), 1 deletions(-)
+               """
+               |> String.trim_trailing()
+
+      assert ChangesetFormatter.format(speech_act_changeset(), :stat, color: false) ==
+               """
+                http://example.com/Foo | 1 -
+                http://example.com/S1  | 1 +
+                http://example.com/S2  | 2 ++
+                3 resources changed, 3 insertions(+), 1 deletions(-)
+               """
+               |> String.trim_trailing()
+    end
+
+    test "lines are never wrapped" do
+      large_commit =
+        commit(
+          add: 1..3 |> Enum.to_list() |> graph(),
+          update: 1..100 |> Enum.map(&{10, &1}) |> graph()
+        )
+
+      #      IO.puts("\n" <> ChangesetFormatter.format(large_commit, :stat))
+
+      assert_no_line_wrap(ChangesetFormatter.format(large_commit, :stat, color: false))
+
+      large_resource =
+        commit(
+          add:
+            graph([
+              {"http://example.com/#{String.duplicate("very", terminal_width())}long", EX.P, EX.O}
+            ]),
+          remove: 1..100 |> Enum.map(&{10, &1}) |> graph()
+        )
+
+      #      IO.puts("\n" <> ChangesetFormatter.format(large_resource, :stat))
+
+      assert_no_line_wrap(ChangesetFormatter.format(large_resource, :stat, color: false))
+    end
+  end
+
+  def assert_no_line_wrap(text) do
+    text
+    |> String.split("\n")
+    |> Enum.each(fn line ->
+      assert String.length(line) <= terminal_width()
+    end)
+  end
+end

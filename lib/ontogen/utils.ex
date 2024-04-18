@@ -19,6 +19,25 @@ defmodule Ontogen.Utils do
   end
 
   @doc """
+  Truncates a string to a maximum length and appends '...' if necessary.
+
+  ## Examples
+
+      iex> Ontogen.Utils.truncate("Hello World", 5)
+      "He..."
+
+      iex> Ontogen.Utils.truncate("Hello", 10)
+      "Hello"
+  """
+  def truncate(string, max_length, trunc_suffix \\ "...") do
+    if String.length(string) > max_length do
+      String.slice(string, 0, max_length - String.length(trunc_suffix)) <> trunc_suffix
+    else
+      string
+    end
+  end
+
+  @doc """
   Formats a given `DateTime` relative to the current UTC time.
 
   ## Examples
@@ -67,6 +86,14 @@ defmodule Ontogen.Utils do
     |> case do
       {years, 0} -> "#{years} years ago"
       {years, months} -> "#{years} years, #{months} month#{if months > 1, do: "s", else: ""} ago"
+    end
+  end
+
+  @default_terminal_width_fallback 120
+  def terminal_width do
+    case :io.columns() do
+      {:ok, columns} -> columns
+      _ -> @default_terminal_width_fallback
     end
   end
 end
