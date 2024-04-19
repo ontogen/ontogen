@@ -8,13 +8,13 @@ defmodule Ontogen.HistoryType.FormatterTest do
 
   describe "default format" do
     test "full dataset history" do
-      {commits, history_graph} = commit_history()
+      {[third, second, first] = commits, history_graph} = commit_history()
 
       assert formatted_history(history_graph, commits, format: :default, color: false) <> "\n" =~
                ~r"""
-               2235310670 - Test commit \(\d+ .+\) <John Doe john\.doe@example\.com>
-               23d9efcfeb - Second commit \(\d+ .+\) <Jane Doe jane\.doe@example\.com>
-               c6fa7aecf6 - Initial commit \(\d+ .+\) <John Doe john\.doe@example\.com>
+               #{short_hash_from_iri(third.__id__)} - Test commit \(\d+ .+\) <John Doe john\.doe@example\.com>
+               #{short_hash_from_iri(second.__id__)} - Second commit \(\d+ .+\) <Jane Doe jane\.doe@example\.com>
+               #{short_hash_from_iri(first.__id__)} - Initial commit \(\d+ .+\) <John Doe john\.doe@example\.com>
                """
     end
   end
@@ -121,7 +121,7 @@ defmodule Ontogen.HistoryType.FormatterTest do
                Author:     John Doe <john.doe@example.com>
                AuthorDate: Fri May 26 13:02:02 2023 +0000
                Commit:     John Doe <john.doe@example.com>
-               CommitDate: Fri May 26 13:02:02 2023 +0000
+               CommitDate: Fri May 26 13:02:00 2023 +0000
 
                #{third.message}
 
@@ -134,7 +134,7 @@ defmodule Ontogen.HistoryType.FormatterTest do
                Author:     John Doe <john.doe@example.com>
                AuthorDate: Fri May 26 13:02:02 2023 +0000
                Commit:     Jane Doe <jane.doe@example.com>
-               CommitDate: Fri May 26 13:02:02 2023 +0000
+               CommitDate: Fri May 26 13:01:59 2023 +0000
 
                #{second.message}
 
@@ -146,7 +146,7 @@ defmodule Ontogen.HistoryType.FormatterTest do
                Author:     John Doe <john.doe@example.com>
                AuthorDate: Fri May 26 13:02:02 2023 +0000
                Commit:     John Doe <john.doe@example.com>
-               CommitDate: Fri May 26 13:02:02 2023 +0000
+               CommitDate: Fri May 26 13:02:01 2023 +0000
 
                #{first.message}
 
@@ -154,6 +154,22 @@ defmodule Ontogen.HistoryType.FormatterTest do
                """
                |> String.trim_trailing()
     end
+  end
+
+  test "order options are passed through" do
+    {[third, second, first] = commits, history_graph} = commit_history()
+
+    assert formatted_history(history_graph, commits,
+             format: :oneline,
+             color: false,
+             order: {:time, :asc}
+           ) ==
+             """
+             #{hash_from_iri(second.__id__)} #{first_line(second.message)}
+             #{hash_from_iri(third.__id__)} #{first_line(third.message)}
+             #{hash_from_iri(first.__id__)} #{first_line(first.message)}
+             """
+             |> String.trim_trailing()
   end
 
   defp formatted_history(history_graph, commits, subject_tuple \\ {:dataset, nil}, opts) do
@@ -171,16 +187,19 @@ defmodule Ontogen.HistoryType.FormatterTest do
       commits([
         [
           add: graph(1),
-          message: "Initial commit"
+          message: "Initial commit",
+          time: datetime(-1)
         ],
         [
           add: graph(2),
           remove: graph(1),
           committer: agent(:agent_jane),
-          message: "Second commit"
+          message: "Second commit",
+          time: datetime(-3)
         ],
         [
-          update: graph([2, 3, 4])
+          update: graph([2, 3, 4]),
+          time: datetime(-2)
         ]
       ])
 

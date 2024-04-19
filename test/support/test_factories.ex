@@ -253,7 +253,11 @@ defmodule Ontogen.TestFactories do
     |> Keyword.merge(attrs)
   end
 
-  def commit(attrs \\ []) do
+  def commit(attrs \\ [])
+
+  def commit(%Commit{} = commit), do: commit
+
+  def commit(attrs) do
     {changeset, attrs} = Action.extract(attrs)
 
     changeset =
@@ -267,15 +271,26 @@ defmodule Ontogen.TestFactories do
     |> Keyword.put_new(:committer, agent())
     |> Keyword.put_new(:time, datetime())
     |> Keyword.put_new(:message, "Test commit")
-    |> Keyword.put_new(:speech_act, changeset |> Keyword.new() |> speech_act())
     |> Keyword.put_new(:changeset, changeset)
+    |> Keyword.update(:speech_act, changeset |> Keyword.new() |> speech_act(), fn
+      %SpeechAct{} = speech_act -> speech_act
+      speech_act_attrs -> speech_act(speech_act_attrs)
+    end)
     |> Commit.new!()
   end
 
   def commits(commits_attrs, root \\ nil) do
     {commits, _} =
       Enum.reduce(commits_attrs, {[], root || Commit.root()}, fn attrs, {commits, parent} ->
-        commit = attrs |> Keyword.put(:parent, parent) |> commit()
+        commit =
+          attrs
+          |> Keyword.put(:parent, parent)
+          |> Keyword.pop(:revert)
+          |> case do
+            {true, attrs} -> attrs |> Keyword.put_new(:commits, [1 | commits]) |> revert()
+            {_, attrs} -> commit(attrs)
+          end
+
         {[commit | commits], commit.__id__}
       end)
 
@@ -294,11 +309,15 @@ defmodule Ontogen.TestFactories do
           head = commit()
           {to_iri(head.parent), nil, [head]}
 
-        [:head, head] ->
+        [start, head] when start in [:head, 1] ->
           {to_iri(head.parent), nil, [head]}
 
-        [:head, head | rest] ->
-          {to_iri(List.last(List.wrap(rest)).parent), nil, [head | rest]}
+        [start, rest] when start in [:head, 1] ->
+          {to_iri(List.last(List.wrap(rest)).parent), nil, rest}
+
+        [number | rest] when is_integer(number) ->
+          commits = Enum.slice(rest, 0..(number - 1))
+          {to_iri(List.last(List.wrap(commits)).parent), nil, commits}
 
         [single] ->
           {nil, to_iri(single), [single]}
