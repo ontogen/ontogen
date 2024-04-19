@@ -33,6 +33,8 @@ defmodule Ontogen.Operation do
     api_block = operation_module.__api__()
 
     quote do
+      @external_resource to_string(unquote(module).__info__(:compile)[:source])
+      require unquote(module)
       alias unquote(module)
       unquote(api_block)
     end
