@@ -20,6 +20,8 @@ defmodule Ontogen.Operations.ClearRepositoryCommand do
       ClearRepositoryCommand.new()
       |> ClearRepositoryCommand.__do_call__()
     end
+
+    def clear_repository!, do: bang!(&clear_repository/0, [])
   end
 
   def new, do: {:ok, new!()}

@@ -8,6 +8,7 @@ defmodule Ontogen.SpeechAct do
   alias RDF.Graph
 
   import Ontogen.Changeset.Helper, only: [copy_to_proposition_struct: 2]
+  import Ontogen.Utils, only: [bang!: 2]
 
   @args_keys Action.fields() ++ [:speaker, :speech_act_time, :data_source]
   @shared_args [:time, :committer]
@@ -52,19 +53,8 @@ defmodule Ontogen.SpeechAct do
     end
   end
 
-  def new!(args) do
-    case new(args) do
-      {:ok, speech_act} -> speech_act
-      {:error, error} -> raise error
-    end
-  end
-
-  def new!(changeset, args) do
-    case new(changeset, args) do
-      {:ok, speech_act} -> speech_act
-      {:error, error} -> raise error
-    end
-  end
+  def new!(args), do: bang!(&new/1, [args])
+  def new!(changeset, args), do: bang!(&new/2, [changeset, args])
 
   def extract(args) do
     {speech_act_args, args} = extract_args(args)

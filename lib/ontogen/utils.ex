@@ -96,4 +96,11 @@ defmodule Ontogen.Utils do
       _ -> @default_terminal_width_fallback
     end
   end
+
+  def bang!(fun, args) do
+    case apply(fun, args) do
+      {:ok, result} -> result
+      {:error, error} -> raise error
+    end
+  end
 end

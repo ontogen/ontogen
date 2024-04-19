@@ -8,6 +8,7 @@ defmodule Ontogen.Commit do
   alias RDF.Graph
 
   import Ontogen.Changeset.Helper, only: [copy_to_proposition_struct: 2]
+  import Ontogen.Utils, only: [bang!: 2]
 
   schema Og.Commit do
     link parent: Og.parentCommit(),
@@ -59,12 +60,7 @@ defmodule Ontogen.Commit do
     end
   end
 
-  def new!(args) do
-    case new(args) do
-      {:ok, commit} -> commit
-      {:error, error} -> raise error
-    end
-  end
+  def new!(args \\ []), do: bang!(&new/1, [args])
 
   defp init(commit, changeset) do
     commit = copy_to_proposition_struct(changeset, commit)

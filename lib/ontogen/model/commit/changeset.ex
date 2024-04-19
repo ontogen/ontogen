@@ -3,6 +3,7 @@ defmodule Ontogen.Commit.Changeset do
   alias Ontogen.Changeset.{Action, Validation, Helper}
   alias RDF.Graph
 
+  import Ontogen.Utils, only: [bang!: 2]
   import Action, only: [is_action_map: 1]
   import Helper
 
@@ -66,12 +67,7 @@ defmodule Ontogen.Commit.Changeset do
   As opposed to `new/1` this function fails in error cases.
   """
   @spec new!(t() | Commit.t() | keyword, keyword) :: t()
-  def new!(args, opts \\ []) do
-    case new(args, opts) do
-      {:ok, changeset} -> changeset
-      {:error, error} -> raise error
-    end
-  end
+  def new!(args, opts \\ []), do: bang!(&new/2, [args, opts])
 
   @doc """
   Extracts a `Ontogen.Commit.Changeset` from the given keywords and returns it with the remaining unprocessed keywords.

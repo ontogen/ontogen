@@ -30,7 +30,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
     # TODO: This is a flaky test on Oxigraph due to this issue: https://github.com/oxigraph/oxigraph/issues/524
     test "head-relative" do
       [fourth, third, second, first] = history = init_history()
-      original_dataset = Ontogen.dataset()
+      original_dataset = Ontogen.dataset!()
 
       message = "Revert commit 1"
 
@@ -121,7 +121,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
       assert Ontogen.head() == revert3
 
       # inserts the uttered statements
-      assert Ontogen.dataset() == original_dataset
+      assert Ontogen.dataset!() == original_dataset
 
       # inserts the provenance
       assert Ontogen.dataset_history() ==
@@ -243,7 +243,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
 
     test "a directly given commit" do
       [_fourth, third, _second, _first] = init_history()
-      original_dataset = Ontogen.dataset()
+      original_dataset = Ontogen.dataset!()
 
       assert {:ok, %Commit{} = revert1} = Ontogen.revert(commit: third)
 
@@ -255,7 +255,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
       assert revert2.reverted_base_commit == revert1.parent
       refute revert2.reverted_target_commit
 
-      assert Ontogen.dataset() == original_dataset
+      assert Ontogen.dataset!() == original_dataset
     end
 
     test "with commit not part of the history" do

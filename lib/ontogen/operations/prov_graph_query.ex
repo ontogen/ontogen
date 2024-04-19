@@ -14,6 +14,8 @@ defmodule Ontogen.Operations.ProvGraphQuery do
       ProvGraphQuery.new!()
       |> ProvGraphQuery.call(store(), repository())
     end
+
+    def prov_graph!, do: bang!(&prov_graph/0, [])
   end
 
   def new, do: {:ok, new!()}

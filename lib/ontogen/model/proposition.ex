@@ -6,6 +6,7 @@ defmodule Ontogen.Proposition do
   alias RTC.Compound
   alias RDF.Graph
 
+  import Ontogen.Utils, only: [bang!: 2]
   import Ontogen.IdUtils
 
   schema Og.Proposition do
@@ -24,12 +25,7 @@ defmodule Ontogen.Proposition do
     end
   end
 
-  def new!(statements) do
-    case new(statements) do
-      {:ok, proposition} -> proposition
-      {:error, error} -> raise error
-    end
-  end
+  def new!(statements \\ []), do: bang!(&new/1, [statements])
 
   def on_load(%{} = proposition, graph, _opts) do
     {

@@ -23,6 +23,7 @@ defmodule Ontogen.Operation do
 
   defmacro api(block) do
     quote do
+      import Ontogen.Utils, only: [bang!: 2]
       @api unquote(Macro.escape(block, unquote: true))
       def __api__, do: @api
     end
@@ -36,6 +37,7 @@ defmodule Ontogen.Operation do
       @external_resource to_string(unquote(module).__info__(:compile)[:source])
       require unquote(module)
       alias unquote(module)
+      import Ontogen.Utils, only: [bang!: 2]
       unquote(api_block)
     end
   end

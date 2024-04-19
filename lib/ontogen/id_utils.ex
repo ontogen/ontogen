@@ -7,6 +7,8 @@ defmodule Ontogen.IdUtils do
   alias Ontogen.IdGenerationError
   alias Ontogen.NS.Og
 
+  import Ontogen.Utils, only: [bang!: 2]
+
   @short_hash_length 10
 
   @sha_iri_prefix "urn:hash::sha256:"
@@ -50,12 +52,7 @@ defmodule Ontogen.IdUtils do
     end
   end
 
-  def dataset_hash_iri!(statements) do
-    case dataset_hash_iri(statements) do
-      {:ok, dataset_hash_iri} -> dataset_hash_iri
-      {:error, error} -> raise error
-    end
-  end
+  def dataset_hash_iri!(statements), do: bang!(&dataset_hash_iri/1, [statements])
 
   def content_hash_iri(type, content_fun, args) do
     content = apply(content_fun, args)

@@ -13,6 +13,8 @@ defmodule Ontogen.Operations.DatasetQuery do
       DatasetQuery.new!()
       |> DatasetQuery.call(store(), repository())
     end
+
+    def dataset!, do: bang!(&dataset/0, [])
   end
 
   def new, do: {:ok, new!()}

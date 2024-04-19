@@ -21,6 +21,8 @@ defmodule Ontogen.Operations.RevertCommand do
       |> RevertCommand.new()
       |> RevertCommand.__do_call__()
     end
+
+    def revert!(args \\ []), do: bang!(&revert/1, [args])
   end
 
   def new(args) do

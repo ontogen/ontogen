@@ -19,6 +19,12 @@ defmodule Ontogen.Operations.HistoryQuery do
     def resource_history(resource, args \\ []), do: history({:resource, resource}, args)
     def statement_history(statement, args \\ []), do: history({:statement, statement}, args)
 
+    def dataset_history!(args \\ []), do: bang!(&dataset_history/1, [args])
+    def resource_history!(resource, args \\ []), do: bang!(&resource_history/2, [resource, args])
+
+    def statement_history!(statement, args \\ []),
+      do: bang!(&statement_history/2, [statement, args])
+
     defp history(subject, args) do
       subject
       |> HistoryQuery.new(args)

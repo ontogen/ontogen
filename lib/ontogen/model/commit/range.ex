@@ -10,6 +10,8 @@ defmodule Ontogen.Commit.Range do
   alias Ontogen.{Commit, InvalidCommitRangeError}
   alias Ontogen.Commit.Range.Fetcher
 
+  import Ontogen.Utils, only: [bang!: 2]
+
   def new({base, target}), do: new(base, target)
   def new(%__MODULE__{} = range), do: {:ok, range}
 
@@ -26,12 +28,7 @@ defmodule Ontogen.Commit.Range do
     end
   end
 
-  def new!(args) do
-    case new(args) do
-      {:ok, range} -> range
-      {:error, error} -> raise error
-    end
-  end
+  def new!(args \\ []), do: bang!(&new/1, [args])
 
   defp normalize(_, %Commit{__id__: id}), do: {:ok, id}
   defp normalize(_, %RDF.IRI{} = iri), do: {:ok, iri}

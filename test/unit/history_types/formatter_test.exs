@@ -10,10 +10,7 @@ defmodule Ontogen.HistoryType.FormatterTest do
     test "full dataset history" do
       {commits, history_graph} = commit_history()
 
-      assert {:ok, formatted} =
-               formatted_history(history_graph, commits, format: :default, color: false)
-
-      assert formatted <> "\n" =~
+      assert formatted_history(history_graph, commits, format: :default, color: false) <> "\n" =~
                ~r"""
                2235310670 - Test commit \(\d+ .+\) <John Doe john\.doe@example\.com>
                23d9efcfeb - Second commit \(\d+ .+\) <Jane Doe jane\.doe@example\.com>
@@ -26,10 +23,7 @@ defmodule Ontogen.HistoryType.FormatterTest do
     test "full dataset history" do
       {[third, second, first] = commits, history_graph} = commit_history()
 
-      assert {:ok, formatted} =
-               formatted_history(history_graph, commits, format: :oneline, color: false)
-
-      assert formatted ==
+      assert formatted_history(history_graph, commits, format: :oneline, color: false) ==
                """
                #{hash_from_iri(third.__id__)} #{first_line(third.message)}
                #{hash_from_iri(second.__id__)} #{first_line(second.message)}
@@ -37,14 +31,11 @@ defmodule Ontogen.HistoryType.FormatterTest do
                """
                |> String.trim_trailing()
 
-      assert {:ok, formatted} =
-               formatted_history(history_graph, commits,
-                 format: :oneline,
-                 changes: :short_stat,
-                 color: false
-               )
-
-      assert formatted ==
+      assert formatted_history(history_graph, commits,
+               format: :oneline,
+               changes: :short_stat,
+               color: false
+             ) ==
                """
                #{hash_from_iri(third.__id__)} #{first_line(third.message)}
                 3 resources changed, 3 insertions(+)
@@ -63,10 +54,7 @@ defmodule Ontogen.HistoryType.FormatterTest do
     test "full dataset history" do
       {[third, second, first] = commits, history_graph} = commit_history()
 
-      assert {:ok, formatted} =
-               formatted_history(history_graph, commits, format: :short, color: false)
-
-      assert formatted ==
+      assert formatted_history(history_graph, commits, format: :short, color: false) ==
                """
                commit #{hash_from_iri(third.__id__)}
                Author: John Doe <john.doe@example.com>
@@ -91,10 +79,7 @@ defmodule Ontogen.HistoryType.FormatterTest do
     test "full dataset history" do
       {[third, second, first] = commits, history_graph} = commit_history()
 
-      assert {:ok, formatted} =
-               formatted_history(history_graph, commits, format: :medium, color: false)
-
-      assert formatted ==
+      assert formatted_history(history_graph, commits, format: :medium, color: false) ==
                """
                commit #{hash_from_iri(third.__id__)}
                Source: <http://example.com/test/dataset>
@@ -125,14 +110,11 @@ defmodule Ontogen.HistoryType.FormatterTest do
     test "full dataset history" do
       {[third, second, first] = commits, history_graph} = commit_history()
 
-      assert {:ok, formatted} =
-               formatted_history(history_graph, commits,
-                 format: :full,
-                 changes: :resource_only,
-                 color: false
-               )
-
-      assert formatted ==
+      assert formatted_history(history_graph, commits,
+               format: :full,
+               changes: :resource_only,
+               color: false
+             ) ==
                """
                commit #{hash_from_iri(third.__id__)}
                Source:     <http://example.com/test/dataset>
@@ -180,7 +162,8 @@ defmodule Ontogen.HistoryType.FormatterTest do
     commit_id_chain = Enum.map(commits, & &1.__id__)
 
     opts = Keyword.put_new(opts, :order, {:desc, :parent, commit_id_chain})
-    Formatter.history(history_graph, subject_type, subject, opts)
+    assert {:ok, formatted} = Formatter.history(history_graph, subject_type, subject, opts)
+    formatted
   end
 
   defp commit_history() do

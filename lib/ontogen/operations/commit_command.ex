@@ -20,12 +20,16 @@ defmodule Ontogen.Operations.CommitCommand do
   alias Ontogen.Operations.EffectiveChangesetQuery
   alias Ontogen.Operations.CommitCommand.Update
 
+  import Ontogen.Utils, only: [bang!: 2]
+
   api do
     def commit(args) do
       args
       |> CommitCommand.new()
       |> CommitCommand.__do_call__()
     end
+
+    def commit!(args \\ []), do: bang!(&commit/1, [args])
   end
 
   def new(args) do
@@ -57,12 +61,7 @@ defmodule Ontogen.Operations.CommitCommand do
 
   defp do_new(speech_act_error, _), do: speech_act_error
 
-  def new!(args) do
-    case new(args) do
-      {:ok, operation} -> operation
-      {:error, error} -> raise error
-    end
-  end
+  def new!(args), do: bang!(&new/1, [args])
 
   defp commit_attrs(speech_act, args) do
     Keyword.put(args, :speech_act, speech_act)

@@ -15,6 +15,8 @@ defmodule Ontogen.Operations.CreateRepositoryCommand do
       |> CreateRepositoryCommand.new(opts)
       |> CreateRepositoryCommand.__do_call__()
     end
+
+    def create_repo!(repo_spec, args \\ []), do: bang!(&create_repo/2, [repo_spec, args])
   end
 
   def new(repository_spec, opts \\ [])

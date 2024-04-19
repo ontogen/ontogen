@@ -16,12 +16,7 @@ defmodule Ontogen.Operations.EffectiveChangesetQuery do
       |> EffectiveChangesetQuery.__do_call__()
     end
 
-    def effective_changeset!(changeset) do
-      case effective_changeset(changeset) do
-        {:ok, changeset} -> changeset
-        {:error, error} -> raise error
-      end
-    end
+    def effective_changeset!(args), do: bang!(&effective_changeset/1, [args])
   end
 
   def new(changeset_args) do
@@ -30,12 +25,7 @@ defmodule Ontogen.Operations.EffectiveChangesetQuery do
     end
   end
 
-  def new!(args) do
-    case new(args) do
-      {:ok, operation} -> operation
-      {:error, error} -> raise error
-    end
-  end
+  def new!(args \\ []), do: bang!(&new/1, [args])
 
   @impl true
   def call(

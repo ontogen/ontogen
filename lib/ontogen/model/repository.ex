@@ -4,6 +4,7 @@ defmodule Ontogen.Repository do
   alias Ontogen.NS.Og
   alias Ontogen.{Dataset, ProvGraph, Commit}
 
+  import Ontogen.Utils, only: [bang!: 2]
   schema Og.Repository do
     link dataset: Og.dataset(), type: Dataset, required: true
     link prov_graph: Og.provGraph(), type: ProvGraph, required: true
@@ -20,12 +21,7 @@ defmodule Ontogen.Repository do
     build(id, attrs)
   end
 
-  def new!(id, attrs) do
-    case new(id, attrs) do
-      {:ok, result} -> result
-      {:error, error} -> raise error
-    end
-  end
+  def new!(id, attrs), do: bang!(&new/2, [id, attrs])
 
   def head_id(%__MODULE__{head: %Commit{__id__: id}}), do: id
   def head_id(%__MODULE__{head: head}), do: head

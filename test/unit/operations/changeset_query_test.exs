@@ -20,31 +20,30 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
     test "with a specified base commit" do
       [fourth, third, second, _first] = init_history()
 
-      assert Ontogen.dataset_changes(base: second) ==
-               {:ok, Changeset.merge([third, fourth])}
+      assert Ontogen.dataset_changes!(base: second) ==
+               Changeset.merge([third, fourth])
 
-      assert Ontogen.dataset_changes(base: fourth) ==
-               {:ok, nil}
+      assert Ontogen.dataset_changes!(base: fourth) == nil
     end
 
     test "with a specified target commit" do
       [fourth, _third, second, first] = history = init_history()
 
-      assert Ontogen.dataset_changes(target: fourth.__id__) ==
-               {:ok, history |> Enum.reverse() |> Changeset.merge()}
+      assert Ontogen.dataset_changes!(target: fourth.__id__) ==
+               history |> Enum.reverse() |> Changeset.merge()
 
-      assert Ontogen.dataset_changes(target: second.__id__) ==
-               {:ok, Changeset.merge([first, second])}
+      assert Ontogen.dataset_changes!(target: second.__id__) ==
+               Changeset.merge([first, second])
     end
 
     test "with a specified base and target commit" do
       [fourth, third, second, first] = init_history()
 
-      assert Ontogen.dataset_changes(base: first.__id__, target: fourth.__id__) ==
-               {:ok, Changeset.merge([second, third, fourth])}
+      assert Ontogen.dataset_changes!(base: first.__id__, target: fourth.__id__) ==
+               Changeset.merge([second, third, fourth])
 
-      assert Ontogen.dataset_changes(base: second.__id__, target: third.__id__) ==
-               Changeset.new(third)
+      assert Ontogen.dataset_changes!(base: second.__id__, target: third.__id__) ==
+               Changeset.new!(third)
     end
 
     test "with relative base commit" do
@@ -53,14 +52,14 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
       assert Ontogen.dataset_changes(base: 1) ==
                Changeset.new(fourth)
 
-      assert Ontogen.dataset_changes(base: 4) ==
-               {:ok, Changeset.merge(Enum.reverse(history))}
+      assert Ontogen.dataset_changes!(base: 4) ==
+               Changeset.merge(Enum.reverse(history))
 
       assert Ontogen.dataset_changes(target: third, base: 1) ==
                Changeset.new(third)
 
-      assert Ontogen.dataset_changes(target: second, base: 2) ==
-               {:ok, Changeset.merge([second, first])}
+      assert Ontogen.dataset_changes!(target: second, base: 2) ==
+               Changeset.merge([second, first])
     end
 
     test "when the specified target commit comes later than the base commit" do
@@ -105,8 +104,8 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
           ]
         ])
 
-      assert Ontogen.dataset_changes() ==
-               {:ok, Changeset.merge([first, second, third, fourth])}
+      assert Ontogen.dataset_changes!() ==
+               Changeset.merge([first, second, third, fourth])
     end
 
     defp init_history do
@@ -149,17 +148,17 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
     test "target commit (default)" do
       [target_commit | _] = init_resource_history()
 
-      changeset = Ontogen.resource_changes(EX.S1)
+      changeset = Ontogen.resource_changes!(EX.S1)
 
-      assert changeset == Ontogen.resource_changes(EX.S1, target: target_commit)
-      assert changeset == Changeset.new(replace: [{EX.S1, EX.p2(), EX.O2}])
+      assert changeset == Ontogen.resource_changes!(EX.S1, target: target_commit)
+      assert changeset == Changeset.new!(replace: [{EX.S1, EX.p2(), EX.O2}])
     end
 
     test "with a specified base commit" do
       [fourth, third, second, first] = init_resource_history()
 
-      assert Ontogen.resource_changes(EX.S1, base: first) ==
-               {:ok, resource_limited_merge([second, third, fourth], EX.S1)}
+      assert Ontogen.resource_changes!(EX.S1, base: first) ==
+               resource_limited_merge([second, third, fourth], EX.S1)
 
       assert Ontogen.resource_changes(EX.S1, base: fourth) ==
                {:ok, nil}
@@ -168,11 +167,11 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
     test "with a specified target commit" do
       [fourth, _third, _second, first] = history = init_resource_history()
 
-      assert Ontogen.resource_changes(EX.S1, target: fourth.__id__) ==
-               {:ok, history |> Enum.reverse() |> resource_limited_merge(EX.S1)}
+      assert Ontogen.resource_changes!(EX.S1, target: fourth.__id__) ==
+               history |> Enum.reverse() |> resource_limited_merge(EX.S1)
 
-      assert Ontogen.resource_changes(EX.S1, target: first.__id__) ==
-               {:ok, resource_limited_merge([first], EX.S1)}
+      assert Ontogen.resource_changes!(EX.S1, target: first.__id__) ==
+               resource_limited_merge([first], EX.S1)
     end
 
     test "with a specified base and target commit" do

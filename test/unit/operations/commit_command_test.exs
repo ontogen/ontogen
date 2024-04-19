@@ -171,17 +171,16 @@ defmodule Ontogen.Operations.CommitCommandTest do
       assert DateTime.diff(DateTime.utc_now(), commit.speech_act.time, :second) <= 1
 
       # inserts the provenance
-      assert Ontogen.prov_graph() ==
-               {:ok,
-                RDF.graph(
-                  [
-                    commit,
-                    expected_add,
-                    Config.user()
-                  ]
-                  |> Enum.map(&Grax.to_rdf!/1),
-                  prefixes: ProvGraph.prefixes()
-                )}
+      assert Ontogen.prov_graph!() ==
+               RDF.graph(
+                 [
+                   commit,
+                   expected_add,
+                   Config.user()
+                 ]
+                 |> Enum.map(&Grax.to_rdf!/1),
+                 prefixes: ProvGraph.prefixes()
+               )
     end
 
     test "with explicit speech_act" do
@@ -498,8 +497,8 @@ defmodule Ontogen.Operations.CommitCommandTest do
 
     test "when there are no remaining changes; with on_no_effective_changes: :error" do
       [last_commit] = init_commit_history()
-      {:ok, last_dataset} = Ontogen.dataset()
-      {:ok, last_prov_graph} = Ontogen.prov_graph()
+      last_dataset = Ontogen.dataset!()
+      last_prov_graph = Ontogen.prov_graph!()
 
       assert Ontogen.commit(
                add: Proposition.graph(last_commit.add),
@@ -522,9 +521,9 @@ defmodule Ontogen.Operations.CommitCommandTest do
     assert Ontogen.repository() |> flatten_property(:head) == stored_repo()
 
     # inserts the statements
-    assert Ontogen.dataset() == {:ok, dataset}
+    assert Ontogen.dataset!() == dataset
 
     # inserts the provenance
-    assert Ontogen.prov_graph() == {:ok, RDF.graph(prov_graph, prefixes: ProvGraph.prefixes())}
+    assert Ontogen.prov_graph!() == RDF.graph(prov_graph, prefixes: ProvGraph.prefixes())
   end
 end

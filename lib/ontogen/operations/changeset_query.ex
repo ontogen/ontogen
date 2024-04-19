@@ -11,6 +11,9 @@ defmodule Ontogen.Operations.ChangesetQuery do
     def dataset_changes(args \\ []), do: changeset_query(:dataset, args)
     def resource_changes(resource, args \\ []), do: changeset_query({:resource, resource}, args)
 
+    def dataset_changes!(args \\ []), do: bang!(&dataset_changes/1, [args])
+    def resource_changes!(resource, args \\ []), do: bang!(&resource_changes/2, [resource, args])
+
     defp changeset_query(subject, args) do
       subject
       |> ChangesetQuery.new(args)
