@@ -43,7 +43,7 @@ defmodule OntogenTest do
     end
   end
 
-  describe "create_repo/3" do
+  describe "create_repository/3" do
     setup do
       on_exit(fn -> File.rm(Config.Repository.IdFile.path()) end)
     end
@@ -53,7 +53,7 @@ defmodule OntogenTest do
 
       repository = repository()
 
-      assert Ontogen.create_repo(repository) == {:ok, repository}
+      assert Ontogen.create_repository(repository) == {:ok, repository}
 
       assert Ontogen.status() == :ready
       assert Ontogen.repository() == repository
@@ -67,7 +67,7 @@ defmodule OntogenTest do
       {:ok, command} = CreateRepositoryCommand.new(repository())
       {:ok, _} = CreateRepositoryCommand.call(command, Config.store())
 
-      assert Ontogen.create_repo(repository()) == {:error, :repo_already_exists}
+      assert Ontogen.create_repository(repository()) == {:error, :repo_already_exists}
     end
 
     test "when the repo is already connected" do
@@ -76,7 +76,7 @@ defmodule OntogenTest do
 
       capture_log(fn -> {:ok, _} = start_supervised({Ontogen, [repo: id(:repository)]}) end)
 
-      assert Ontogen.create_repo(repository()) == {:error, :repo_already_connected}
+      assert Ontogen.create_repository(repository()) == {:error, :repo_already_connected}
     end
   end
 end

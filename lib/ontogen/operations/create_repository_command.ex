@@ -10,13 +10,14 @@ defmodule Ontogen.Operations.CreateRepositoryCommand do
   alias RDF.IRI
 
   api do
-    def create_repo(repo_spec, opts \\ []) do
+    def create_repository(repo_spec, opts \\ []) do
       repo_spec
       |> CreateRepositoryCommand.new(opts)
       |> CreateRepositoryCommand.__do_call__()
     end
 
-    def create_repo!(repo_spec, args \\ []), do: bang!(&create_repo/2, [repo_spec, args])
+    def create_repository!(repo_spec, args \\ []),
+      do: bang!(&create_repository/2, [repo_spec, args])
   end
 
   def new(repository_spec, opts \\ [])
