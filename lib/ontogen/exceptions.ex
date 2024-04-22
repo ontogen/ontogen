@@ -51,6 +51,17 @@ defmodule Ontogen.InvalidSpeechActError do
   end
 end
 
+defmodule Ontogen.InvalidCommitRefError do
+  @moduledoc """
+  Raised on invalid commit refs.
+  """
+  defexception [:value]
+
+  def message(%{value: invalid}) do
+    "Invalid commit ref: #{invalid}"
+  end
+end
+
 defmodule Ontogen.InvalidCommitRangeError do
   @moduledoc """
   Raised on invalid `Ontogen.Commit.Range` specs or when a commit is not in the specified range.
@@ -59,6 +70,14 @@ defmodule Ontogen.InvalidCommitRangeError do
 
   def message(%{reason: :out_of_range}) do
     "Invalid commit range: out of range"
+  end
+
+  def message(%{reason: :head_base}) do
+    "Invalid commit range: HEAD is not a valid value for base"
+  end
+
+  def message(%{reason: :target_before_base}) do
+    "Invalid commit range: target commit is before base"
   end
 
   def message(%{reason: :no_head}) do

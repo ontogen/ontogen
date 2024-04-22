@@ -14,9 +14,9 @@ defmodule Ontogen.IdUtils do
   @sha_iri_prefix "urn:hash::sha256:"
   def sha_iri_prefix, do: @sha_iri_prefix
 
-  def hash_iri(value) do
-    ~i<#{@sha_iri_prefix}#{hash(value)}>
-  end
+  def hash_to_iri(hash), do: ~i<#{@sha_iri_prefix}#{hash}>
+
+  def hash_iri(value), do: value |> hash() |> hash_to_iri()
 
   def hash(value) do
     :crypto.hash(:sha256, value)
