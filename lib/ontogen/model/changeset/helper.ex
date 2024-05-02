@@ -74,6 +74,26 @@ defmodule Ontogen.Changeset.Helper do
     struct(struct, with_propositions)
   end
 
+  def merged_graph(changeset) do
+    changeset
+    |> Map.take(Action.fields())
+    |> Map.values()
+    |> Enum.reject(&is_nil/1)
+    |> case do
+      [] -> Graph.new()
+      [graph] -> graph
+      [first | graphs] -> Enum.reduce(graphs, first, &Graph.add(&2, &1))
+    end
+  end
+
+  def action(changeset, triple) do
+    Enum.find(Action.fields(), &(changeset |> Map.get(&1) |> graph_include?(triple)))
+  end
+
+  def includes?(changeset, subject) do
+    Enum.any?(Action.fields(), &(changeset |> Map.get(&1) |> graph_describes?(subject)))
+  end
+
   def to_rdf(%_type{overwrite: overwrite} = changeset) do
     changeset
     |> Map.delete(:overwrite)
@@ -110,6 +130,10 @@ defmodule Ontogen.Changeset.Helper do
   def graph_delete(graph, removals), do: graph |> Graph.delete(removals) |> graph_cleanup()
   def graph_intersection(nil, _), do: Graph.new()
   def graph_intersection(graph1, graph2), do: Graph.intersection(graph1, graph2)
+  def graph_include?(nil, _), do: false
+  def graph_include?(graph, triple), do: Graph.include?(graph, triple)
+  def graph_describes?(nil, _), do: false
+  def graph_describes?(graph, subject), do: Graph.describes?(graph, subject)
   def graph_cleanup(nil), do: nil
   def graph_cleanup(graph), do: unless(Graph.empty?(graph), do: graph)
 

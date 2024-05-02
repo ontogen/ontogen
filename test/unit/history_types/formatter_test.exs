@@ -47,6 +47,36 @@ defmodule Ontogen.HistoryType.FormatterTest do
                 1 resources changed, 1 insertions(+)
                """
                |> String.trim_trailing()
+
+      assert formatted_history(history_graph, commits,
+               format: :oneline,
+               changes: :combined_changes,
+               color: false
+             ) ==
+               """
+               #{hash_from_iri(third.__id__)} #{first_line(third.message)}
+                  <http://example.com/s2>
+                ±     <http://example.com/p2> <http://example.com/o2> .
+
+                  <http://example.com/s3>
+                ±     <http://example.com/p3> <http://example.com/o3> .
+
+                  <http://example.com/s4>
+                ±     <http://example.com/p4> <http://example.com/o4> .
+
+
+               #{hash_from_iri(second.__id__)} #{first_line(second.message)}
+                  <http://example.com/s1>
+                -     <http://example.com/p1> <http://example.com/o1> .
+
+                  <http://example.com/s2>
+                +     <http://example.com/p2> <http://example.com/o2> .
+
+
+               #{hash_from_iri(first.__id__)} #{first_line(first.message)}
+                  <http://example.com/s1>
+                +     <http://example.com/p1> <http://example.com/o1> .
+               """
     end
   end
 

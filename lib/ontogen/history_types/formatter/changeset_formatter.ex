@@ -1,6 +1,6 @@
 defmodule Ontogen.HistoryType.Formatter.ChangesetFormatter do
   alias Ontogen.{Changeset, Commit, SpeechAct}
-  alias RDF.{Graph, Description}
+  alias RDF.{Graph, Description, Turtle}
   alias IO.ANSI
 
   import Ontogen.Utils
@@ -8,10 +8,28 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatter do
   # ATTENTION: The order of this list is relevant! Since Optimus, the command-line
   # parser used in the CLI, unfortunately doesn't keep the order of the options,
   # we show multiple selected format in the order defined by this list.
-  @formats ~w[stat resource_only short_stat]a
+  @formats ~w[speech_changes changes combined_changes stat resource_only short_stat]a
   def formats, do: @formats
 
   def format(changeset, format, opts \\ [])
+
+  def format(%Commit{speech_act: nil}, :speech_changes, _opts),
+    do: "# Revert without speech act"
+
+  def format(%Commit{} = commit, :speech_changes, opts),
+    do: format(commit.speech_act, :changes, opts)
+
+  def format(invalid, :speech_changes, _opts),
+    do: raise(ArgumentError, "Invalid struct for speech_changes format: #{inspect(invalid)}")
+
+  def format(%Commit{speech_act: nil} = commit, :combined_changes, opts),
+    do: format(commit, :changes, opts)
+
+  def format(%Commit{} = commit, :combined_changes, opts),
+    do: do_format(commit, :combined_changes, opts)
+
+  def format(invalid, :combined_changes, _opts),
+    do: raise(ArgumentError, "Invalid struct for combined_changes format: #{inspect(invalid)}")
 
   def format(%Commit{} = commit, format, opts) do
     commit
@@ -121,10 +139,99 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatter do
     ]
   end
 
+  defp do_format(changeset, :changes, opts) do
+    colorize = Keyword.get(opts, :color, ANSI.enabled?())
+
+    changeset
+    |> Changeset.Helper.merged_graph()
+    |> diff(diff_prefixer(changeset, colorize), colorize)
+  end
+
+  defp do_format(commit, :combined_changes, opts) do
+    colorize = Keyword.get(opts, :color, ANSI.enabled?())
+    committed_changes = Commit.Changeset.new!(commit)
+    speech_act_changes = SpeechAct.Changeset.new!(commit.speech_act)
+
+    committed_changes
+    |> Changeset.Helper.merged_graph()
+    |> Graph.add(Changeset.Helper.merged_graph(speech_act_changes))
+    |> diff(combined_diff_prefixer(committed_changes, speech_act_changes, colorize), colorize)
+  end
+
   defp do_format(_, invalid, _) do
     raise ArgumentError,
           "invalid change format: #{inspect(invalid)}. Possible formats: #{Enum.join(@formats, ", ")}"
   end
+
+  defp diff(graph, line_prefixer, colorize) do
+    Turtle.write_string!(graph,
+      content: [
+        {:separated,
+         [
+           :base,
+           if(Graph.prefixes(graph, nil), do: :prefixes),
+           :triples
+         ]},
+        if(colorize, do: [IO.ANSI.reset()])
+      ],
+      line_prefix: line_prefixer
+    )
+  end
+
+  defp diff_prefixer(changeset, colorize) do
+    none = if colorize, do: [IO.ANSI.reset(), "  "], else: "  "
+
+    fn
+      :triple, triple, _ ->
+        changeset |> Changeset.Helper.action(triple) |> change_prefix(colorize)
+
+      _, _, _ ->
+        none
+    end
+  end
+
+  defp combined_diff_prefixer(commit, speech_act, colorize) do
+    none = if colorize, do: [IO.ANSI.reset(), "   "], else: "   "
+
+    fn
+      :description, subject, _ ->
+        if Changeset.Helper.includes?(commit, subject) do
+          none
+        else
+          colorize_ineffective("#  ", colorize)
+        end
+
+      :triple, triple, _ ->
+        if action = Changeset.Helper.action(commit, triple) do
+          [" " | change_prefix(action, colorize)]
+        else
+          ["#", speech_act |> Changeset.Helper.action(triple) |> change_prefix(colorize)]
+          |> colorize_ineffective(colorize)
+        end
+
+      _, _, _ ->
+        none
+    end
+  end
+
+  defp change_prefix(:add, false), do: "+ "
+  defp change_prefix(:update, false), do: "± "
+  defp change_prefix(:replace, false), do: "⨦ "
+  defp change_prefix(:remove, false), do: "- "
+  defp change_prefix(:overwrite, false), do: "~ "
+
+  defp change_prefix(:add, true), do: [IO.ANSI.green(), change_prefix(:add, false)]
+  defp change_prefix(:update, true), do: [IO.ANSI.cyan(), change_prefix(:update, false)]
+  defp change_prefix(:replace, true), do: [IO.ANSI.light_cyan(), change_prefix(:replace, false)]
+  defp change_prefix(:remove, true), do: [IO.ANSI.red(), change_prefix(:remove, false)]
+
+  defp change_prefix(:overwrite, true),
+    do: [IO.ANSI.light_red(), change_prefix(:overwrite, false)]
+
+  defp colorize_ineffective(prefix, true),
+    do: [IO.ANSI.white(), IO.ANSI.faint(), prefix, IO.ANSI.crossed_out()]
+
+  defp colorize_ineffective(prefix, _), do: prefix
 
   defp changed_resources({insertions, deletions, overwrites}) do
     insertions

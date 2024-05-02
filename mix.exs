@@ -44,7 +44,7 @@ defmodule Ontogen.MixProject do
 
   defp deps do
     [
-      rdf_ex_dep(:rdf, "~> 1.2"),
+      rdf_ex_dep(:rdf, "~> 2.0"),
       rdf_ex_dep(:grax, "~> 0.4"),
       rdf_ex_dep(:sparql_client, "~> 0.4"),
       rdf_ex_dep(:rtc, "~> 0.1"),
