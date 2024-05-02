@@ -5,7 +5,10 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatter do
 
   import Ontogen.Utils
 
-  @formats ~w[short_stat stat resource_only]a
+  # ATTENTION: The order of this list is relevant! Since Optimus, the command-line
+  # parser used in the CLI, unfortunately doesn't keep the order of the options,
+  # we show multiple selected format in the order defined by this list.
+  @formats ~w[stat resource_only short_stat]a
   def formats, do: @formats
 
   def format(changeset, format, opts \\ [])
