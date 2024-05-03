@@ -15,6 +15,7 @@ defmodule Ontogen do
   include_api Ontogen.Operations.RevertCommand
   include_api Ontogen.Operations.EffectiveChangesetQuery
   include_api Ontogen.Operations.ChangesetQuery
+  include_api Ontogen.Operations.RevisionQuery
   include_api Ontogen.Operations.HistoryQuery
   include_api Ontogen.Operations.DatasetQuery
   include_api Ontogen.Operations.ProvGraphQuery
