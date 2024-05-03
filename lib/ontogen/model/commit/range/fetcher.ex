@@ -1,7 +1,7 @@
 defmodule Ontogen.Commit.Range.Fetcher do
   @moduledoc false
 
-  alias Ontogen.{Commit, Store, Repository, InvalidCommitRangeError}
+  alias Ontogen.{Commit, Store, Repository, InvalidCommitRangeError, EmptyRepositoryError}
   alias Ontogen.NS.Og
   alias RDF.{IRI, Graph, Description, PrefixMap}
 
@@ -15,7 +15,7 @@ defmodule Ontogen.Commit.Range.Fetcher do
     if head != Commit.root() do
       fetch(head, store, repository)
     else
-      {:error, :no_head}
+      {:error, EmptyRepositoryError.exception(repository: repository)}
     end
   end
 

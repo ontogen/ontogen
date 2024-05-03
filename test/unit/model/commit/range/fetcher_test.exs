@@ -4,11 +4,12 @@ defmodule Ontogen.Commit.Range.FetcherTest do
   doctest Ontogen.Commit.Range.Fetcher
 
   alias Ontogen.Commit.Range.Fetcher
-  alias Ontogen.{Commit, InvalidCommitRangeError}
+  alias Ontogen.{Commit, InvalidCommitRangeError, EmptyRepositoryError}
 
   describe "fetch/3" do
     test "on a clean repo without commits", %{repo: repo, store: store} do
-      assert Fetcher.fetch(:head, store, repo) == {:error, :no_head}
+      assert Fetcher.fetch(:head, store, repo) ==
+               {:error, EmptyRepositoryError.exception(repository: repo)}
     end
 
     test "with commit in history", %{store: store} do

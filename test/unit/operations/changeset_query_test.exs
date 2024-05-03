@@ -4,11 +4,12 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
   doctest Ontogen.Operations.ChangesetQuery
 
   alias Ontogen.Commit.Changeset
-  alias Ontogen.InvalidCommitRangeError
+  alias Ontogen.{InvalidCommitRangeError, EmptyRepositoryError}
 
   describe "Ontogen.dataset_changes/1" do
     test "on a clean repo without commits" do
-      assert Ontogen.dataset_changes() == {:error, :no_head}
+      assert Ontogen.dataset_changes() ==
+               {:error, EmptyRepositoryError.exception(repository: Ontogen.repository())}
     end
 
     test "target commit (default)" do
@@ -142,7 +143,8 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
 
   describe "Ontogen.resource_changes/1" do
     test "on a clean repo without commits" do
-      assert Ontogen.resource_changes(EX.S1) == {:error, :no_head}
+      assert Ontogen.resource_changes(EX.S1) ==
+               {:error, EmptyRepositoryError.exception(repository: Ontogen.repository())}
     end
 
     test "target commit (default)" do

@@ -3,12 +3,20 @@ defmodule Ontogen.Operations.RevertCommandTest do
 
   doctest Ontogen.Operations.RevertCommand
 
-  alias Ontogen.{Commit, Config, InvalidChangesetError, InvalidCommitRangeError}
+  alias Ontogen.{
+    Commit,
+    Config,
+    InvalidChangesetError,
+    InvalidCommitRangeError,
+    EmptyRepositoryError
+  }
+
   import Ontogen.IdUtils
 
   describe "Ontogen.revert/1" do
     test "when no commits specified" do
-      assert Ontogen.revert(foo: :bar) == {:error, :no_head}
+      assert Ontogen.revert(foo: :bar) ==
+               {:error, EmptyRepositoryError.exception(repository: Ontogen.repository())}
     end
 
     test "when nothing to revert" do

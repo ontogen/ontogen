@@ -29,6 +29,17 @@ defmodule Ontogen.InvalidRepoSpecError do
   end
 end
 
+defmodule Ontogen.EmptyRepositoryError do
+  @moduledoc """
+  Raised when the current repository does not have any commits.
+  """
+  defexception [:repository]
+
+  def message(%{repository: repository}) do
+    "Repository#{if repository, do: " #{Ontogen.IdUtils.to_iri(repository)}"} does not have any commits yet"
+  end
+end
+
 defmodule Ontogen.InvalidCommitError do
   @moduledoc """
   Raised on invalid `Ontogen.Commit` args.
