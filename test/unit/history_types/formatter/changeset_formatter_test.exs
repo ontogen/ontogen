@@ -239,6 +239,37 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
                ±     ex:p2 ex:o2 .
                """
     end
+
+    test ":context_data opt" do
+      assert Commit.Changeset.new!(
+               add: graph([1]),
+               update: graph([2, {1, 2}], prefixes: [ex: EX]),
+               overwrite: graph([{2, 1}])
+             )
+             |> ChangesetFormatter.format(:changes,
+               context_data: [
+                 statement({1, 3}),
+                 statement(3)
+               ]
+             ) ==
+               """
+               @prefix ex: <http://example.com/> .
+
+               \e[0m  ex:s1
+               \e[32m+     ex:p1 ex:o1 ;
+               \e[36m±     ex:p2 ex:o2 ;
+               \e[0m      ex:p3 ex:o3 .
+
+               \e[0m  ex:s2
+               \e[91m~     ex:p1 ex:o1 ;
+               \e[36m±     ex:p2 ex:o2 .
+
+               \e[0m  ex:s3
+               \e[0m      ex:p3 ex:o3 .
+               \e[0m
+               """
+               |> String.trim_trailing()
+    end
   end
 
   describe "speech_changes" do
@@ -315,6 +346,50 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
                \e[0m
                """
                |> String.trim_trailing()
+    end
+
+    test ":context_data opt" do
+      commit =
+        commit(
+          add: graph([1], prefixes: [ex: EX]),
+          replace: graph([3]),
+          remove: graph([4]),
+          overwrite: graph([{3, 1}]),
+          speech_act:
+            speech_act(
+              add: graph([1, 11], prefixes: [ex: EX]),
+              update: graph([2]),
+              replace: graph([3]),
+              remove: graph([{4, 44}])
+            )
+        )
+
+      assert ChangesetFormatter.format(commit, :combined_changes,
+               color: false,
+               context_data: graph([11, {11, 2}, {3, 1}, 4, 5])
+             ) ==
+               """
+                  <http://example.com/s1>
+                +     <http://example.com/p1> <http://example.com/o1> .
+
+               #  <http://example.com/s11>
+               #+     <http://example.com/p11> <http://example.com/o11> ;
+                      <http://example.com/p2> <http://example.com/o2> .
+
+               #  <http://example.com/s2>
+               #±     <http://example.com/p2> <http://example.com/o2> .
+
+                  <http://example.com/s3>
+                ~     <http://example.com/p1> <http://example.com/o1> ;
+                ⨦     <http://example.com/p3> <http://example.com/o3> .
+
+                  <http://example.com/s4>
+                -     <http://example.com/p4> <http://example.com/o4> ;
+               #-     <http://example.com/p44> <http://example.com/o44> .
+
+                  <http://example.com/s5>
+                      <http://example.com/p5> <http://example.com/o5> .
+               """
     end
 
     test "revert" do

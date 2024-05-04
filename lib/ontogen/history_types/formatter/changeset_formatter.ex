@@ -144,6 +144,7 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatter do
 
     changeset
     |> Changeset.Helper.merged_graph()
+    |> Graph.add(Keyword.get(opts, :context_data, []))
     |> diff(diff_prefixer(changeset, colorize), colorize)
   end
 
@@ -155,6 +156,7 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatter do
     committed_changes
     |> Changeset.Helper.merged_graph()
     |> Graph.add(Changeset.Helper.merged_graph(speech_act_changes))
+    |> Graph.add(Keyword.get(opts, :context_data, Graph.new()))
     |> diff(combined_diff_prefixer(committed_changes, speech_act_changes, colorize), colorize)
   end
 
@@ -183,7 +185,11 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatter do
 
     fn
       :triple, triple, _ ->
-        changeset |> Changeset.Helper.action(triple) |> change_prefix(colorize)
+        if action = Changeset.Helper.action(changeset, triple) do
+          change_prefix(action, colorize)
+        else
+          none
+        end
 
       _, _, _ ->
         none
@@ -195,18 +201,23 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatter do
 
     fn
       :description, subject, _ ->
-        if Changeset.Helper.includes?(commit, subject) do
+        if Changeset.Helper.includes?(commit, subject) or
+             not Changeset.Helper.includes?(speech_act, subject) do
           none
         else
           colorize_ineffective("#  ", colorize)
         end
 
       :triple, triple, _ ->
-        if action = Changeset.Helper.action(commit, triple) do
-          [" " | change_prefix(action, colorize)]
-        else
-          ["#", speech_act |> Changeset.Helper.action(triple) |> change_prefix(colorize)]
-          |> colorize_ineffective(colorize)
+        cond do
+          action = Changeset.Helper.action(commit, triple) ->
+            [" " | change_prefix(action, colorize)]
+
+          action = Changeset.Helper.action(speech_act, triple) ->
+            ["#", change_prefix(action, colorize)] |> colorize_ineffective(colorize)
+
+          true ->
+            none
         end
 
       _, _, _ ->
