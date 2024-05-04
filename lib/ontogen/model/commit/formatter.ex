@@ -1,6 +1,5 @@
-defmodule Ontogen.HistoryType.Formatter.CommitFormatter do
-  alias Ontogen.{Commit, SpeechAct, Agent}
-  alias Ontogen.HistoryType.Formatter.ChangesetFormatter
+defmodule Ontogen.Commit.Formatter do
+  alias Ontogen.{Commit, SpeechAct, Changeset, Agent}
   alias RDF.IRI
   alias IO.ANSI
 
@@ -166,7 +165,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatter do
 
   defp changes(commit, change_formats, opts) do
     change_formats
-    |> Enum.map(&ChangesetFormatter.format(commit, &1, opts))
+    |> Enum.map(&Changeset.Formatter.format(commit, &1, opts))
     |> Enum.intersperse("\n\n")
   end
 

@@ -3,7 +3,7 @@ defmodule Ontogen.Commit do
 
   alias Ontogen.{Proposition, SpeechAct, Config}
   alias Ontogen.Commit.{Id, Changeset}
-  alias Ontogen.HistoryType.Formatter.CommitFormatter
+  alias Ontogen.Commit.Formatter
   alias Ontogen.NS.Og
   alias RDF.Graph
 
@@ -91,6 +91,6 @@ defmodule Ontogen.Commit do
 
   def format(commit, opts \\ []) do
     {format, opts} = Keyword.pop(opts, :format, :default)
-    CommitFormatter.format(commit, format, opts)
+    Formatter.format(commit, format, opts)
   end
 end

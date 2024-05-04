@@ -2,7 +2,7 @@ defmodule Ontogen.HistoryType.Formatter do
   @behaviour Ontogen.HistoryType
 
   alias Ontogen.HistoryType.Native
-  alias Ontogen.HistoryType.Formatter.CommitFormatter
+  alias Ontogen.Commit
 
   @impl true
   def history(history_graph, subject_type, subject, opts \\ []) do
@@ -28,14 +28,14 @@ defmodule Ontogen.HistoryType.Formatter do
     change_formats = Keyword.get(opts, :changes, []) |> List.wrap()
 
     splitter =
-      if CommitFormatter.one_line_format?(format) and Enum.empty?(change_formats) do
+      if Commit.Formatter.one_line_format?(format) and Enum.empty?(change_formats) do
         "\n"
       else
         "\n\n"
       end
 
     commits
-    |> Stream.map(&CommitFormatter.format(&1, format, opts))
+    |> Stream.map(&Commit.Formatter.format(&1, format, opts))
     |> Stream.intersperse(splitter)
   end
 end

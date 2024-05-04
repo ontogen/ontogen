@@ -1,4 +1,4 @@
-defmodule Ontogen.HistoryType.Formatter.ChangesetFormatter do
+defmodule Ontogen.Changeset.Formatter do
   alias Ontogen.{Changeset, Commit, SpeechAct}
   alias RDF.{Graph, Description, Turtle}
   alias IO.ANSI

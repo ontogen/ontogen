@@ -1,9 +1,9 @@
-defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
+defmodule Ontogen.Commit.FormatterTest do
   use OntogenCase
 
-  doctest Ontogen.HistoryType.Formatter.CommitFormatter
+  doctest Ontogen.Commit.Formatter
 
-  alias Ontogen.HistoryType.Formatter.CommitFormatter
+  alias Ontogen.Commit.Formatter
 
   import Ontogen.IdUtils
 
@@ -11,29 +11,29 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
     test "commit" do
       commit = commit(message: "First commit\nwith description")
 
-      assert CommitFormatter.format(commit, :default, color: false) =~
+      assert Formatter.format(commit, :default, color: false) =~
                ~r"fc376678c4 - First commit \(\d+ .+\) <John Doe john\.doe@example\.com>$"
 
-      assert CommitFormatter.format(commit, :default, color: true) =~
+      assert Formatter.format(commit, :default, color: true) =~
                "\e[33mfc376678c4\e[0m - First commit \e[32m("
 
-      assert CommitFormatter.format(commit, :default) ==
-               CommitFormatter.format(commit, :default, color: true)
+      assert Formatter.format(commit, :default) ==
+               Formatter.format(commit, :default, color: true)
     end
 
     test "flat committer" do
       assert commit(committer: id(:agent))
-             |> CommitFormatter.format(:default, color: false) =~
+             |> Formatter.format(:default, color: false) =~
                ") <http://example.com/Agent>"
     end
 
     test "revert commit" do
-      assert CommitFormatter.format(revert(), :default) =~
+      assert Formatter.format(revert(), :default) =~
                "\e[33m0f6be19cfb\e[0m - \e[3mRevert of commits:"
     end
 
     test "with changes" do
-      assert CommitFormatter.format(commit(), :default, color: false, changes: :short_stat) <>
+      assert Formatter.format(commit(), :default, color: false, changes: :short_stat) <>
                "\n" =~
                ~r"""
                af0f05affb - Test commit \(\d+ .+\) <John Doe john\.doe@example\.com>
@@ -46,12 +46,12 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
     test "commit" do
       commit = commit(message: "First commit\nwith description")
 
-      assert CommitFormatter.format(commit, :oneline) ==
+      assert Formatter.format(commit, :oneline) ==
                "\e[33mfc376678c4decae97dda5fd4ecf174d5f51c4a07fb26220b6e73719f04f63f0b\e[0m First commit"
     end
 
     test "revert" do
-      assert CommitFormatter.format(revert(), :oneline) =~
+      assert Formatter.format(revert(), :oneline) =~
                "\e[33m0f6be19cfb2b86fe37e6113c7210fccfd26e31467f2b6a21a733bd47d9d721d2\e[0m \e[3mRevert of commits:\e[0m"
     end
   end
@@ -60,7 +60,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
     test "commit" do
       commit = commit(message: "First commit\nwith description")
 
-      assert CommitFormatter.format(commit, :short) ==
+      assert Formatter.format(commit, :short) ==
                """
                \e[33mcommit fc376678c4decae97dda5fd4ecf174d5f51c4a07fb26220b6e73719f04f63f0b\e[0m
                Author: John Doe <john.doe@example.com>
@@ -75,7 +75,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
                message: "First commit\nwith description",
                speech_act: speech_act(speaker: nil)
              )
-             |> CommitFormatter.format(:short) ==
+             |> Formatter.format(:short) ==
                """
                \e[33mcommit fc376678c4decae97dda5fd4ecf174d5f51c4a07fb26220b6e73719f04f63f0b\e[0m
                Source: <http://example.com/test/dataset>
@@ -86,7 +86,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
     end
 
     test "revert" do
-      assert CommitFormatter.format(revert(), :short) ==
+      assert Formatter.format(revert(), :short) ==
                """
                \e[33mcommit 0f6be19cfb2b86fe37e6113c7210fccfd26e31467f2b6a21a733bd47d9d721d2\e[0m
                RevertBase:   commit-root
@@ -98,7 +98,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
       commits = commit_history()
 
       assert revert(commits: Enum.slice(commits, 1..1))
-             |> CommitFormatter.format(:short) ==
+             |> Formatter.format(:short) ==
                """
                \e[33mcommit 943416c00ba537b0de9e7189cfa58627178e31ae7b8ee185b167a2f441611459\e[0m
                RevertTarget: 23d9efcfebbde0367d707dcaf3d6f7ef7691db6ff6c0f11b3738e65badff270f
@@ -108,7 +108,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
                |> String.trim_trailing()
 
       assert revert(commits: Enum.slice(commits, 1..2))
-             |> CommitFormatter.format(:short) ==
+             |> Formatter.format(:short) ==
                """
                \e[33mcommit 75506fe4bfd5ec56cdba81d484aea8bf62640a2932f0bbaa686e3b4441ffc00a\e[0m
                RevertBase:   commit-root
@@ -124,7 +124,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
     test "commit" do
       commit = commit(message: "First commit\nwith description")
 
-      assert CommitFormatter.format(commit, :medium) ==
+      assert Formatter.format(commit, :medium) ==
                """
                \e[33mcommit fc376678c4decae97dda5fd4ecf174d5f51c4a07fb26220b6e73719f04f63f0b\e[0m
                Source: <http://example.com/test/dataset>
@@ -142,7 +142,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
                message: "First commit\nwith description",
                speech_act: speech_act(speaker: nil)
              )
-             |> CommitFormatter.format(:medium) ==
+             |> Formatter.format(:medium) ==
                """
                \e[33mcommit fc376678c4decae97dda5fd4ecf174d5f51c4a07fb26220b6e73719f04f63f0b\e[0m
                Source: <http://example.com/test/dataset>
@@ -157,7 +157,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
                message: "First commit\nwith description",
                speech_act: speech_act(data_source: nil)
              )
-             |> CommitFormatter.format(:medium) ==
+             |> Formatter.format(:medium) ==
                """
                \e[33mcommit fc376678c4decae97dda5fd4ecf174d5f51c4a07fb26220b6e73719f04f63f0b\e[0m
                Author: John Doe <john.doe@example.com>
@@ -173,7 +173,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
       [third, second, first] = commits = commit_history()
 
       assert revert(commits: Enum.slice(commits, 0..1))
-             |> CommitFormatter.format(:medium) ==
+             |> Formatter.format(:medium) ==
                """
                \e[33mcommit 4e97d6e2faef8698f736e1d4264894b9eacf05c4e3f4653d795649c8d1869c3a\e[0m
                RevertBase:   #{hash_from_iri(first.__id__)}
@@ -192,7 +192,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
     test "commit" do
       commit = commit(message: "First commit\nwith description")
 
-      assert CommitFormatter.format(commit, :full) ==
+      assert Formatter.format(commit, :full) ==
                """
                \e[33mcommit fc376678c4decae97dda5fd4ecf174d5f51c4a07fb26220b6e73719f04f63f0b\e[0m
                Source:     <http://example.com/test/dataset>
@@ -210,7 +210,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
     test "with changes" do
       commit = commit(message: "First commit\nwith description")
 
-      assert CommitFormatter.format(commit, :full, changes: [:resource_only, :short_stat]) ==
+      assert Formatter.format(commit, :full, changes: [:resource_only, :short_stat]) ==
                """
                \e[33mcommit fc376678c4decae97dda5fd4ecf174d5f51c4a07fb26220b6e73719f04f63f0b\e[0m
                Source:     <http://example.com/test/dataset>
@@ -236,7 +236,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
                committer: id(:agent),
                speech_act: speech_act(speaker: id(:agent))
              )
-             |> CommitFormatter.format(:full) =~
+             |> Formatter.format(:full) =~
                """
                \e[33mcommit a4f334cc9ba50825b099ed045a9f86b9dd8b845e90cfafdec2940889ae35136d\e[0m
                Source:     <http://example.com/test/dataset>
@@ -255,7 +255,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
                message: "First commit\nwith description",
                speech_act: speech_act(speaker: nil)
              )
-             |> CommitFormatter.format(:full) ==
+             |> Formatter.format(:full) ==
                """
                \e[33mcommit fc376678c4decae97dda5fd4ecf174d5f51c4a07fb26220b6e73719f04f63f0b\e[0m
                Source:     <http://example.com/test/dataset>
@@ -273,7 +273,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
                message: "First commit\nwith description",
                speech_act: speech_act(data_source: nil)
              )
-             |> CommitFormatter.format(:full) ==
+             |> Formatter.format(:full) ==
                """
                \e[33mcommit fc376678c4decae97dda5fd4ecf174d5f51c4a07fb26220b6e73719f04f63f0b\e[0m
                Source:     -
@@ -292,7 +292,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
       [_third, second, first] = commits = commit_history()
 
       assert revert(commits: Enum.slice(commits, 1..2))
-             |> CommitFormatter.format(:full) ==
+             |> Formatter.format(:full) ==
                """
                \e[33mcommit 75506fe4bfd5ec56cdba81d484aea8bf62640a2932f0bbaa686e3b4441ffc00a\e[0m
                RevertBase:   commit-root
@@ -312,7 +312,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
     test "commit" do
       commit = commit(message: "First commit\nwith description")
 
-      assert CommitFormatter.format(commit, :raw) ==
+      assert Formatter.format(commit, :raw) ==
                """
                \e[33mcommit fc376678c4decae97dda5fd4ecf174d5f51c4a07fb26220b6e73719f04f63f0b\e[0m
                add ae04b9c2c1bfa7cf292a17851ecb1451e0d649dd9e8f76cb32b4b32ddae82d1d
@@ -326,7 +326,7 @@ defmodule Ontogen.HistoryType.Formatter.CommitFormatterTest do
     end
 
     test "revert" do
-      assert CommitFormatter.format(revert(), :raw) ==
+      assert Formatter.format(revert(), :raw) ==
                """
                \e[33mcommit 0f6be19cfb2b86fe37e6113c7210fccfd26e31467f2b6a21a733bd47d9d721d2\e[0m
                add ae04b9c2c1bfa7cf292a17851ecb1451e0d649dd9e8f76cb32b4b32ddae82d1d

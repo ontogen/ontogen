@@ -1,42 +1,42 @@
-defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
+defmodule Ontogen.Changeset.FormatterTest do
   use OntogenCase
 
-  doctest Ontogen.HistoryType.Formatter.ChangesetFormatter
+  doctest Ontogen.Changeset.Formatter
 
-  alias Ontogen.HistoryType.Formatter.ChangesetFormatter
+  alias Ontogen.Changeset.Formatter
   alias Ontogen.Commit
 
   describe "short_stat" do
     test "commit" do
-      assert ChangesetFormatter.format(commit(), :short_stat) ==
+      assert Formatter.format(commit(), :short_stat) ==
                " 3 resources changed, 3 insertions(+), 1 deletions(-)"
 
-      assert ChangesetFormatter.format(commit(changeset: [overwrite: graph()]), :short_stat) ==
+      assert Formatter.format(commit(changeset: [overwrite: graph()]), :short_stat) ==
                " 2 resources changed, 3 overwrites(~)"
     end
 
     test "speech act" do
-      assert ChangesetFormatter.format(speech_act(), :short_stat) ==
+      assert Formatter.format(speech_act(), :short_stat) ==
                " 2 resources changed, 3 insertions(+)"
     end
 
     test "changeset" do
-      assert ChangesetFormatter.format(commit_changeset(), :short_stat) ==
+      assert Formatter.format(commit_changeset(), :short_stat) ==
                " 3 resources changed, 3 insertions(+), 1 deletions(-)"
 
-      assert ChangesetFormatter.format(speech_act_changeset(), :short_stat) ==
+      assert Formatter.format(speech_act_changeset(), :short_stat) ==
                " 3 resources changed, 3 insertions(+), 1 deletions(-)"
     end
 
     test "revert commit" do
-      assert ChangesetFormatter.format(revert(), :short_stat) ==
+      assert Formatter.format(revert(), :short_stat) ==
                " 3 resources changed, 3 insertions(+), 1 deletions(-)"
     end
   end
 
   describe "resource_only" do
     test "commit" do
-      assert ChangesetFormatter.format(commit(), :resource_only) ==
+      assert Formatter.format(commit(), :resource_only) ==
                """
                http://example.com/Foo
                http://example.com/S1
@@ -46,7 +46,7 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
     end
 
     test "speech act" do
-      assert ChangesetFormatter.format(speech_act(), :resource_only) ==
+      assert Formatter.format(speech_act(), :resource_only) ==
                """
                http://example.com/S1
                http://example.com/S2
@@ -55,7 +55,7 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
     end
 
     test "changeset" do
-      assert ChangesetFormatter.format(commit_changeset(), :resource_only) ==
+      assert Formatter.format(commit_changeset(), :resource_only) ==
                """
                http://example.com/Foo
                http://example.com/S1
@@ -63,7 +63,7 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
                """
                |> String.trim_trailing()
 
-      assert ChangesetFormatter.format(speech_act_changeset(), :resource_only) ==
+      assert Formatter.format(speech_act_changeset(), :resource_only) ==
                """
                http://example.com/Foo
                http://example.com/S1
@@ -75,7 +75,7 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
 
   describe "stat" do
     test "commit" do
-      assert ChangesetFormatter.format(commit(), :stat) ==
+      assert Formatter.format(commit(), :stat) ==
                """
                 http://example.com/Foo | 1 \e[32m\e[0m\e[31m-\e[0m\e[91m\e[0m
                 http://example.com/S1  | 1 \e[32m+\e[0m\e[31m\e[0m\e[91m\e[0m
@@ -86,7 +86,7 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
     end
 
     test "speech act" do
-      assert ChangesetFormatter.format(speech_act(), :stat) ==
+      assert Formatter.format(speech_act(), :stat) ==
                """
                 http://example.com/S1 | 1 \e[32m+\e[0m\e[31m\e[0m\e[91m\e[0m
                 http://example.com/S2 | 2 \e[32m++\e[0m\e[31m\e[0m\e[91m\e[0m
@@ -96,7 +96,7 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
     end
 
     test "changeset" do
-      assert ChangesetFormatter.format(commit_changeset(), :stat, color: false) ==
+      assert Formatter.format(commit_changeset(), :stat, color: false) ==
                """
                 http://example.com/Foo | 1 -
                 http://example.com/S1  | 1 +
@@ -105,7 +105,7 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
                """
                |> String.trim_trailing()
 
-      assert ChangesetFormatter.format(speech_act_changeset(), :stat, color: false) ==
+      assert Formatter.format(speech_act_changeset(), :stat, color: false) ==
                """
                 http://example.com/Foo | 1 -
                 http://example.com/S1  | 1 +
@@ -122,9 +122,9 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
           update: 1..100 |> Enum.map(&{10, &1}) |> graph()
         )
 
-      #      IO.puts("\n" <> ChangesetFormatter.format(large_commit, :stat))
+      #      IO.puts("\n" <> Formatter.format(large_commit, :stat))
 
-      assert_no_line_wrap(ChangesetFormatter.format(large_commit, :stat, color: false))
+      assert_no_line_wrap(Formatter.format(large_commit, :stat, color: false))
 
       large_resource =
         commit(
@@ -135,9 +135,9 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
           remove: 1..100 |> Enum.map(&{10, &1}) |> graph()
         )
 
-      #      IO.puts("\n" <> ChangesetFormatter.format(large_resource, :stat))
+      #      IO.puts("\n" <> Formatter.format(large_resource, :stat))
 
-      assert_no_line_wrap(ChangesetFormatter.format(large_resource, :stat, color: false))
+      assert_no_line_wrap(Formatter.format(large_resource, :stat, color: false))
     end
   end
 
@@ -150,7 +150,7 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
                remove: statement(4),
                overwrite: statement(5)
              )
-             |> ChangesetFormatter.format(:changes) ==
+             |> Formatter.format(:changes) ==
                """
                \e[0m  <http://example.com/s1>
                \e[32m+     <http://example.com/p1> <http://example.com/o1> ;
@@ -179,7 +179,7 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
                replace: statement(3),
                remove: statement(4)
              )
-             |> ChangesetFormatter.format(:changes, color: false) ==
+             |> Formatter.format(:changes, color: false) ==
                """
                  <http://example.com/s1>
                +     <http://example.com/p1> <http://example.com/o1> ;
@@ -203,7 +203,7 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
                replace: statement(3),
                remove: statement(4)
              )
-             |> ChangesetFormatter.format(:changes) ==
+             |> Formatter.format(:changes) ==
                """
                \e[0m  <http://example.com/s1>
                \e[32m+     <http://example.com/p1> <http://example.com/o1> ;
@@ -226,7 +226,7 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
                update: graph([2, {1, 2}], prefixes: [ex: EX]),
                overwrite: graph([{2, 1}])
              )
-             |> ChangesetFormatter.format(:changes, color: false) ==
+             |> Formatter.format(:changes, color: false) ==
                """
                @prefix ex: <http://example.com/> .
 
@@ -246,7 +246,7 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
                update: graph([2, {1, 2}], prefixes: [ex: EX]),
                overwrite: graph([{2, 1}])
              )
-             |> ChangesetFormatter.format(:changes,
+             |> Formatter.format(:changes,
                context_data: [
                  statement({1, 3}),
                  statement(3)
@@ -274,7 +274,7 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
 
   describe "speech_changes" do
     test "commit" do
-      assert ChangesetFormatter.format(commit(), :speech_changes, color: false) ==
+      assert Formatter.format(commit(), :speech_changes, color: false) ==
                """
                  <http://example.com/Foo>
                -     <http://example.com/bar> 42 .
@@ -289,21 +289,21 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
     end
 
     test "revert" do
-      assert ChangesetFormatter.format(revert(), :speech_changes) ==
+      assert Formatter.format(revert(), :speech_changes) ==
                "# Revert without speech act"
     end
 
     test "other change struct fail" do
       assert_raise ArgumentError, fn ->
-        ChangesetFormatter.format(speech_act(), :speech_changes)
+        Formatter.format(speech_act(), :speech_changes)
       end
 
       assert_raise ArgumentError, fn ->
-        ChangesetFormatter.format(speech_act_changeset(), :speech_changes, color: false)
+        Formatter.format(speech_act_changeset(), :speech_changes, color: false)
       end
 
       assert_raise ArgumentError, fn ->
-        ChangesetFormatter.format(commit_changeset(), :speech_changes)
+        Formatter.format(commit_changeset(), :speech_changes)
       end
     end
   end
@@ -325,7 +325,7 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
             )
         )
 
-      assert ChangesetFormatter.format(commit, :combined_changes) ==
+      assert Formatter.format(commit, :combined_changes) ==
                """
                \e[0m   <http://example.com/s1>
                 \e[32m+     <http://example.com/p1> <http://example.com/o1> .
@@ -364,7 +364,7 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
             )
         )
 
-      assert ChangesetFormatter.format(commit, :combined_changes,
+      assert Formatter.format(commit, :combined_changes,
                color: false,
                context_data: graph([11, {11, 2}, {3, 1}, 4, 5])
              ) ==
@@ -393,7 +393,7 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
     end
 
     test "revert" do
-      assert ChangesetFormatter.format(revert(), :combined_changes, color: false) ==
+      assert Formatter.format(revert(), :combined_changes, color: false) ==
                """
                  <http://example.com/Foo>
                -     <http://example.com/bar> 42 .
@@ -409,15 +409,15 @@ defmodule Ontogen.HistoryType.Formatter.ChangesetFormatterTest do
 
     test "other change struct fail" do
       assert_raise ArgumentError, fn ->
-        ChangesetFormatter.format(speech_act(), :combined_changes)
+        Formatter.format(speech_act(), :combined_changes)
       end
 
       assert_raise ArgumentError, fn ->
-        ChangesetFormatter.format(speech_act_changeset(), :combined_changes, color: false)
+        Formatter.format(speech_act_changeset(), :combined_changes, color: false)
       end
 
       assert_raise ArgumentError, fn ->
-        ChangesetFormatter.format(commit_changeset(), :combined_changes)
+        Formatter.format(commit_changeset(), :combined_changes)
       end
     end
   end
