@@ -4,6 +4,7 @@ defmodule Ontogen.Commit.FormatterTest do
   doctest Ontogen.Commit.Formatter
 
   alias Ontogen.Commit.Formatter
+  alias Ontogen.SpeechAct
 
   import Ontogen.IdUtils
 
@@ -337,6 +338,31 @@ defmodule Ontogen.Commit.FormatterTest do
 
                - af0f05affbb433c0d2e881712909aafc2664c8d42b2d74951f026db32e653417
                """
+    end
+  end
+
+  describe "speech act formats" do
+    test "ordinary commit" do
+      commit = commit(message: "First commit\nwith description")
+
+      assert Formatter.format(commit, :speech_act) ==
+               SpeechAct.Formatter.format(commit.speech_act, :full)
+
+      assert Formatter.format(commit, :speech_act, color: false) ==
+               SpeechAct.Formatter.format(commit.speech_act, :full, color: false)
+
+      assert Formatter.format(commit, :raw_speech_act) ==
+               SpeechAct.Formatter.format(commit.speech_act, :raw)
+    end
+
+    test "revert" do
+      revert = revert()
+
+      assert Formatter.format(revert, :speech_act) ==
+               "Revert without speech act"
+
+      assert Formatter.format(revert, :raw_speech_act) ==
+               "Revert without speech act"
     end
   end
 

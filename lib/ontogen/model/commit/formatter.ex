@@ -1,38 +1,45 @@
 defmodule Ontogen.Commit.Formatter do
-  alias Ontogen.{Commit, SpeechAct, Changeset, Agent}
-  alias RDF.IRI
+  alias Ontogen.{Commit, SpeechAct}
   alias IO.ANSI
 
-  import Ontogen.{IdUtils, Utils}
+  import Ontogen.{FormatterHelper, IdUtils, Utils}
+
+  @speech_act_formats %{
+    speech_act: :full,
+    raw_speech_act: :raw
+  }
 
   @one_line_formats ~w[default oneline]a
-  @multi_line_formats ~w[short medium full raw]a
+  @multi_line_formats ~w[short medium full speech_act raw speech_act_raw]a
   @formats @one_line_formats ++ @multi_line_formats
-
-  @hash_formats ~w[short full iri]a
-
   def formats, do: @formats
 
   def one_line_format?(format) when format in @one_line_formats, do: true
   def one_line_format?(_), do: false
 
-  def hash_formats, do: @hash_formats
-
   def format(%Commit{} = commit, format, opts \\ []) do
-    change_formats = Keyword.get(opts, :changes, []) |> List.wrap()
-
-    [
-      do_format(commit, format, opts),
-      if Enum.empty?(change_formats) do
-        []
+    if speech_act_format = @speech_act_formats[format] do
+      if Commit.revert?(commit) do
+        "Revert without speech act"
       else
-        [
-          if(one_line_format?(format), do: "\n", else: "\n\n")
-          | changes(commit, change_formats, opts)
-        ]
+        SpeechAct.Formatter.format(commit.speech_act, speech_act_format, opts)
       end
-    ]
-    |> IO.iodata_to_binary()
+    else
+      change_formats = Keyword.get(opts, :changes, []) |> List.wrap()
+
+      [
+        do_format(commit, format, opts),
+        if Enum.empty?(change_formats) do
+          []
+        else
+          [
+            if(one_line_format?(format), do: "\n", else: "\n\n")
+            | changes(commit, change_formats, opts)
+          ]
+        end
+      ]
+      |> IO.iodata_to_binary()
+    end
   end
 
   defp do_format(commit, :default, opts) do
@@ -163,40 +170,7 @@ defmodule Ontogen.Commit.Formatter do
           "invalid format: #{inspect(invalid)}. Possible formats: #{Enum.join(@formats, ", ")}"
   end
 
-  defp changes(commit, change_formats, opts) do
-    change_formats
-    |> Enum.map(&Changeset.Formatter.format(commit, &1, opts))
-    |> Enum.intersperse("\n\n")
-  end
-
-  defp hash(%Commit{__id__: iri}, format), do: hash(iri, format)
-  defp hash(%IRI{} = iri, :iri), do: to_string(iri)
-  defp hash(%IRI{} = iri, :full), do: hash_from_iri(iri)
-  defp hash(%IRI{} = iri, :short), do: short_hash_from_iri(iri)
-
   defp summary(message), do: first_line(message)
-
-  defp agent(agent, email_with_brackets \\ true)
-  defp agent(%IRI{} = iri, false), do: to_string(iri)
-  defp agent(%IRI{} = iri, true), do: ["<", to_string(iri), ">"]
-
-  defp agent(%Agent{name: nil, email: nil} = agent, false),
-    do: ["??? ", to_string(agent.__id__)]
-
-  defp agent(%Agent{name: nil, email: nil} = agent, true),
-    do: ["??? <", to_string(agent.__id__), ">"]
-
-  defp agent(%Agent{} = agent, false),
-    do: [agent.name || "???", " ", Agent.email(agent) || "???"]
-
-  defp agent(%Agent{} = agent, true),
-    do: [agent.name || "???", " <", Agent.email(agent) || "???", ">"]
-
-  defp author_or_source(%SpeechAct{speaker: speaker}) when not is_nil(speaker),
-    do: ["Author: ", agent(speaker), "\n"]
-
-  defp author_or_source(%SpeechAct{data_source: source}) when not is_nil(source),
-    do: ["Source: <", to_id(source), ">\n"]
 
   defp revert_fields(commit) do
     reverted_base =
@@ -215,6 +189,4 @@ defmodule Ontogen.Commit.Formatter do
       reverted_base || reverted_target
     end
   end
-
-  defp time(datetime), do: Calendar.strftime(datetime, "%a %b %d %X %Y %z")
 end
