@@ -94,6 +94,14 @@ defmodule Ontogen.Changeset.Helper do
     Enum.any?(Action.fields(), &(changeset |> Map.get(&1) |> graph_describes?(subject)))
   end
 
+  def subjects(changeset) do
+    Enum.reduce(
+      Action.fields(),
+      MapSet.new(),
+      &MapSet.union(&2, changeset |> Map.get(&1) |> graph_subjects())
+    )
+  end
+
   def to_rdf(%_type{overwrite: overwrite} = changeset) do
     changeset
     |> Map.delete(:overwrite)
@@ -134,6 +142,8 @@ defmodule Ontogen.Changeset.Helper do
   def graph_include?(graph, triple), do: Graph.include?(graph, triple)
   def graph_describes?(nil, _), do: false
   def graph_describes?(graph, subject), do: Graph.describes?(graph, subject)
+  def graph_subjects(nil), do: MapSet.new()
+  def graph_subjects(graph), do: Graph.subjects(graph)
   def graph_cleanup(nil), do: nil
   def graph_cleanup(graph), do: unless(Graph.empty?(graph), do: graph)
 
