@@ -328,21 +328,43 @@ defmodule Ontogen.Changeset.FormatterTest do
       assert Formatter.format(commit, :combined_changes) ==
                """
                \e[0m   <http://example.com/s1>
-                \e[32m+     <http://example.com/p1> <http://example.com/o1> .
+               \e[0m \e[32m+     <http://example.com/p1> <http://example.com/o1> .
 
-               \e[37m\e[2m#  \e[9m<http://example.com/s11>
-               \e[37m\e[2m#\e[32m+ \e[9m    <http://example.com/p11> <http://example.com/o11> .
+               \e[0m\e[37m\e[2m#  \e[9m<http://example.com/s11>
+               \e[0m\e[37m\e[2m#\e[32m+ \e[9m    <http://example.com/p11> <http://example.com/o11> .
 
-               \e[37m\e[2m#  \e[9m<http://example.com/s2>
-               \e[37m\e[2m#\e[36m± \e[9m    <http://example.com/p2> <http://example.com/o2> .
+               \e[0m\e[37m\e[2m#  \e[9m<http://example.com/s2>
+               \e[0m\e[37m\e[2m#\e[36m± \e[9m    <http://example.com/p2> <http://example.com/o2> .
 
                \e[0m   <http://example.com/s3>
-                \e[91m~     <http://example.com/p1> <http://example.com/o1> ;
-                \e[96m⨦     <http://example.com/p3> <http://example.com/o3> .
+               \e[0m \e[91m~     <http://example.com/p1> <http://example.com/o1> ;
+               \e[0m \e[96m⨦     <http://example.com/p3> <http://example.com/o3> .
 
                \e[0m   <http://example.com/s4>
-                \e[31m-     <http://example.com/p4> <http://example.com/o4> ;
-               \e[37m\e[2m#\e[31m- \e[9m    <http://example.com/p44> <http://example.com/o44> .
+               \e[0m \e[31m-     <http://example.com/p4> <http://example.com/o4> ;
+               \e[0m\e[37m\e[2m#\e[31m- \e[9m    <http://example.com/p44> <http://example.com/o44> .
+               \e[0m
+               """
+               |> String.trim_trailing()
+
+      commit =
+        commit(
+          add: graph([{2, 3}, 3]),
+          speech_act: speech_act(add: graph([2, {2, 3}, 3]))
+        )
+
+      assert Formatter.format(commit, :combined_changes,
+               color: true,
+               context_data: graph([2, {2, 1}])
+             ) ==
+               """
+               \e[0m   <http://example.com/s2>
+               \e[0m       <http://example.com/p1> <http://example.com/o1> ;
+               \e[0m\e[37m\e[2m#\e[32m+ \e[9m    <http://example.com/p2> <http://example.com/o2> ;
+               \e[0m \e[32m+     <http://example.com/p3> <http://example.com/o3> .
+
+               \e[0m   <http://example.com/s3>
+               \e[0m \e[32m+     <http://example.com/p3> <http://example.com/o3> .
                \e[0m
                """
                |> String.trim_trailing()

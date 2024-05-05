@@ -205,16 +205,21 @@ defmodule Ontogen.Changeset.Formatter do
              not Changeset.Helper.includes?(speech_act, subject) do
           none
         else
-          colorize_ineffective("#  ", colorize)
+          "#  "
+          |> colorize_ineffective(colorize)
+          |> clean_ansi(colorize)
         end
 
       :triple, triple, _ ->
         cond do
           action = Changeset.Helper.action(commit, triple) ->
             [" " | change_prefix(action, colorize)]
+            |> clean_ansi(colorize)
 
           action = Changeset.Helper.action(speech_act, triple) ->
-            ["#", change_prefix(action, colorize)] |> colorize_ineffective(colorize)
+            ["#", change_prefix(action, colorize)]
+            |> colorize_ineffective(colorize)
+            |> clean_ansi(colorize)
 
           true ->
             none
@@ -243,6 +248,9 @@ defmodule Ontogen.Changeset.Formatter do
     do: [IO.ANSI.white(), IO.ANSI.faint(), prefix, IO.ANSI.crossed_out()]
 
   defp colorize_ineffective(prefix, _), do: prefix
+
+  defp clean_ansi(iodata, false), do: iodata
+  defp clean_ansi(iodata, true), do: [IO.ANSI.reset() | iodata]
 
   defp changed_resources({insertions, deletions, overwrites}) do
     insertions
