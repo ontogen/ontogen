@@ -173,20 +173,13 @@ defmodule Ontogen.Commit.Formatter do
   defp summary(message), do: first_line(message)
 
   defp revert_fields(commit) do
-    reverted_base =
-      if commit.reverted_base_commit do
-        ["RevertBase:   ", hash_from_iri(commit.reverted_base_commit), "\n"]
-      end
-
-    reverted_target =
-      if commit.reverted_target_commit do
-        ["RevertTarget: ", hash_from_iri(commit.reverted_target_commit), "\n"]
-      end
-
-    if reverted_base && reverted_target do
-      [reverted_base, reverted_target]
-    else
-      reverted_base || reverted_target
-    end
+    [
+      "RevertBase:   ",
+      hash_from_iri(commit.reverted_base_commit),
+      "\n",
+      "RevertTarget: ",
+      hash_from_iri(commit.reverted_target_commit),
+      "\n"
+    ]
   end
 end

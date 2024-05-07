@@ -68,7 +68,7 @@ defmodule Ontogen.Commit do
   end
 
   def validate(commit) do
-    if commit.speech_act || commit.reverted_base_commit || commit.reverted_target_commit do
+    if commit.speech_act || commit.reverted_target_commit do
       Grax.validate(commit)
     else
       {:error, "missing speech_act in commit #{commit.__id__}"}

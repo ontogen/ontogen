@@ -91,18 +91,20 @@ defmodule Ontogen.Commit.FormatterTest do
                """
                \e[33mcommit 0f6be19cfb2b86fe37e6113c7210fccfd26e31467f2b6a21a733bd47d9d721d2\e[0m
                RevertBase:   commit-root
+               RevertTarget: af0f05affbb433c0d2e881712909aafc2664c8d42b2d74951f026db32e653417
 
                Revert of commits:
                """
                |> String.trim_trailing()
 
-      commits = commit_history()
+      [_third, second, first] = commits = commit_history()
 
       assert revert(commits: Enum.slice(commits, 1..1))
              |> Formatter.format(:short) ==
                """
                \e[33mcommit 943416c00ba537b0de9e7189cfa58627178e31ae7b8ee185b167a2f441611459\e[0m
-               RevertTarget: 23d9efcfebbde0367d707dcaf3d6f7ef7691db6ff6c0f11b3738e65badff270f
+               RevertBase:   #{hash_from_iri(first.__id__)}
+               RevertTarget: #{hash_from_iri(second.__id__)}
 
                Revert of commits:
                """
@@ -113,7 +115,7 @@ defmodule Ontogen.Commit.FormatterTest do
                """
                \e[33mcommit 75506fe4bfd5ec56cdba81d484aea8bf62640a2932f0bbaa686e3b4441ffc00a\e[0m
                RevertBase:   commit-root
-               RevertTarget: 23d9efcfebbde0367d707dcaf3d6f7ef7691db6ff6c0f11b3738e65badff270f
+               RevertTarget: #{hash_from_iri(second.__id__)}
 
                Revert of commits:
                """

@@ -309,20 +309,17 @@ defmodule Ontogen.TestFactories do
 
         [:head] ->
           head = commit()
-          {to_iri(head.parent), nil, [head]}
+          {to_iri(head.parent), to_iri(head), [head]}
 
-        [start, head] when start in [:head, 1] ->
-          {to_iri(head.parent), nil, [head]}
-
-        [start, rest] when start in [:head, 1] ->
-          {to_iri(List.last(List.wrap(rest)).parent), nil, rest}
+        [start, head | rest] when start in [:head, 1] ->
+          {to_iri(head.parent), to_iri(head), [head | rest]}
 
         [number | rest] when is_integer(number) ->
-          commits = Enum.slice(rest, 0..(number - 1))
-          {to_iri(List.last(List.wrap(commits)).parent), nil, commits}
+          [head | _] = commits = Enum.slice(rest, 0..(number - 1))
+          {to_iri(List.last(commits).parent), to_iri(head), commits}
 
         [single] ->
-          {nil, to_iri(single), [single]}
+          {to_iri(single.parent), to_iri(single), [single]}
 
         [first | rest] ->
           {to_iri(List.last(List.wrap(rest)).parent), to_iri(first), [first | rest]}

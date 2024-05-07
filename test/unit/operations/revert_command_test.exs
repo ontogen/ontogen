@@ -54,7 +54,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
       assert revert1.time == datetime(1)
       assert revert1.message == message
       assert revert1.reverted_base_commit == third.__id__
-      refute revert1.reverted_target_commit
+      assert revert1.reverted_target_commit == fourth.__id__
       refute revert1.speech_act
 
       # updates the head in the dataset of the repo
@@ -83,7 +83,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
       assert revert2.committer == Config.user()
       assert DateTime.diff(DateTime.utc_now(), revert2.time, :second) <= 1
       assert revert2.reverted_base_commit == first.__id__
-      refute revert2.reverted_target_commit
+      assert revert2.reverted_target_commit == revert1.__id__
 
       assert revert2.message ==
                """
@@ -115,7 +115,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
       assert {:ok, %Commit{} = revert3} = Ontogen.revert(to: fourth)
 
       assert revert3.reverted_base_commit == fourth.__id__
-      refute revert3.reverted_target_commit
+      assert revert3.reverted_target_commit == revert2.__id__
 
       assert revert3.message ==
                """
@@ -140,7 +140,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
       assert {:ok, %Commit{} = revert4} = Ontogen.revert(to: :root)
 
       assert revert4.reverted_base_commit == Commit.root()
-      refute revert3.reverted_target_commit
+      assert revert4.reverted_target_commit == revert3.__id__
 
       # updates the head in the dataset of the repo
       assert Ontogen.head() == revert4
@@ -203,7 +203,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
                Ontogen.revert(range: {third, fourth}, time: datetime(1))
 
       assert revert.reverted_base_commit == third.__id__
-      refute revert.reverted_target_commit
+      assert revert.reverted_target_commit == fourth.__id__
     end
 
     test "base-relative range" do
@@ -216,7 +216,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
                )
 
       assert revert1.reverted_base_commit == third.__id__
-      refute revert1.reverted_target_commit
+      assert revert1.reverted_target_commit == fourth.__id__
 
       assert {:ok, %Commit{} = revert2} =
                Ontogen.revert(
@@ -225,7 +225,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
                )
 
       assert revert2.reverted_base_commit == Commit.root()
-      refute revert2.reverted_target_commit
+      assert revert2.reverted_target_commit == revert1.__id__
 
       assert {:ok, %Commit{} = revert3} =
                Ontogen.revert(
@@ -234,7 +234,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
                )
 
       assert revert3.reverted_base_commit == third.__id__
-      refute revert3.reverted_target_commit
+      assert revert3.reverted_target_commit == revert2.__id__
 
       assert revert3.message ==
                """
@@ -250,18 +250,18 @@ defmodule Ontogen.Operations.RevertCommandTest do
     end
 
     test "a directly given commit" do
-      [_fourth, third, _second, _first] = init_history()
+      [_fourth, third, second, _first] = init_history()
       original_dataset = Ontogen.dataset!()
 
       assert {:ok, %Commit{} = revert1} = Ontogen.revert(commit: third)
 
-      refute revert1.reverted_base_commit
+      assert revert1.reverted_base_commit == second.__id__
       assert revert1.reverted_target_commit == third.__id__
 
       assert {:ok, %Commit{} = revert2} = Ontogen.revert(commit: revert1.__id__)
 
       assert revert2.reverted_base_commit == revert1.parent
-      refute revert2.reverted_target_commit
+      assert revert2.reverted_target_commit == revert1.__id__
 
       assert Ontogen.dataset!() == original_dataset
     end

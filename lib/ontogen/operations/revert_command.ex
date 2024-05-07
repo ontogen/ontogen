@@ -68,7 +68,7 @@ defmodule Ontogen.Operations.RevertCommand do
          {:ok, changeset} <- changeset(commits),
          {:ok, commit_command} <-
            command
-           |> commit_args(changeset, commits, Repository.head_id(repo))
+           |> commit_args(changeset, commits)
            |> CommitCommand.new() do
       CommitCommand.call(commit_command, store, repo)
     end
@@ -83,22 +83,13 @@ defmodule Ontogen.Operations.RevertCommand do
      |> Commit.Changeset.invert()}
   end
 
-  defp commit_args(%__MODULE__{} = command, changeset, commits, head) do
+  defp commit_args(%__MODULE__{} = command, changeset, commits) do
     commit_attrs = command.commit_attrs
     range = command.range
 
-    cond do
-      range.target in [:head, head] ->
-        Keyword.put(commit_attrs, :reverted_base_commit, range.base)
-
-      length(commits) == 1 ->
-        Keyword.put(commit_attrs, :reverted_target_commit, range.target)
-
-      true ->
-        commit_attrs
-        |> Keyword.put(:reverted_base_commit, range.base)
-        |> Keyword.put(:reverted_target_commit, range.target)
-    end
+    commit_attrs
+    |> Keyword.put(:reverted_base_commit, range.base)
+    |> Keyword.put(:reverted_target_commit, range.target)
     |> Keyword.put_new(:message, default_message(commits))
     |> Keyword.put(:revert, changeset)
     |> Keyword.put(:on_no_effective_changes, :error)
