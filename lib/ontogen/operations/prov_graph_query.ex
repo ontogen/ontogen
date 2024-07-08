@@ -1,7 +1,7 @@
 defmodule Ontogen.Operations.ProvGraphQuery do
   use Ontogen.Query
 
-  alias Ontogen.{Store, Repository, ProvGraph}
+  alias Ontogen.{Service, ProvGraph}
   alias RDF.Graph
 
   import Ontogen.QueryUtils, only: [graph_query: 0]
@@ -12,7 +12,7 @@ defmodule Ontogen.Operations.ProvGraphQuery do
       # because we don't wont to block it for this potentially large read access.
       # Also, we don't want to pass the potentially large data structure between processes.
       ProvGraphQuery.new!()
-      |> ProvGraphQuery.call(store(), repository())
+      |> ProvGraphQuery.call(service())
     end
 
     def prov_graph!, do: bang!(&prov_graph/0, [])
@@ -22,10 +22,8 @@ defmodule Ontogen.Operations.ProvGraphQuery do
   def new!, do: %__MODULE__{}
 
   @impl true
-  def call(%__MODULE__{}, store, repository) do
-    prov_graph_id = Repository.prov_graph_id(repository)
-
-    with {:ok, graph} <- Store.query(store, prov_graph_id, graph_query()) do
+  def call(%__MODULE__{}, service) do
+    with {:ok, graph} <- Service.handle_sparql(graph_query(), service, :prov) do
       {:ok, graph |> Graph.add_prefixes(ProvGraph.prefixes())}
     end
   end

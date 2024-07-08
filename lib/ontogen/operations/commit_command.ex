@@ -8,7 +8,7 @@ defmodule Ontogen.Operations.CommitCommand do
     ]
 
   alias Ontogen.{
-    Store,
+    Service,
     Repository,
     Commit,
     Changeset,
@@ -101,23 +101,22 @@ defmodule Ontogen.Operations.CommitCommand do
   end
 
   @impl true
-  def call(%__MODULE__{} = command, store, %Repository{} = repo) do
-    parent_commit = Repository.head_id(repo)
+  def call(%__MODULE__{} = command, service) do
+    parent_commit = Repository.head_id(service.repository)
 
-    with {:ok, effective_changeset} <- effective_changeset(command, store, repo),
+    with {:ok, effective_changeset} <- effective_changeset(command, service),
          {:ok, commit} <- build_commit(command, effective_changeset, parent_commit) do
-      apply_commit(commit, command.additional_prov_metadata, store, repo)
+      apply_commit(commit, command.additional_prov_metadata, service)
     end
   end
 
   defp effective_changeset(
          %__MODULE__{changes: changes, on_no_effective_changes: on_no_effective_changes},
-         store,
-         repo
+         service
        ) do
     with {:ok, effective_changeset_query} <- EffectiveChangesetQuery.new(changes) do
       effective_changeset_query
-      |> EffectiveChangesetQuery.call(store, repo)
+      |> EffectiveChangesetQuery.call(service)
       |> handle_no_effective_changes(on_no_effective_changes)
     end
   end
@@ -134,11 +133,11 @@ defmodule Ontogen.Operations.CommitCommand do
     |> Commit.new()
   end
 
-  defp apply_commit(commit, additional_prov_metadata, store, repo) do
-    with {:ok, update} <- Update.build(repo, commit, additional_prov_metadata),
-         :ok <- Store.update(store, nil, update),
-         {:ok, new_repo} <- Repository.set_head(repo, commit) do
-      {:ok, new_repo, commit}
+  defp apply_commit(commit, additional_prov_metadata, service) do
+    with {:ok, update} <- Update.build(service.repository, commit, additional_prov_metadata),
+         :ok <- Service.handle_sparql(update, service, nil),
+         {:ok, new_service} <- Service.set_head(service, commit) do
+      {:ok, new_service, commit}
     end
   end
 end

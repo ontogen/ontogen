@@ -1,0 +1,16 @@
+@prefix : <https://w3id.org/bog#> .
+@prefix og: <https://w3id.org/ontogen#> .
+@prefix oga: <https://w3id.org/ontogen/store/adapter/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+[ :this oga:Oxigraph
+    # all of these can be omitted since predefined defaults of the adapter
+    ; og:storeEndpointScheme "http"
+    ; og:storeEndpointHost "localhost"
+    ; og:storeEndpointPort 7878
+
+    # all of these can be omitted since auto-generated from the storeEndpoint props
+    # ; og:storeQueryEndpoint <http://localhost:7878/query>
+    # ; og:storeUpdateEndpoint <http://localhost:7878/update>
+    # ; og:storeGraphStoreEndpoint <http://localhost:7878/store>
+] .

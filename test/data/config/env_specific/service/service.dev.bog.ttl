@@ -1,0 +1,7 @@
+@prefix : <https://w3id.org/bog#> .
+@prefix og: <https://w3id.org/ontogen#> .
+@prefix oga: <https://w3id.org/ontogen/store/adapter/> .
+
+[ :this og:Service
+    ; og:serviceStore [ :this oga:Oxigraph ]
+] .

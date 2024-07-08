@@ -1,5 +1,5 @@
 defmodule Ontogen.Operations.RevertCommandTest do
-  use Ontogen.RepositoryCase, async: false
+  use Ontogen.ServiceCase, async: false
 
   doctest Ontogen.Operations.RevertCommand
 
@@ -16,7 +16,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
   describe "Ontogen.revert/1" do
     test "when no commits specified" do
       assert Ontogen.revert(foo: :bar) ==
-               {:error, EmptyRepositoryError.exception(repository: Ontogen.repository())}
+               {:error, EmptyRepositoryError.exception(repository: Ontogen.repository!())}
     end
 
     test "when nothing to revert" do
@@ -61,7 +61,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
       assert Ontogen.head() == revert1
 
       # updates the repo graph in the store
-      assert Ontogen.repository() |> flatten_property(:head) == stored_repo()
+      assert Ontogen.repository!(stored: true) == Ontogen.repository!() |> flatten_property(:head)
 
       # inserts the uttered statements
       assert Ontogen.dataset() ==
@@ -80,7 +80,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
 
       assert {:ok, %Commit{} = revert2} = Ontogen.revert(to: first)
 
-      assert revert2.committer == Config.user()
+      assert revert2.committer == Config.user!()
       assert DateTime.diff(DateTime.utc_now(), revert2.time, :second) <= 1
       assert revert2.reverted_base_commit == first.__id__
       assert revert2.reverted_target_commit == revert1.__id__
@@ -162,7 +162,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
                  time: datetime(1)
                )
 
-      assert revert1.committer == Config.user()
+      assert revert1.committer == Config.user!()
       assert revert1.time == datetime(1)
       assert revert1.reverted_base_commit == first.__id__
       assert revert1.reverted_target_commit == third.__id__
@@ -180,7 +180,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
       assert Ontogen.head() == revert1
 
       # updates the repo graph in the store
-      assert Ontogen.repository() |> flatten_property(:head) == stored_repo()
+      assert Ontogen.repository!(stored: true) == Ontogen.repository!() |> flatten_property(:head)
 
       # inserts the uttered statements
       assert Ontogen.dataset() ==

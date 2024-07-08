@@ -8,7 +8,6 @@ defmodule Ontogen.TestFactories do
   alias RDF.Graph
 
   alias Ontogen.{
-    Config,
     Repository,
     Dataset,
     ProvGraph,
@@ -38,6 +37,9 @@ defmodule Ontogen.TestFactories do
   def id(:speech_act), do: speech_act().__id__
   def id(resource) when is_rdf_resource(resource), do: resource
   def id(iri) when is_binary(iri), do: RDF.iri(iri)
+
+  def email(format \\ :iri)
+  def email(:iri), do: ~I<mailto:john.doe@example.com>
 
   def datetime, do: ~U[2023-05-26 13:02:02.255559Z]
 
@@ -88,6 +90,8 @@ defmodule Ontogen.TestFactories do
     end)
   end
 
+  def empty_graph, do: RDF.graph()
+
   @graph [
            EX.S1 |> EX.p1(EX.O1),
            EX.S2 |> EX.p2(42, "Foo")
@@ -115,20 +119,6 @@ defmodule Ontogen.TestFactories do
             |> RDF.graph()
   def subgraph, do: @subgraph
 
-  def config(attrs \\ []) when is_list(attrs) do
-    attrs
-    |> config_attrs()
-    |> Config.new!()
-  end
-
-  def config_attrs(attrs \\ []) do
-    [
-      user: Keyword.get(attrs, :user, agent()),
-      store: Keyword.get(attrs, :store, store())
-    ]
-    |> Keyword.merge(attrs)
-  end
-
   def agent(id \\ :agent_john, attrs \\ []) do
     id
     |> id()
@@ -148,7 +138,7 @@ defmodule Ontogen.TestFactories do
   def agent_attrs(_, attrs) do
     [
       name: "John Doe",
-      email: ~I<mailto:john.doe@example.com>
+      email: email()
     ]
     |> Keyword.merge(attrs)
   end

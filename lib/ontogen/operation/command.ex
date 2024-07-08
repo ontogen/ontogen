@@ -1,14 +1,10 @@
 defmodule Ontogen.Command do
-  alias Ontogen.{Repository, Store}
+  alias Ontogen.Service
 
   @type t :: struct
 
-  @callback call(
-              command :: t,
-              repository :: Repository.t(),
-              store :: Store.t()
-            ) ::
-              {:ok, Repository.t(), any} | {:ok, Repository.t()} | {:error, any}
+  @callback call(operation :: t, service :: Service.t()) ::
+              {:ok, Service.t(), any} | {:ok, Service.t()} | {:error, any}
 
   defmacro __using__(opts) do
     opts = Keyword.put(opts, :params, [{:type, __MODULE__} | Keyword.get(opts, :params, [])])

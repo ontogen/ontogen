@@ -1,6 +1,6 @@
 defmodule Ontogen.NS do
   @moduledoc """
-  `RDF.Vocabulary.Namespace`s for the used vocabularies.
+  `RDF.Vocabulary.Namespace`s for the used vocabularies within Ontogen.
   """
 
   use RDF.Vocabulary.Namespace
@@ -16,16 +16,28 @@ defmodule Ontogen.NS do
     case_violations: :fail
 
   @vocabdoc """
-  The Ontogen config vocabulary.
+  The Ontogen store adapter vocabulary.
   """
-  defvocab Ogc,
-    base_iri: "https://w3id.org/ontogen/config#",
-    file: "ontogen_config.ttl",
+  defvocab OgA,
+    base_iri: "https://w3id.org/ontogen/store/adapter/",
+    file: "ontogen_store_adapter.ttl",
+    terms: [],
+    strict: false
+
+  @vocabdoc """
+  The vocabulary for the precompiled Bog Turtle language.
+
+  See <https://w3id.org/ontogen/spec>
+  """
+  defvocab Bog,
+    base_iri: "https://w3id.org/bog#",
+    file: "bog.ttl",
     case_violations: :fail
 
   @prefixes RDF.prefix_map(
               og: Ontogen.NS.Og,
-              ogc: Ontogen.NS.Ogc,
+              oga: Ontogen.NS.OgA,
+              bog: Ontogen.NS.Bog,
               rtc: RTC,
               prov: PROV,
               dcat: DCAT,

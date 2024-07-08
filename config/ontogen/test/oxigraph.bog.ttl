@@ -1,0 +1,10 @@
+@prefix : <https://w3id.org/bog#> .
+@prefix og: <https://w3id.org/ontogen#> .
+@prefix oga: <https://w3id.org/ontogen/store/adapter/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+[ :this oga:Oxigraph
+    ; og:storeEndpointScheme "http"
+    ; og:storeEndpointHost "localhost"
+    ; og:storeEndpointPort 7879
+] .

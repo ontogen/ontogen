@@ -4,7 +4,7 @@ defmodule Ontogen.Operations.EffectiveChangesetQuery do
       changeset: nil
     ]
 
-  alias Ontogen.{SpeechAct, Commit, Store, Repository, NoEffectiveChanges}
+  alias Ontogen.{SpeechAct, Commit, Service, NoEffectiveChanges}
   alias RDF.{Graph, Description}
 
   import Ontogen.QueryUtils
@@ -32,19 +32,17 @@ defmodule Ontogen.Operations.EffectiveChangesetQuery do
         %__MODULE__{
           changeset: %{add: add, remove: remove, update: update, replace: replace}
         },
-        store,
-        repo
+        service
       ) do
-    dataset = Repository.dataset_graph_id(repo)
-
     with {:ok, add_remove_change_graph} <-
-           Store.construct(store, dataset, add_remove_query(add, remove, update, replace)),
+           add_remove_query(add, remove, update, replace)
+           |> Service.handle_sparql(service, :dataset),
          effective_add = effective_add(add, add_remove_change_graph),
          effective_update = effective_add(update, add_remove_change_graph),
          effective_replace = effective_add(replace, add_remove_change_graph),
          effective_remove = effective_remove(remove, add_remove_change_graph),
-         {:ok, update_overwrites_graph} <- update_overwrites(store, dataset, update),
-         {:ok, replace_overwrites_graph} <- replace_overwrites(store, dataset, replace),
+         {:ok, update_overwrites_graph} <- update_overwrites(service, update),
+         {:ok, replace_overwrites_graph} <- replace_overwrites(service, replace),
          overwrite = overwrite_remove(update_overwrites_graph, replace_overwrites_graph) do
       if effective_add || effective_remove || effective_update || effective_replace ||
            overwrite do
@@ -61,20 +59,24 @@ defmodule Ontogen.Operations.EffectiveChangesetQuery do
     end
   end
 
-  defp update_overwrites(_, _, nil), do: {:ok, nil}
+  defp update_overwrites(_, nil), do: {:ok, nil}
 
-  defp update_overwrites(store, dataset, update) do
+  defp update_overwrites(service, update) do
     with {:ok, update_overwrite_graph} <-
-           Store.construct(store, dataset, update_overwrites_query(update)) do
+           update
+           |> update_overwrites_query()
+           |> Service.handle_sparql(service, :dataset) do
       {:ok, Graph.delete(update_overwrite_graph, update)}
     end
   end
 
-  defp replace_overwrites(_, _, nil), do: {:ok, nil}
+  defp replace_overwrites(_, nil), do: {:ok, nil}
 
-  defp replace_overwrites(store, dataset, replace) do
+  defp replace_overwrites(service, replace) do
     with {:ok, replace_overwrite_graph} <-
-           Store.construct(store, dataset, replace_overwrites_query(replace)) do
+           replace
+           |> replace_overwrites_query()
+           |> Service.handle_sparql(service, :dataset) do
       {:ok, Graph.delete(replace_overwrite_graph, replace)}
     end
   end
@@ -136,6 +138,7 @@ defmodule Ontogen.Operations.EffectiveChangesetQuery do
       ?s ?p ?o .
     }
     """
+    |> Ontogen.Store.SPARQL.Operation.construct!()
   end
 
   defp triples(nil), do: ""
@@ -158,6 +161,7 @@ defmodule Ontogen.Operations.EffectiveChangesetQuery do
       ?s ?p ?o .
     }
     """
+    |> Ontogen.Store.SPARQL.Operation.construct!()
   end
 
   defp subject_predicate_pairs(update) do
@@ -183,6 +187,7 @@ defmodule Ontogen.Operations.EffectiveChangesetQuery do
       ?s ?p ?o .
     }
     """
+    |> Ontogen.Store.SPARQL.Operation.construct!()
   end
 
   defp subjects(replace) do

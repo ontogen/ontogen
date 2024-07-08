@@ -1,0 +1,10 @@
+@prefix : <https://w3id.org/bog#> .
+@prefix og: <https://w3id.org/ontogen#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+[ :this og:Repository
+    ; dcterms:title "test repository"
+    ; dcterms:creator :I
+    ; dcterms:publisher :I
+] .

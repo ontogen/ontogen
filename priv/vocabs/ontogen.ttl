@@ -163,12 +163,12 @@ og:Repository a rdfs:Class
     ; rdfs:label "Ontogen repository"
 .
 
-    og:dataset a rdf:Property
+    og:repositoryDataset a rdf:Property
         ; rdfs:domain og:Repository
         ; rdfs:range  og:Dataset
     .
 
-    og:provGraph a rdf:Property
+    og:repositoryProvGraph a rdf:Property
         ; rdfs:domain og:Repository
         ; rdfs:range  og:ProvGraph
     .
@@ -184,12 +184,6 @@ og:Dataset a rdfs:Class
     ; rdfs:comment "A DCAT dataset that version-controlled with Ontogen"
 .
 
-    og:repository a rdf:Property
-        ; owl:inverseOf og:dataset
-        ; rdfs:domain og:Dataset
-        ; rdfs:range  og:Repository
-        ; skos:scopeNote "This property MAY be used only in addition to its inverse, and it MUST NOT be used to replace it."@en ;
-    .
 
 og:ProvGraph a rdfs:Class
     ; rdfs:subClassOf prov:Bundle
@@ -202,3 +196,67 @@ og:Removal rdfs:comment "Graph name for removals in a RDF encoded changeset".
 og:Update rdfs:comment "Graph name for updates in a RDF encoded changeset".
 og:Replacement rdfs:comment "Graph name for replacements in a RDF encoded changeset".
 og:Overwrite rdfs:comment "Graph name for overwrites in a RDF encoded changeset".
+
+
+og:Store a rdfs:Class
+    ; rdfs:label "Store"
+.
+
+    og:storeQueryEndpoint a rdf:Property
+        ; rdfs:domain og:Store
+    .
+
+    og:storeUpdateEndpoint a rdf:Property
+        ; rdfs:domain og:Store
+    .
+
+    og:storeGraphStoreEndpoint a rdf:Property
+        ; rdfs:domain og:Store
+    .
+
+    og:storeEndpointScheme a rdf:Property
+        ; rdfs:domain og:Store
+        ; rdfs:range xsd:string
+    .
+
+    og:storeEndpointHost a rdf:Property
+        ; rdfs:domain og:Store
+        ; rdfs:range xsd:string
+    .
+
+    og:storeEndpointPort a rdf:Property
+        ; rdfs:domain og:Store
+        ; rdfs:range xsd:positiveInteger
+    .
+
+    og:storeEndpointUserInfo a rdf:Property
+        ; rdfs:domain og:Store
+        ; rdfs:range xsd:string
+    .
+
+    og:storeEndpointDataset a rdf:Property
+        ; rdfs:domain og:Store
+        ; rdfs:range xsd:string
+    .
+
+
+og:Service a rdfs:Class
+    ; rdfs:subClassOf dcat:DataService
+    ; rdfs:label "Service"
+.
+
+    og:serviceRepository a rdf:Property
+        ; rdfs:domain og:Service
+        ; rdfs:range  og:Repository
+    .
+
+    og:serviceStore a rdf:Property
+        ; rdfs:domain og:Service
+        ; rdfs:range  og:Store
+    .
+
+    og:serviceOperator a rdf:Property
+        ; rdfs:domain og:Service
+        ; rdfs:range  og:Agent
+    .
+

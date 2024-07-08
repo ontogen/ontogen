@@ -3,41 +3,18 @@ defmodule Ontogen.Application do
 
   use Application
 
-  @mix_env Mix.env()
+  @env Mix.env()
 
   @impl true
-  def start(_type, args) do
-    @mix_env
-    |> children(args)
-    |> Supervisor.start_link(strategy: :one_for_one, name: Ontogen.Supervisor)
-    |> handle_failure(Application.get_env(:ontogen, :allow_configless_mode, false))
+  def start(_type, _args) do
+    Ontogen.Bog.create_salt_base_path()
+
+    children = children(@env)
+
+    opts = [strategy: :one_for_one, name: Ontogen.Supervisor]
+    Supervisor.start_link(children, opts)
   end
 
-  defp children(:test, args) do
-    [
-      {Ontogen.Config, config_load_paths(args)}
-    ]
-  end
-
-  defp children(_, args) do
-    [
-      {Ontogen.Config, config_load_paths(args)},
-      {Ontogen, Keyword.get(args, :repo_args, [])}
-    ]
-  end
-
-  defp config_load_paths(args) do
-    Keyword.get(args, :config_load_paths) ||
-      Application.get_env(:ontogen, :config_load_paths) ||
-      Ontogen.Config.default_load_paths()
-  end
-
-  defp handle_failure(
-         {:error, {:shutdown, {:failed_to_start_child, Ontogen.Config, %Ontogen.ConfigError{}}}},
-         true
-       ) do
-    Supervisor.start_link([], strategy: :one_for_one, name: Ontogen.Supervisor)
-  end
-
-  defp handle_failure(result, _), do: result
+  defp children(:test), do: []
+  defp children(_), do: [Ontogen]
 end

@@ -5,7 +5,7 @@ defmodule Ontogen.ConfigError do
   defexception [:file, :reason]
 
   def message(%{file: nil, reason: :missing}) do
-    "No config file found"
+    "No config found"
   end
 
   def message(%{file: nil, reason: reason}) do
@@ -17,15 +17,26 @@ defmodule Ontogen.ConfigError do
   end
 end
 
-defmodule Ontogen.InvalidRepoSpecError do
+defmodule Ontogen.InvalidSPARQLOperationError do
   @moduledoc """
-  Raised when the repo spec for the creation of a `Ontogen.Repository`
-  is invalid.
+  Raised when creating an invalid `Ontogen.Store.SPARQL.Operation`.
   """
-  defexception [:reason]
 
-  def message(%{reason: reason}) do
-    "Invalid repository spec: #{reason}"
+  defexception [:message]
+
+  def exception(value) do
+    %__MODULE__{message: "Invalid SPARQL operation: #{value}"}
+  end
+end
+
+defmodule Ontogen.InvalidStoreEndpointError do
+  @moduledoc """
+  Raised on invalid `Ontogen.Store.Endpoint`s.
+  """
+  defexception [:message]
+
+  def exception(value) do
+    %__MODULE__{message: "Invalid store endpoint: #{value}"}
   end
 end
 
@@ -134,15 +145,30 @@ defmodule Ontogen.IdGenerationError do
   end
 end
 
-defmodule Ontogen.Repository.NotReadyError do
+defmodule Ontogen.Repository.NotSetupError do
   @moduledoc """
-  Raised when trying to perform an operation on a repo when it is not ready,
-  i.e. not connected with a repository in the store.
+  Raised when an attempt is made to perform an operation on the `Ontogen.Service`
+  instance with a `Ontogen.Store` where the `Ontogen.Repository`
+  was not initialized with `Ontogen.setup/1`.
   """
-  defexception [:operation]
 
-  def message(%{operation: operation}) do
-    "Unable to perform #{inspect(operation)}. Repository not ready."
+  defexception [:service, :operation]
+
+  def message(%{service: service}) do
+    "Repository of service #{inspect(service)} not setup on the store"
+  end
+end
+
+defmodule Ontogen.Repository.SetupError do
+  @moduledoc """
+  Raised when an attempt is made to setup a `Ontogen.Store` where the
+   `Ontogen.Repository` is already setup.
+  """
+
+  defexception [:reason, :service]
+
+  def message(%{service: service, reason: :already_setup}) do
+    "Repository of service #{inspect(service)} already setup on the store"
   end
 end
 

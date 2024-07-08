@@ -1,0 +1,9 @@
+@prefix : <https://w3id.org/bog#> .
+@prefix og: <https://w3id.org/ontogen#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+:I a og:Agent
+    ; foaf:name "Jane Doe"
+    ; og:email <mailto:jane.doe@example.com>
+.

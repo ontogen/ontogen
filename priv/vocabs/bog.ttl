@@ -1,0 +1,33 @@
+@prefix bog: <https://w3id.org/bog#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+bog:Referencable a rdfs:Class
+    ; rdfs:label "Referencable"
+    ; rdfs:comment "A thing that can be referenced via auto-generated UUIDv5-hashed HMAC-SHA256 hashed UUID-URN-URIs or anonymously via local names or indexicals."
+.
+
+    bog:refHash a rdf:Property
+        ; rdfs:domain bog:Referencable
+        ; rdfs:range xsd:string
+    .
+
+    bog:ref a rdf:Property
+        ; rdfs:domain bog:Referencable
+        ; rdfs:range xsd:string
+        ; rdfs:comment "A local name a user can use on his machine to reference a resource. These names are always rendered/skolemized to the UUIDv5 URI of the og:refHash"
+    .
+
+
+bog:this a rdf:Property
+    ; rdfs:domain bog:Referencable
+    ; rdfs:comment "This property will be resolved by the precompiler to `a {class} ; bog:ref {lower-cased(class)}`"
+    ; rdfs:comment "This property is intended to have RDFS classes as its range. However, to maintain compatibility with various OWL profiles, we deliberately omit a formal rdfs:range definition."
+.
+
+bog:I a owl:NamedIndividual
+    ; rdfs:comment "This resource will be resolved by the precompiler to `[a og:Agent ; bog:ref \"agent\"]`"
+.
+

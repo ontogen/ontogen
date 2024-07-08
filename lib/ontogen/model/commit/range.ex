@@ -116,16 +116,16 @@ defmodule Ontogen.Commit.Range do
 
   def absolute(%__MODULE__{} = range), do: {:ok, range}
 
-  def fetch(%Commit.Range{} = range, store, repository) do
+  def fetch(%Commit.Range{} = range, service) do
     if has_ref?(range) do
-      with {:ok, chain} <- Fetcher.fetch(:head, store, repository),
+      with {:ok, chain} <- Fetcher.fetch(:head, service),
            {:ok, base, _} <- resolve_ref(range.base, chain),
            {:ok, target, chain} <- resolve_ref(range.target, chain) do
         %__MODULE__{range | target: target, base: base}
         |> update_commit_ids(chain)
       end
     else
-      with {:ok, chain} <- Fetcher.fetch(range.target, store, repository) do
+      with {:ok, chain} <- Fetcher.fetch(range.target, service) do
         update_commit_ids(range, chain)
       end
     end

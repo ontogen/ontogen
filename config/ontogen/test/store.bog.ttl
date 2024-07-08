@@ -1,0 +1,15 @@
+@prefix : <https://w3id.org/bog#> .
+@prefix og: <https://w3id.org/ontogen#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+[ :this og:Store
+    # Fuseki
+    ; og:storeQueryEndpoint <http://localhost:3030/ontogen-test-dataset/query>
+    ; og:storeUpdateEndpoint <http://localhost:3030/ontogen-test-dataset/update>
+    ; og:storeGraphStoreEndpoint <http://localhost:3030/ontogen-test-dataset/data>
+
+    # Oxigraph
+#    ; og:storeQueryEndpoint <http://localhost:7879/query>
+#    ; og:storeUpdateEndpoint <http://localhost:7879/update>
+#    ; og:storeGraphStoreEndpoint <http://localhost:7879/store>
+] .

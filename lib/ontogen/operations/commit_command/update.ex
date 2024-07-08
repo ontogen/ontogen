@@ -5,24 +5,24 @@ defmodule Ontogen.Operations.CommitCommand.Update do
   alias RDF.{NTriples, Graph, PrefixMap}
 
   def build(repo, commit, additional_prov_metadata) do
-    {:ok,
-     """
-     #{[:og] |> Ontogen.NS.prefixes() |> PrefixMap.to_sparql()}
-     DELETE DATA {
-       #{head(repo, commit.parent)}
-       #{dataset_changes(repo, commit.remove)}
-       #{dataset_changes(repo, commit.overwrite)}
-     } ;
-     INSERT DATA {
-       #{head(repo, commit.__id__)}
-       #{dataset_changes(repo, commit.add)}
-       #{dataset_changes(repo, commit.update)}
-       #{dataset_changes(repo, commit.replace)}
-       #{provenance(repo, commit)}
-       #{provenance(repo, commit.speech_act)}
-       #{provenance(repo, additional_prov_metadata)}
-     }
-     """}
+    """
+    #{[:og] |> Ontogen.NS.prefixes() |> PrefixMap.to_sparql()}
+    DELETE DATA {
+      #{head(repo, commit.parent)}
+      #{dataset_changes(repo, commit.remove)}
+      #{dataset_changes(repo, commit.overwrite)}
+    } ;
+    INSERT DATA {
+      #{head(repo, commit.__id__)}
+      #{dataset_changes(repo, commit.add)}
+      #{dataset_changes(repo, commit.update)}
+      #{dataset_changes(repo, commit.replace)}
+      #{provenance(repo, commit)}
+      #{provenance(repo, commit.speech_act)}
+      #{provenance(repo, additional_prov_metadata)}
+    }
+    """
+    |> Ontogen.Store.SPARQL.Operation.update()
   end
 
   defp head(_, nil), do: ""

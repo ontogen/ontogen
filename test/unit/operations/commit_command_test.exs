@@ -1,5 +1,5 @@
 defmodule Ontogen.Operations.CommitCommandTest do
-  use Ontogen.RepositoryCase, async: false
+  use Ontogen.ServiceCase, async: false
 
   doctest Ontogen.Operations.CommitCommand
 
@@ -163,11 +163,11 @@ defmodule Ontogen.Operations.CommitCommandTest do
       assert {:ok, commit} = Ontogen.commit(add: graph())
 
       assert commit.add == expected_add
-      assert commit.committer == Config.user()
+      assert commit.committer == Config.user!()
       assert DateTime.diff(DateTime.utc_now(), commit.time, :second) <= 1
 
       assert commit.speech_act.add == expected_add
-      assert commit.speech_act.speaker == Config.user()
+      assert commit.speech_act.speaker == Config.user!()
       assert DateTime.diff(DateTime.utc_now(), commit.speech_act.time, :second) <= 1
 
       # inserts the provenance
@@ -176,7 +176,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
                  [
                    commit,
                    expected_add,
-                   Config.user()
+                   Config.user!()
                  ]
                  |> Enum.map(&Grax.to_rdf!/1),
                  prefixes: ProvGraph.prefixes()
@@ -250,7 +250,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
         Proposition.new!(graph()),
         Proposition.new!(add),
         Proposition.new!(remove),
-        Config.user(),
+        Config.user!(),
         agent(:agent_jane)
       ]
       |> Enum.map(&Grax.to_rdf!/1)
@@ -298,7 +298,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
         expected_update_proposition,
         expected_remove_proposition,
         original_update,
-        Config.user(),
+        Config.user!(),
         agent(:agent_jane)
       ]
       |> Enum.map(&Grax.to_rdf!/1)
@@ -357,7 +357,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
         replace_proposition,
         overwrite_proposition,
         speech_act,
-        Config.user(),
+        Config.user!(),
         agent(:agent_jane)
       ]
       |> Enum.map(&Grax.to_rdf!/1)
@@ -421,7 +421,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
           Proposition.new!(graph()),
           expected_add_proposition,
           expected_remove_proposition,
-          Config.user(),
+          Config.user!(),
           agent(:agent_jane)
         ]
         |> Enum.map(&Grax.to_rdf!/1)
@@ -488,7 +488,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
             remove: remove,
             time: datetime()
           ),
-          Config.user(),
+          Config.user!(),
           agent(:agent_jane)
         ]
         |> Enum.map(&Grax.to_rdf!/1)
@@ -518,7 +518,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
     assert Ontogen.head() == head
 
     # updates the repo graph in the store
-    assert Ontogen.repository() |> flatten_property(:head) == stored_repo()
+    assert Ontogen.repository!(stored: true) == Ontogen.repository!() |> flatten_property(:head)
 
     # inserts the statements
     assert Ontogen.dataset!() == dataset

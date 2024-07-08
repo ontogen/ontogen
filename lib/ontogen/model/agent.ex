@@ -1,5 +1,6 @@
 defmodule Ontogen.Agent do
   use Grax.Schema
+  use Ontogen.Bog.Referencable
 
   alias Ontogen.NS.Og
   alias RDF.IRI

@@ -1,0 +1,10 @@
+@prefix bog: <https://w3id.org/bog#> .
+@prefix og: <https://w3id.org/ontogen#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+[ bog:this og:Dataset
+    ; dcterms:title "test dataset"
+    ; dcterms:creator bog:I
+    ; dcterms:publisher bog:I
+] .

@@ -6,7 +6,7 @@ defmodule Ontogen.AgentTest do
 
   test "can be loaded from RDF with just an foaf:mbox" do
     assert """
-           @prefix foaf: <http://xmlns.com/foaf/0.1/> .
+           #{RDF.turtle_prefixes(foaf: FOAF)}
 
            <http://example.com/Agent/john_doe>
              foaf:name "John Doe" ;

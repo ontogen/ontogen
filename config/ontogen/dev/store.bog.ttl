@@ -1,0 +1,9 @@
+@prefix : <https://w3id.org/bog#> .
+@prefix og: <https://w3id.org/ontogen#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+[ :this og:Store
+    ; og:storeQueryEndpoint <http://localhost:7878/query>
+    ; og:storeUpdateEndpoint <http://localhost:7878/update>
+    ; og:storeGraphStoreEndpoint <http://localhost:7878/store>
+] .

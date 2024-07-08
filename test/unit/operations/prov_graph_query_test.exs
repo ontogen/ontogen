@@ -1,5 +1,5 @@
 defmodule Ontogen.Operations.ProvGraphQueryTest do
-  use Ontogen.RepositoryCase, async: false
+  use Ontogen.ServiceCase, async: false
 
   doctest Ontogen.Operations.ProvGraphQuery
 

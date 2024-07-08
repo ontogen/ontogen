@@ -1,84 +1,58 @@
 defmodule Ontogen.Config do
-  @system_path Application.compile_env(:ontogen, :system_config_path, "/etc/ontogen_config.ttl")
-  @global_path Application.compile_env(:ontogen, :global_config_path, "~/.ontogen_config.ttl")
-
-  @local_config_dir Mix.Project.project_file() |> Path.dirname() |> Path.join("config")
-
-  @local_path Application.compile_env(
-                :ontogen,
-                :local_config_path,
-                "#{@local_config_dir}/#{Mix.env()}.ttl"
-              )
-
-  @paths [
-    system: @system_path,
-    global: @global_path,
-    local: @local_path
-  ]
-
-  @default_load_paths Keyword.keys(@paths)
-
-  @prefixes Ontogen.NS.prefixes(~w[og ogc foaf]a)
-
-  use Grax.Schema
-  use Agent
-
-  import RDF.Sigils
-
-  alias Ontogen.NS.Ogc
+  alias Ontogen.{Agent, Repository, Dataset, ProvGraph, Service, Store}
   alias Ontogen.Config.Loader
 
-  schema Ogc.Config do
-    link :user, Ogc.user(), type: Ontogen.Agent, required: true
-    link :store, Ogc.store(), type: Ontogen.Store, required: true
-  end
+  import Ontogen.Utils, only: [bang!: 2]
 
-  @id ~I<http://localhost/ontogen/config>
-  def id, do: @id
+  defdelegate graph(opts \\ []), to: Loader, as: :load_graph
 
-  def new(attrs) when is_list(attrs) do
-    build(id(), attrs)
-  end
+  def graph!(opts \\ []), do: bang!(&graph/1, [opts])
 
-  def new!(attrs) when is_list(attrs) do
-    build!(id(), attrs)
-  end
+  [
+    agent: Agent,
+    service: Service,
+    repository: Repository,
+    dataset: Dataset,
+    prov_graph: ProvGraph
+  ]
+  |> Enum.each(fn {name, schema} ->
+    bang_name = String.to_atom("#{name}!")
 
-  def to_rdf(%__MODULE__{} = config, opts \\ []) do
-    opts = Keyword.put_new(opts, :prefixes, @prefixes)
-    Grax.to_rdf(config, opts)
-  end
-
-  @doc """
-  The list of paths from which the configuration is iteratively built.
-
-  #{Enum.map_join(@default_load_paths, "\n", &"- `#{inspect(&1)}`")}
-  """
-  def default_load_paths, do: @default_load_paths
-
-  def path(name), do: @paths[name]
-
-  def start_link(load_paths) do
-    with {:ok, config} <- Loader.load_config(load_paths) do
-      Agent.start_link(fn -> config end, name: __MODULE__)
+    def unquote(:"#{name}_id")(ref \\ :this) do
+      unquote(schema).deref_id!(ref)
     end
-  end
 
-  def config do
-    Agent.get(__MODULE__, & &1)
-  end
-
-  def user do
-    Agent.get(__MODULE__, & &1.user)
-  end
-
-  def store do
-    Agent.get(__MODULE__, & &1.store)
-  end
-
-  def reload(load_paths) do
-    with {:ok, config} <- Loader.load_config(load_paths) do
-      Agent.update(__MODULE__, fn -> config end)
+    def unquote(name)(ref \\ :this, opts \\ []) do
+      with {:ok, graph} <- graph(opts), do: unquote(schema).deref(ref, graph)
     end
+
+    def unquote(bang_name)(ref \\ :this, opts \\ []) do
+      unquote(schema).deref!(ref, graph!(opts))
+    end
+  end)
+
+  defdelegate user(), to: __MODULE__, as: :agent
+  defdelegate user!(), to: __MODULE__, as: :agent!
+
+  def store(ref \\ :this, opts \\ [])
+
+  def store(:this, opts) do
+    with {:ok, graph} <- graph(opts),
+         {:ok, service} <- Service.this(graph),
+         do: {:ok, service.store}
+  end
+
+  def store(ref, opts) do
+    with {:ok, graph} <- graph(opts), do: Store.deref(ref, graph)
+  end
+
+  def store!(ref \\ :this, opts \\ [])
+
+  def store!(:this, opts) do
+    Service.this!(graph!(opts)).store
+  end
+
+  def store!(ref, opts) do
+    Store.deref(ref, graph!(opts))
   end
 end

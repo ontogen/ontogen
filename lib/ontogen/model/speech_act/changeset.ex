@@ -91,6 +91,8 @@ defmodule Ontogen.SpeechAct.Changeset do
   def empty?(%__MODULE__{add: nil, update: nil, replace: nil, remove: nil}), do: true
   def empty?(%__MODULE__{}), do: false
 
+  def inserts(%__MODULE__{} = changeset), do: Helper.inserts(changeset)
+
   def to_rdf(%__MODULE__{} = changeset), do: Helper.to_rdf(changeset)
 
   def from_rdf(%RDF.Dataset{} = dataset, opts \\ []),

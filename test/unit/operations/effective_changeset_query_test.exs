@@ -1,5 +1,5 @@
 defmodule Ontogen.Operations.EffectiveChangesetQueryTest do
-  use Ontogen.RepositoryCase, async: false
+  use Ontogen.ServiceCase, async: false
 
   doctest Ontogen.Operations.EffectiveChangesetQuery
 

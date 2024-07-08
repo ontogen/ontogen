@@ -46,8 +46,8 @@ defmodule Ontogen.Operations.ChangesetQuery do
   defp validate_history_query(%HistoryQuery{} = history_query), do: {:ok, history_query}
 
   @impl true
-  def call(%__MODULE__{} = operation, store, repository) do
-    with {:ok, history} <- HistoryQuery.call(operation.history_query, store, repository) do
+  def call(%__MODULE__{} = operation, service) do
+    with {:ok, history} <- HistoryQuery.call(operation.history_query, service) do
       changeset(history, operation.history_query.subject_type, operation.history_query.subject)
     end
   end

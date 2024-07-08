@@ -1,7 +1,7 @@
 defmodule Ontogen.Operations.DatasetQuery do
   use Ontogen.Query
 
-  alias Ontogen.{Store, Repository}
+  alias Ontogen.Service
 
   import Ontogen.QueryUtils, only: [graph_query: 0]
 
@@ -11,7 +11,7 @@ defmodule Ontogen.Operations.DatasetQuery do
       # because we don't wont to block it for this potentially large read access.
       # Also, we don't want to pass the potentially large data structure between processes.
       DatasetQuery.new!()
-      |> DatasetQuery.call(store(), repository())
+      |> DatasetQuery.call(service())
     end
 
     def dataset!, do: bang!(&dataset/0, [])
@@ -21,8 +21,7 @@ defmodule Ontogen.Operations.DatasetQuery do
   def new!, do: %__MODULE__{}
 
   @impl true
-  def call(%__MODULE__{}, store, repository) do
-    dataset_id = Repository.dataset_graph_id(repository)
-    Store.query(store, dataset_id, graph_query())
+  def call(%__MODULE__{}, service) do
+    Service.handle_sparql(graph_query(), service, :dataset)
   end
 end

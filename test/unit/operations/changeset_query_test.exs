@@ -1,5 +1,5 @@
 defmodule Ontogen.Operations.ChangesetQueryTest do
-  use Ontogen.RepositoryCase, async: false
+  use Ontogen.ServiceCase, async: false
 
   doctest Ontogen.Operations.ChangesetQuery
 
@@ -9,7 +9,7 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
   describe "Ontogen.dataset_changes/1" do
     test "on a clean repo without commits" do
       assert Ontogen.dataset_changes() ==
-               {:error, EmptyRepositoryError.exception(repository: Ontogen.repository())}
+               {:error, EmptyRepositoryError.exception(repository: Ontogen.repository!())}
     end
 
     test "target commit (default)" do
@@ -144,7 +144,7 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
   describe "Ontogen.resource_changes/1" do
     test "on a clean repo without commits" do
       assert Ontogen.resource_changes(EX.S1) ==
-               {:error, EmptyRepositoryError.exception(repository: Ontogen.repository())}
+               {:error, EmptyRepositoryError.exception(repository: Ontogen.repository!())}
     end
 
     test "target commit (default)" do

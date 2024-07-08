@@ -6,7 +6,9 @@ defmodule Ontogen.Operations.HistoryQuery.Query do
   import Ontogen.QueryUtils
 
   def build(operation) do
-    {:ok, query(operation.subject, operation.range)}
+    operation.subject
+    |> query(operation.range)
+    |> Ontogen.Store.SPARQL.Operation.construct()
   end
 
   defp query(subject, range) do

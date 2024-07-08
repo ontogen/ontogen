@@ -35,7 +35,7 @@ defmodule Ontogen.SpeechAct do
       args
       |> Keyword.put_new(
         :speaker,
-        Keyword.get_lazy(commit_args, :committer, fn -> Config.user() end)
+        Keyword.get_lazy(commit_args, :committer, fn -> Config.user!() end)
       )
       |> Keyword.put(
         :time,

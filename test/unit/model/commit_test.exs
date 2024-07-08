@@ -90,7 +90,7 @@ defmodule Ontogen.CommitTest do
 
       assert commit.add == proposition()
       assert DateTime.diff(DateTime.utc_now(), commit.time, :second) <= 1
-      assert commit.committer == Config.user()
+      assert commit.committer == Config.user!()
     end
 
     test "implicit proposition creation" do

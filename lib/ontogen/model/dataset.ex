@@ -4,11 +4,10 @@ defmodule Ontogen.Dataset do
   """
 
   use Grax.Schema
+  use Ontogen.Bog.Referencable
 
   alias Ontogen.NS.Og
-  alias Ontogen.Repository
 
   schema Og.Dataset < DCAT.Dataset do
-    link repository: Og.repository(), type: Repository
   end
 end

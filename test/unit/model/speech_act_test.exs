@@ -39,7 +39,7 @@ defmodule Ontogen.SpeechActTest do
             %SpeechAct{
               __id__: %IRI{
                 value:
-                  "urn:hash::sha256:86cf12f6a217af987fd86dd0b332c6af0cfb80fe2c32a7dd485e75d4379cd15e"
+                  "urn:hash::sha256:1cc91da9ebdd4bb82de6768c6ad0a19e231b057228fd07820b58a5b9ad8229cd"
               }
             }} =
              SpeechAct.new(
@@ -48,6 +48,7 @@ defmodule Ontogen.SpeechActTest do
                replace: graph(3),
                remove: graph(4),
                data_source: dataset(),
+               speaker: nil,
                time: datetime()
              )
   end
@@ -75,7 +76,7 @@ defmodule Ontogen.SpeechActTest do
 
       assert speech_act.add == proposition()
       assert DateTime.diff(DateTime.utc_now(), speech_act.time, :second) <= 1
-      assert speech_act.speaker == Config.user()
+      assert speech_act.speaker == Config.user!()
     end
 
     test "without statements" do

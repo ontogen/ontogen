@@ -10,7 +10,7 @@ defmodule Ontogen.Operations.RevisionQuery do
       :resources
     ]
 
-  alias Ontogen.{Store, Repository}
+  alias Ontogen.Service
 
   import Ontogen.QueryUtils, only: [to_term: 1]
 
@@ -32,22 +32,18 @@ defmodule Ontogen.Operations.RevisionQuery do
   end
 
   @impl true
-  def call(%__MODULE__{} = query, store, repository) do
-    dataset_id = Repository.dataset_graph_id(repository)
-
-    Store.construct(store, dataset_id, query(query.resources), raw_mode: true)
-  end
-
-  defp query(resources) do
+  def call(%__MODULE__{} = query, service) do
     """
     CONSTRUCT { ?s ?p ?o }
     WHERE
     {
       VALUES (?s) {
-        #{Enum.map_join(resources, "\n", &"(#{to_term(&1)})")}
+        #{Enum.map_join(query.resources, "\n", &"(#{to_term(&1)})")}
       }
       ?s ?p ?o .
     }
     """
+    |> Ontogen.Store.SPARQL.Operation.construct!()
+    |> Service.handle_sparql(service, :dataset)
   end
 end

@@ -40,4 +40,4 @@ ontogen-*.tar
 
 .tool-versions*
 
-/.ontogen_repo
+/.bog/

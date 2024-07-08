@@ -1,29 +1,29 @@
 defmodule Ontogen.Commit.Range.Fetcher do
   @moduledoc false
 
-  alias Ontogen.{Commit, Store, Repository, InvalidCommitRangeError, EmptyRepositoryError}
+  alias Ontogen.{Commit, Service, Repository, InvalidCommitRangeError, EmptyRepositoryError}
   alias Ontogen.NS.Og
   alias RDF.{IRI, Graph, Description, PrefixMap}
 
   import RDF.Namespace.IRI
 
-  def fetch(%Commit{__id__: id}, store, repository), do: fetch(id, store, repository)
+  def fetch(%Commit{__id__: id}, service), do: fetch(id, service)
 
-  def fetch(:head, store, repository) do
-    head = Repository.head_id(repository)
+  def fetch(:head, service) do
+    head = Repository.head_id(service.repository)
 
     if head != Commit.root() do
-      fetch(head, store, repository)
+      fetch(head, service)
     else
-      {:error, EmptyRepositoryError.exception(repository: repository)}
+      {:error, EmptyRepositoryError.exception(repository: service.repository)}
     end
   end
 
-  def fetch(%IRI{} = commit_id, store, repository) do
+  def fetch(%IRI{} = commit_id, service) do
     with {:ok, commit_graph} <-
-           Store.construct(store, Repository.prov_graph_id(repository), query(commit_id),
-             raw_mode: true
-           ) do
+           commit_id
+           |> query()
+           |> Service.handle_sparql(service, :prov) do
       chain(commit_graph, commit_id)
     end
   end
@@ -39,6 +39,7 @@ defmodule Ontogen.Commit.Range.Fetcher do
       ?commit og:parentCommit ?parent .
     }
     """
+    |> Ontogen.Store.SPARQL.Operation.construct!()
   end
 
   defp chain(history_graph, current, acc \\ [])

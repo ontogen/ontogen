@@ -5,7 +5,7 @@ defmodule Ontogen.Operations.RevertCommand do
       commit_attrs: nil
     ]
 
-  alias Ontogen.{Repository, Commit, IdUtils}
+  alias Ontogen.{Commit, IdUtils}
 
   alias Ontogen.Operations.{
     HistoryQuery,
@@ -60,17 +60,17 @@ defmodule Ontogen.Operations.RevertCommand do
   defp commit_range(invalid), do: {:error, "invalid commit spec: #{inspect(invalid)}"}
 
   @impl true
-  def call(%__MODULE__{} = command, store, %Repository{} = repo) do
-    with {:ok, range} <- Commit.Range.fetch(command.range, store, repo),
+  def call(%__MODULE__{} = command, service) do
+    with {:ok, range} <- Commit.Range.fetch(command.range, service),
          command = %__MODULE__{command | range: range},
          {:ok, history_query} <- ChangesetQuery.history_query(:dataset, range: range),
-         {:ok, commits} <- HistoryQuery.call(history_query, store, repo),
+         {:ok, commits} <- HistoryQuery.call(history_query, service),
          {:ok, changeset} <- changeset(commits),
          {:ok, commit_command} <-
            command
            |> commit_args(changeset, commits)
            |> CommitCommand.new() do
-      CommitCommand.call(commit_command, store, repo)
+      CommitCommand.call(commit_command, service)
     end
   end
 
