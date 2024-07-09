@@ -19,6 +19,9 @@ defmodule Ontogen do
   include_api Ontogen.Operations.RepositoryQuery
   include_api Ontogen.Operations.ProvGraphQuery
 
+  @env Mix.env()
+  def env, do: Application.get_env(:ontogen, :env, @env)
+
   def start_link(args) do
     GenServer.start_link(__MODULE__, args, name: __MODULE__)
   end

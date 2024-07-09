@@ -3,13 +3,11 @@ defmodule Ontogen.Application do
 
   use Application
 
-  @env Mix.env()
-
   @impl true
   def start(_type, _args) do
     Ontogen.Bog.create_salt_base_path()
 
-    children = children(@env)
+    children = children(Ontogen.env())
 
     opts = [strategy: :one_for_one, name: Ontogen.Supervisor]
     Supervisor.start_link(children, opts)

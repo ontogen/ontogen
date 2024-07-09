@@ -22,7 +22,6 @@ defmodule Ontogen.Config.Loader do
 
   @default_load_paths Keyword.keys(@named_paths)
 
-  @default_env Mix.env()
 
   @doc """
   The list of paths from which the configuration is iteratively built.
@@ -32,7 +31,11 @@ defmodule Ontogen.Config.Loader do
   def default_load_paths, do: @default_load_paths
 
   def env(opts \\ []) do
-    Keyword.get(opts, :env, System.get_env("OG_ENV") || System.get_env("MIX_ENV") || @default_env)
+    Keyword.get(
+      opts,
+      :env,
+      System.get_env("OG_ENV") || System.get_env("MIX_ENV") || Ontogen.env()
+    )
   end
 
   defp named_path(name), do: @named_paths[name]
