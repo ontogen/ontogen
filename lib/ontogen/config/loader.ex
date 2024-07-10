@@ -22,6 +22,7 @@ defmodule Ontogen.Config.Loader do
 
   @default_load_paths Keyword.keys(@named_paths)
 
+  def local_path, do: @local_path
 
   @doc """
   The list of paths from which the configuration is iteratively built.

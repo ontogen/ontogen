@@ -19,6 +19,8 @@ defmodule Ontogen do
   include_api Ontogen.Operations.RepositoryQuery
   include_api Ontogen.Operations.ProvGraphQuery
 
+  @allow_configless_mode Application.compile_env(:ontogen, :allow_configless_mode, false)
+
   @env Mix.env()
   def env, do: Application.get_env(:ontogen, :env, @env)
 
@@ -52,17 +54,46 @@ defmodule Ontogen do
   @impl true
   def handle_continue({:boot, opts}, _) do
     case BootCommand.call(opts) do
-      {:ok, service} -> {:noreply, service}
-      {:error, _} = error -> {:stop, error}
+      {:ok, service} ->
+        {:noreply, service}
+
+      {:error, error} ->
+        if @allow_configless_mode do
+          {:noreply, {:error, error}}
+        else
+          {:stop, error}
+        end
     end
   end
 
   @impl true
+  def handle_call(%BootCommand{} = operation, from, {:error, _}),
+    do: handle_call(operation, from, nil)
+
+  def handle_call(%BootCommand{} = operation, from, nil),
+    do: handle_call(operation, from, Ontogen.Config.service!())
+
+  def handle_call(%BootCommand{} = operation, _from, service) do
+    case BootCommand.call(operation, service) do
+      {:ok, service} -> {:reply, {:ok, service}, service}
+      {:error, _} = error -> {:reply, error, service}
+    end
+  end
+
+  def handle_call(:status, _from, {:error, error}),
+    do: {:reply, ConfigError.exception(reason: error), {:error, error}}
+
+  def handle_call(:status, _from, nil), do: {:reply, :unconfigured, nil}
+  def handle_call(:status, _from, service), do: {:reply, service.status, service}
+
   def handle_call(_operation, _from, nil) do
     {:reply, {:error, ConfigError.exception(reason: :missing)}, nil}
   end
 
-  def handle_call(:status, _from, service), do: {:reply, service.status, service}
+  def handle_call(_operation, _from, {:error, error}) do
+    {:reply, {:error, ConfigError.exception(reason: error)}, {:error, error}}
+  end
+
   def handle_call(:service, _from, service), do: {:reply, service, service}
   def handle_call(:store, _from, service), do: {:reply, service.store, service}
 
@@ -71,13 +102,6 @@ defmodule Ontogen do
 
   def handle_call(:prov_graph_info, _from, service),
     do: {:reply, service.repository.prov_graph, service}
-
-  def handle_call(%BootCommand{} = operation, _from, service) do
-    case BootCommand.call(operation, service) do
-      {:ok, service} -> {:reply, {:ok, service}, service}
-      {:error, _} = error -> {:reply, error, service}
-    end
-  end
 
   def handle_call(%SetupCommand{} = operation, _from, %Service{status: :not_setup} = service) do
     case SetupCommand.call(operation, service) do
