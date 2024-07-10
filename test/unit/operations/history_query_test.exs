@@ -1,5 +1,5 @@
 defmodule Ontogen.Operations.HistoryQueryTest do
-  use Ontogen.RepositoryCase, async: false
+  use Ontogen.ServiceCase, async: false
 
   doctest Ontogen.Operations.HistoryQuery
 
@@ -8,7 +8,7 @@ defmodule Ontogen.Operations.HistoryQueryTest do
   describe "Ontogen.dataset_history/1" do
     test "on a clean repo without commits" do
       assert Ontogen.dataset_history() ==
-               {:error, EmptyRepositoryError.exception(repository: Ontogen.repository())}
+               {:error, EmptyRepositoryError.exception(repository: Ontogen.repository!())}
     end
 
     test "full native history" do
@@ -158,7 +158,7 @@ defmodule Ontogen.Operations.HistoryQueryTest do
   describe "Ontogen.resource_history/1" do
     test "on a clean repo without commits" do
       assert Ontogen.resource_history(EX.S1) ==
-               {:error, EmptyRepositoryError.exception(repository: Ontogen.repository())}
+               {:error, EmptyRepositoryError.exception(repository: Ontogen.repository!())}
     end
 
     test "full native history" do
@@ -267,7 +267,7 @@ defmodule Ontogen.Operations.HistoryQueryTest do
   describe "Ontogen.statement_history/1 with triple" do
     test "on a clean repo without commits" do
       assert Ontogen.statement_history(statement_of_interest()) ==
-               {:error, EmptyRepositoryError.exception(repository: Ontogen.repository())}
+               {:error, EmptyRepositoryError.exception(repository: Ontogen.repository!())}
     end
 
     test "full native history" do
@@ -367,7 +367,7 @@ defmodule Ontogen.Operations.HistoryQueryTest do
   describe "Ontogen.statement_history/1 with subject-predicate-pair" do
     test "on a clean repo without commits" do
       assert Ontogen.statement_history(predication_of_interest()) ==
-               {:error, EmptyRepositoryError.exception(repository: Ontogen.repository())}
+               {:error, EmptyRepositoryError.exception(repository: Ontogen.repository!())}
     end
 
     test "full native history" do
