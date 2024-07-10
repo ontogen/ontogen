@@ -1,0 +1,28 @@
+@prefix : <https://w3id.org/bog#> .
+@prefix og: <https://w3id.org/ontogen#> .
+@prefix oga: <https://w3id.org/ontogen/store/adapter/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+
+[ :this og:Service
+
+    #################################################
+    # store selection
+
+# Select to adapter of your choice and feel free to remove the unused
+# (incl. their respective config files)
+<%= unless @adapter == nil, do: "#" %>    ; og:serviceStore [ :this og:Store ]
+<%= unless @adapter == Ontogen.Store.Adapters.Oxigraph, do: "#" %>    ; og:serviceStore [ :this oga:Oxigraph ]
+<%= unless @adapter == Ontogen.Store.Adapters.Fuseki, do: "#" %>    ; og:serviceStore [ :this oga:Fuseki ]
+
+    #################################################
+    # metadata
+
+    ; dcterms:title "Your service name"
+    ; dcterms:creator :I
+    ; dcterms:publisher :I
+
+] .

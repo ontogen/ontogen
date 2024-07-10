@@ -1,0 +1,13 @@
+@prefix : <https://w3id.org/bog#> .
+@prefix og: <https://w3id.org/ontogen#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+
+[ :this og:Store
+    ; og:storeQueryEndpoint <http://localhost:7878/query>
+    ; og:storeUpdateEndpoint <http://localhost:7878/update>
+    ; og:storeGraphStoreEndpoint <http://localhost:7878/store>
+] .
