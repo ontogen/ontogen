@@ -11,8 +11,16 @@ defmodule Ontogen.Store do
   alias Ontogen.Store.GenSPARQL
   alias Ontogen.InvalidStoreEndpointError
   alias Ontogen.NS.Og
+  alias RDF.NS.RDFS
 
   import Ontogen.Utils, only: [bang!: 2]
+
+  @adapter_classes "priv/vocabs/ontogen_store_adapter.ttl"
+                   |> RDF.Turtle.read_file!()
+                   |> RDF.Graph.query({:adapter?, RDFS.subClassOf(), Og.Store})
+                   |> Enum.map(fn %{adapter: adapter_class} -> adapter_class end)
+  def adapter_classes, do: @adapter_classes
+  def adapters, do: @adapter_classes |> Enum.map(&Grax.schema/1) |> Enum.reject(&is_nil/1)
 
   schema Og.Store do
     property query_endpoint: Og.storeQueryEndpoint(), type: :iri, required: true

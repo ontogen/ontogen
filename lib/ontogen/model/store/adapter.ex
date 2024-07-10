@@ -134,6 +134,36 @@ defmodule Ontogen.Store.Adapter do
   end
 
   @doc """
+  Returns the store adapter name for the given store adapter module.
+
+  ## Example
+
+      iex> Ontogen.Store.Adapter.type_name(Ontogen.Store.Adapters.Fuseki)
+      "Fuseki"
+
+      iex> Ontogen.Store.Adapter.type_name(Ontogen.Store.Adapters.Oxigraph)
+      "Oxigraph"
+
+      iex> Ontogen.Store.Adapter.type_name(Ontogen.Repository)
+      ** (RuntimeError) Invalid Ontogen.Store.Adapter type: Ontogen.Repository
+
+      iex> Ontogen.Store.Adapter.type_name(NonExisting)
+      ** (RuntimeError) Invalid Ontogen.Store.Adapter type: NonExisting
+
+  """
+  @spec type(type()) :: binary
+  def type_name(type) do
+    if type?(type) do
+      case Module.split(type) do
+        ["Ontogen", "Store", "Adapters", name] -> name
+        _ -> raise "Invalid Ontogen.Store.Adapter type name schema: #{inspect(type)}"
+      end
+    else
+      raise "Invalid Ontogen.Store.Adapter type: #{inspect(type)}"
+    end
+  end
+
+  @doc """
   Returns the `Ontogen.Store.Adapter` module for the given string.
 
   ## Example
