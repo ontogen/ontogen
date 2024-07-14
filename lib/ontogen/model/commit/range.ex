@@ -65,15 +65,9 @@ defmodule Ontogen.Commit.Range do
   def parse(string, opts \\ []) do
     case String.split(string, "..") do
       [target_ref_string] ->
-        with {:ok, target} <- Commit.Ref.parse(target_ref_string) do
-          if Keyword.get(opts, :force, false) do
-            with {:ok, base} <- Commit.Ref.shift(target) do
-              new(base, target)
-            end
-          else
-            {:ok, target}
-          end
-        end
+        target_ref_string
+        |> Commit.Ref.parse()
+        |> ref_as(Keyword.get(opts, :single_ref_as, :ref))
 
       [base_ref_string, target_ref_string] ->
         with {:ok, base} <- Commit.Ref.parse(base_ref_string),
@@ -84,6 +78,17 @@ defmodule Ontogen.Commit.Range do
   end
 
   def parse!(string, opts \\ []), do: bang!(&parse/2, [string, opts])
+
+  defp ref_as({:error, _} = error, _), do: error
+  defp ref_as({:ok, ref}, :ref), do: {:ok, ref}
+  defp ref_as({:ok, target}, :target), do: new(:root, target)
+  defp ref_as({:ok, base}, :base), do: new(base, :head)
+
+  defp ref_as({:ok, target}, :single_commit_range) do
+    with {:ok, base} <- Commit.Ref.shift(target) do
+      new(base, target)
+    end
+  end
 
   def extract(args) when is_list(args) do
     {range, args} = Keyword.pop(args, :range)
