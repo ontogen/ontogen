@@ -62,9 +62,7 @@ defmodule Ontogen.Config.Loader do
                          ; og:serviceOperator :I
                      ] .
                      """
-                     |> Turtle.read_string!(
-                       bnode_gen: RDF.BlankNode.Generator.Random.new(prefix: "bog")
-                     )
+                     |> Turtle.read_string!()
   def service_structure, do: @service_structure
 
   def load_graph(opts \\ []) do
