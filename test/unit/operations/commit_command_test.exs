@@ -26,7 +26,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
     assert {:ok, %Ontogen.Commit{} = commit} =
              Ontogen.commit(
                add: graph(),
-               data_source: dataset(),
+               data_source: id(:dataset),
                speaker: agent(),
                committer: committer,
                time: time,
@@ -113,7 +113,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
     speech_act =
       speech_act(
         add: graph(),
-        data_source: data_source,
+        data_source: data_source.__id__,
         speaker: speaker,
         time: datetime(-1)
       )
@@ -127,7 +127,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
                committer: committer,
                time: datetime(),
                message: message,
-               additional_prov_metadata: graph([1])
+               additional_prov_metadata: graph([1, Grax.to_rdf!(data_source)])
              )
 
     assert commit.parent == Commit.root()

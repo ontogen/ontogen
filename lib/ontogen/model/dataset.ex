@@ -8,6 +8,6 @@ defmodule Ontogen.Dataset do
 
   alias Ontogen.NS.Og
 
-  schema Og.Dataset < DCAT.Dataset do
+  schema Og.Dataset do
   end
 end

@@ -7,6 +7,8 @@ defmodule Ontogen.ConfigTest do
   alias Ontogen.{Service, Store, Repository, Dataset, ProvGraph, Agent}
   alias Ontogen.Store.Adapters.{Oxigraph, Fuseki, GraphDB}
 
+  import RDF.Sigils
+
   @configured_store_adapter configured_store_adapter()
 
   test "agent/0" do
@@ -25,11 +27,7 @@ defmodule Ontogen.ConfigTest do
     assert {:ok,
             %Service{
               repository: %Repository{
-                dataset: %Dataset{
-                  title: "test dataset",
-                  creators: [%FOAF.Agent{name: "Jane Doe"}],
-                  publishers: [%FOAF.Agent{name: "Jane Doe"}]
-                }
+                dataset: %Dataset{}
               },
               store: %@configured_store_adapter{}
             }} =
@@ -39,14 +37,7 @@ defmodule Ontogen.ConfigTest do
   end
 
   test "repository/0" do
-    assert {:ok,
-            %Repository{
-              dataset: %Dataset{
-                title: "test dataset",
-                creators: [%FOAF.Agent{name: "Jane Doe"}],
-                publishers: [%FOAF.Agent{name: "Jane Doe"}]
-              }
-            }} =
+    assert {:ok, %Repository{dataset: %Dataset{}}} =
              Config.repository()
 
     assert Config.repository("repository") == Config.repository()
@@ -55,9 +46,9 @@ defmodule Ontogen.ConfigTest do
   test "dataset/0" do
     assert {:ok,
             %Dataset{
-              title: "test dataset",
-              creators: [%FOAF.Agent{name: "Jane Doe"}],
-              publishers: [%FOAF.Agent{name: "Jane Doe"}]
+              __additional_statements__: %{
+                ~I<http://purl.org/dc/terms/title> => %{~L"test dataset" => nil}
+              }
             }} =
              Config.dataset()
 

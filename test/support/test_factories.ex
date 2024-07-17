@@ -164,9 +164,7 @@ defmodule Ontogen.TestFactories do
   end
 
   def dataset_attrs(attrs \\ []) do
-    [
-      title: "Test dataset"
-    ]
+    []
     |> Keyword.merge(attrs)
   end
 
@@ -239,7 +237,7 @@ defmodule Ontogen.TestFactories do
     [
       add: graph(),
       speaker: agent(),
-      data_source: dataset(),
+      data_source: id(:dataset),
       time: datetime()
     ]
     |> Keyword.merge(attrs)

@@ -24,7 +24,8 @@ defmodule Ontogen.SpeechAct do
          type: Ontogen.Agent,
          depth: +1,
          on_missing_description: :use_rdf_node
-    link data_source: Og.dataSource(), type: DCAT.Dataset, depth: 0
+
+    property data_source: Og.dataSource(), type: :iri
   end
 
   def new(%Changeset{} = changeset, args) do
