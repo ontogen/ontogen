@@ -56,7 +56,7 @@ defmodule Ontogen.Config.Loader do
                      [ :this og:Service
                          ; og:serviceRepository [ :this og:Repository
                              ; og:repositoryDataset [ :this og:Dataset ]
-                             ; og:repositoryProvGraph [ :this og:ProvGraph ]
+                             ; og:repositoryHistory [ :this og:History ]
                          ]
 
                          ; og:serviceOperator :I

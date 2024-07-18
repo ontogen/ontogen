@@ -10,7 +10,7 @@ defmodule Ontogen.TestFactories do
   alias Ontogen.{
     Repository,
     Dataset,
-    ProvGraph,
+    History,
     Agent,
     Store,
     Proposition,
@@ -31,7 +31,7 @@ defmodule Ontogen.TestFactories do
   def id(:repository), do: ~I<http://example.com/test/repo>
   def id(:repo), do: id(:repository)
   def id(:dataset), do: ~I<http://example.com/test/dataset>
-  def id(:prov_graph), do: ~I<http://example.com/test/prov_graph>
+  def id(:history), do: ~I<http://example.com/test/history>
   def id(:store), do: ~I<http://example.com/Store>
   def id(:proposition), do: proposition().__id__
   def id(:speech_act), do: speech_act().__id__
@@ -152,7 +152,7 @@ defmodule Ontogen.TestFactories do
   def repository_attrs(attrs \\ []) do
     [
       dataset: Keyword.get(attrs, :dataset, dataset()),
-      prov_graph: Keyword.get(attrs, :prov_graph, prov_graph())
+      history: Keyword.get(attrs, :history, history())
     ]
     |> Keyword.merge(attrs)
   end
@@ -168,13 +168,13 @@ defmodule Ontogen.TestFactories do
     |> Keyword.merge(attrs)
   end
 
-  def prov_graph(id \\ :prov_graph, attrs \\ []) do
+  def history(id \\ :history, attrs \\ []) do
     id
     |> id()
-    |> ProvGraph.build!(prov_graph_attrs(attrs))
+    |> History.build!(history_attrs(attrs))
   end
 
-  def prov_graph_attrs(attrs \\ []) do
+  def history_attrs(attrs \\ []) do
     []
     |> Keyword.merge(attrs)
   end

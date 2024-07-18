@@ -44,7 +44,7 @@ defmodule Ontogen.Operations.CommitCommand.Update do
   defp provenance(_, nil), do: ""
 
   defp provenance(repo, %Graph{} = graph) do
-    "GRAPH <#{Repository.prov_graph_id(repo)}> { #{triples(graph)} }"
+    "GRAPH <#{Repository.history_graph_id(repo)}> { #{triples(graph)} }"
   end
 
   defp provenance(repo, %_grax_schema{__id__: _} = element) do

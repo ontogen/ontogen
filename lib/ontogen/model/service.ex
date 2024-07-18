@@ -34,5 +34,5 @@ defmodule Ontogen.Service do
   defp graph_name(_service, %RDF.IRI{} = graph_name), do: graph_name
   defp graph_name(service, :repo), do: Repository.graph_id(service.repository)
   defp graph_name(service, :dataset), do: Repository.dataset_graph_id(service.repository)
-  defp graph_name(service, :prov), do: Repository.prov_graph_id(service.repository)
+  defp graph_name(service, :history), do: Repository.history_graph_id(service.repository)
 end

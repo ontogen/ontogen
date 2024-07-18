@@ -1,4 +1,4 @@
-defmodule Ontogen.ProvGraph do
+defmodule Ontogen.History do
   use Grax.Schema
   use Ontogen.Bog.Referencable
 
@@ -7,7 +7,7 @@ defmodule Ontogen.ProvGraph do
 
   @prefixes RDF.standard_prefixes() |> PrefixMap.merge!(rtc: RTC, og: Og)
 
-  schema Og.ProvGraph do
+  schema Og.History do
   end
 
   def prefixes, do: @prefixes

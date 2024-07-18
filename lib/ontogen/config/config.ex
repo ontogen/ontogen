@@ -1,5 +1,5 @@
 defmodule Ontogen.Config do
-  alias Ontogen.{Agent, Repository, Dataset, ProvGraph, Service, Store}
+  alias Ontogen.{Agent, Repository, Dataset, History, Service, Store}
   alias Ontogen.Config.Loader
 
   import Ontogen.Utils, only: [bang!: 2]
@@ -13,7 +13,7 @@ defmodule Ontogen.Config do
     service: Service,
     repository: Repository,
     dataset: Dataset,
-    prov_graph: ProvGraph
+    history: History
   ]
   |> Enum.each(fn {name, schema} ->
     bang_name = String.to_atom("#{name}!")

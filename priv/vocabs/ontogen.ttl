@@ -168,9 +168,9 @@ og:Repository a rdfs:Class
         ; rdfs:range  og:Dataset
     .
 
-    og:repositoryProvGraph a rdf:Property
+    og:repositoryHistory a rdf:Property
         ; rdfs:domain og:Repository
-        ; rdfs:range  og:ProvGraph
+        ; rdfs:range  og:History
     .
 
     og:head a rdf:Property, owl:FunctionalProperty
@@ -185,9 +185,9 @@ og:Dataset a rdfs:Class
 .
 
 
-og:ProvGraph a rdfs:Class
+og:History a rdfs:Class
     ; rdfs:subClassOf prov:Bundle
-    ; rdfs:label "Ontogen provenance graph"
+    ; rdfs:label "History"
 .
 
 

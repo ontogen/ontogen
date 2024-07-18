@@ -17,7 +17,7 @@ defmodule Ontogen do
   include_api Ontogen.Operations.HistoryQuery
   include_api Ontogen.Operations.DatasetQuery
   include_api Ontogen.Operations.RepositoryQuery
-  include_api Ontogen.Operations.ProvGraphQuery
+  include_api Ontogen.Operations.HistoryGraphQuery
 
   @allow_configless_mode Application.compile_env(:ontogen, :allow_configless_mode, false)
 
@@ -36,7 +36,7 @@ defmodule Ontogen do
 
   def dataset_info, do: GenServer.call(__MODULE__, :dataset_info)
 
-  def prov_graph_info, do: GenServer.call(__MODULE__, :prov_graph_info)
+  def history_info, do: GenServer.call(__MODULE__, :history_info)
 
   def head, do: GenServer.call(__MODULE__, :head)
 
@@ -100,8 +100,8 @@ defmodule Ontogen do
   def handle_call(:dataset_info, _from, service),
     do: {:reply, service.repository.dataset, service}
 
-  def handle_call(:prov_graph_info, _from, service),
-    do: {:reply, service.repository.prov_graph, service}
+  def handle_call(:history_info, _from, service),
+    do: {:reply, service.repository.history, service}
 
   def handle_call(%SetupCommand{} = operation, _from, %Service{status: :not_setup} = service) do
     case SetupCommand.call(operation, service) do

@@ -4,7 +4,7 @@ defmodule Ontogen.ConfigTest do
   doctest Ontogen.Config
 
   alias Ontogen.Config
-  alias Ontogen.{Service, Store, Repository, Dataset, ProvGraph, Agent}
+  alias Ontogen.{Service, Store, Repository, Dataset, History, Agent}
   alias Ontogen.Store.Adapters.{Oxigraph, Fuseki, GraphDB}
 
   import RDF.Sigils
@@ -55,9 +55,9 @@ defmodule Ontogen.ConfigTest do
     assert Config.dataset("dataset") == Config.dataset()
   end
 
-  test "prov_graph/0" do
-    assert {:ok, %ProvGraph{}} = Config.prov_graph()
-    assert Config.prov_graph("provGraph") == Config.prov_graph()
+  test "history/0" do
+    assert {:ok, %History{}} = Config.history()
+    assert Config.history("history") == Config.history()
   end
 
   case @configured_store_adapter do

@@ -6,7 +6,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
   alias Ontogen.{
     Commit,
     Config,
-    ProvGraph,
+    History,
     SpeechAct,
     Proposition,
     InvalidCommitError,
@@ -171,7 +171,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
       assert DateTime.diff(DateTime.utc_now(), commit.speech_act.time, :second) <= 1
 
       # inserts the provenance
-      assert Ontogen.prov_graph!() ==
+      assert Ontogen.history!() ==
                RDF.graph(
                  [
                    commit,
@@ -179,7 +179,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
                    Config.user!()
                  ]
                  |> Enum.map(&Grax.to_rdf!/1),
-                 prefixes: ProvGraph.prefixes()
+                 prefixes: History.prefixes()
                )
     end
 
@@ -498,7 +498,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
     test "when there are no remaining changes; with on_no_effective_changes: :error" do
       [last_commit] = init_commit_history()
       last_dataset = Ontogen.dataset!()
-      last_prov_graph = Ontogen.prov_graph!()
+      last_history = Ontogen.history!()
 
       assert Ontogen.commit(
                add: Proposition.graph(last_commit.add),
@@ -509,11 +509,11 @@ defmodule Ontogen.Operations.CommitCommandTest do
              ) ==
                {:error, %NoEffectiveChanges{}}
 
-      assert_repo_state(last_commit, last_dataset, last_prov_graph)
+      assert_repo_state(last_commit, last_dataset, last_history)
     end
   end
 
-  defp assert_repo_state(head, dataset, prov_graph) do
+  defp assert_repo_state(head, dataset, history) do
     # updates the head in the repo
     assert Ontogen.head() == head
 
@@ -524,6 +524,6 @@ defmodule Ontogen.Operations.CommitCommandTest do
     assert Ontogen.dataset!() == dataset
 
     # inserts the provenance
-    assert Ontogen.prov_graph!() == RDF.graph(prov_graph, prefixes: ProvGraph.prefixes())
+    assert Ontogen.history!() == RDF.graph(history, prefixes: History.prefixes())
   end
 end

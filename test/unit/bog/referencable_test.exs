@@ -170,7 +170,7 @@ defmodule Ontogen.Bog.ReferencableTest do
     assert Ontogen.Store.this_ref() == "store"
     assert Ontogen.Repository.this_ref() == "repository"
     assert Ontogen.Dataset.this_ref() == "dataset"
-    assert Ontogen.ProvGraph.this_ref() == "provGraph"
+    assert Ontogen.History.this_ref() == "history"
     assert Ontogen.Agent.this_ref() == "agent"
   end
 
@@ -198,7 +198,7 @@ defmodule Ontogen.Bog.ReferencableTest do
       assert Ontogen.Bog.Referencable.type?(Ontogen.Store)
       assert Ontogen.Bog.Referencable.type?(Ontogen.Repository)
       assert Ontogen.Bog.Referencable.type?(Ontogen.Dataset)
-      assert Ontogen.Bog.Referencable.type?(Ontogen.ProvGraph)
+      assert Ontogen.Bog.Referencable.type?(Ontogen.History)
       refute Ontogen.Bog.Referencable.type?(Ontogen.SpeechAct)
       refute Ontogen.Bog.Referencable.type?(FOAF.Agent)
       refute Ontogen.Bog.Referencable.type?(NotExisting)

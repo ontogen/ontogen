@@ -3,12 +3,12 @@ defmodule Ontogen.Repository do
   use Ontogen.Bog.Referencable
 
   alias Ontogen.NS.Og
-  alias Ontogen.{Dataset, ProvGraph, Commit}
+  alias Ontogen.{Dataset, History, Commit}
 
   import Ontogen.Utils, only: [bang!: 2]
   schema Og.Repository do
     link dataset: Og.repositoryDataset(), type: Dataset, required: true
-    link prov_graph: Og.repositoryProvGraph(), type: ProvGraph, required: true
+    link history: Og.repositoryHistory(), type: History, required: true
 
     link head: Og.head(), type: Commit, on_missing_description: :use_rdf_node
   end
@@ -35,5 +35,5 @@ defmodule Ontogen.Repository do
 
   def graph_id(%__MODULE__{} = repository), do: repository.__id__
   def dataset_graph_id(%__MODULE__{dataset: dataset}), do: dataset.__id__
-  def prov_graph_id(%__MODULE__{prov_graph: prov_graph}), do: prov_graph.__id__
+  def history_graph_id(%__MODULE__{history: history}), do: history.__id__
 end

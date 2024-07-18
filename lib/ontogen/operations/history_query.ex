@@ -90,7 +90,7 @@ defmodule Ontogen.Operations.HistoryQuery do
   def call(%__MODULE__{} = operation, service) do
     with {:ok, operation} <- with_absolute_range(operation),
          {:ok, query} <- Query.build(operation),
-         {:ok, history_graph} <- Service.handle_sparql(query, service, :prov) do
+         {:ok, history_graph} <- Service.handle_sparql(query, service, :history) do
       HistoryType.history(
         history_graph,
         operation.subject_type,

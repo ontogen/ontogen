@@ -23,7 +23,7 @@ defmodule Ontogen.Commit.Range.Fetcher do
     with {:ok, commit_graph} <-
            commit_id
            |> query()
-           |> Service.handle_sparql(service, :prov) do
+           |> Service.handle_sparql(service, :history) do
       chain(commit_graph, commit_id)
     end
   end
