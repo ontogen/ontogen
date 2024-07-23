@@ -5,6 +5,14 @@ defmodule Ontogen.Operations.HistoryQueryTest do
 
   alias Ontogen.{InvalidCommitRangeError, EmptyRepositoryError}
 
+  describe "history/0" do
+    test "with defaults, it returns the full history graph" do
+      init_commit_history()
+      assert {:ok, %RDF.Graph{} = graph} = Ontogen.history()
+      assert [_] = RDF.Graph.query(graph, {:commit?, Og.commitMessage(), "Initial commit"})
+    end
+  end
+
   describe "Ontogen.dataset_history/1" do
     test "on a clean repo without commits" do
       assert Ontogen.dataset_history() ==

@@ -32,6 +32,7 @@ defmodule Ontogen.Commit.Range do
   end
 
   def new!(args \\ []), do: bang!(&new/1, [args])
+  def new!(base, target), do: bang!(&new/2, [base, target])
 
   defp normalize(_, %Commit{__id__: id}), do: {:ok, id}
   defp normalize(_, %RDF.IRI{} = iri), do: {:ok, iri}

@@ -17,7 +17,6 @@ defmodule Ontogen do
   include_api Ontogen.Operations.HistoryQuery
   include_api Ontogen.Operations.DatasetQuery
   include_api Ontogen.Operations.RepositoryQuery
-  include_api Ontogen.Operations.HistoryGraphQuery
 
   @allow_configless_mode Application.compile_env(:ontogen, :allow_configless_mode, false)
 
