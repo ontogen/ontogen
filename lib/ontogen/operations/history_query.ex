@@ -4,7 +4,6 @@ defmodule Ontogen.Operations.HistoryQuery do
       subject_type: nil,
       subject: nil,
       range: nil,
-      ids_only: false,
       history_type_opts: nil
     ]
 
@@ -33,8 +32,6 @@ defmodule Ontogen.Operations.HistoryQuery do
   end
 
   def new(subject, args \\ []) do
-    {ids_only, args} = Keyword.pop(args, :ids_only, false)
-
     with {:ok, subject_type, subject} <- normalize_subject(subject),
          {:ok, range, args} <- Commit.Range.extract(args) do
       {:ok,
@@ -42,7 +39,6 @@ defmodule Ontogen.Operations.HistoryQuery do
          subject_type: subject_type,
          subject: subject,
          range: range,
-         ids_only: ids_only,
          history_type_opts: args
        }}
     end
