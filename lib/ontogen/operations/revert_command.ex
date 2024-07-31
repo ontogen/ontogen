@@ -63,7 +63,7 @@ defmodule Ontogen.Operations.RevertCommand do
   def call(%__MODULE__{} = command, service) do
     with {:ok, range} <- Commit.Range.fetch(command.range, service),
          command = %__MODULE__{command | range: range},
-         {:ok, history_query} <- ChangesetQuery.history_query(:dataset, range: range),
+         {:ok, history_query} <- ChangesetQuery.history_query(range: range),
          {:ok, commits} <- HistoryQuery.call(history_query, service),
          {:ok, changeset} <- changeset(commits),
          {:ok, commit_command} <-

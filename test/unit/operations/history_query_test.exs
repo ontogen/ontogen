@@ -5,64 +5,93 @@ defmodule Ontogen.Operations.HistoryQueryTest do
 
   alias Ontogen.{InvalidCommitRangeError, EmptyRepositoryError}
 
-  describe "history/0" do
+  describe "history/1" do
     test "with defaults, it returns the full history graph" do
-      init_commit_history()
-      assert {:ok, %RDF.Graph{} = graph} = Ontogen.history()
-      assert [_] = RDF.Graph.query(graph, {:commit?, Og.commitMessage(), "Initial commit"})
+      history = init_history()
+
+      assert Ontogen.history() ==
+               {:ok,
+                RDF.graph(Enum.map(history, &Grax.to_rdf!(&1)))
+                |> Graph.add_prefixes(RDF.standard_prefixes())
+                |> Graph.add_prefixes(og: Og, rtc: RTC)}
+    end
+
+    test "with :resource" do
+      history = init_resource_history()
+
+      assert Ontogen.history(resource: EX.S1) ==
+               {:ok,
+                RDF.graph(Enum.map(history, &Grax.to_rdf!(&1)))
+                |> Graph.add_prefixes(RDF.standard_prefixes())
+                |> Graph.add_prefixes(og: Og, rtc: RTC)}
+    end
+
+    test "with :statement" do
+      history = init_statement_history()
+
+      assert Ontogen.history(statement: statement_of_interest()) ==
+               {:ok,
+                RDF.graph(Enum.map(history, &Grax.to_rdf!(&1)))
+                |> Graph.add_prefixes(RDF.standard_prefixes())
+                |> Graph.add_prefixes(og: Og, rtc: RTC)}
+    end
+
+    test "with :statement and subject-predicate-pair on :statement" do
+      history = init_predication_history()
+
+      assert Ontogen.history(statement: predication_of_interest()) ==
+               {:ok,
+                RDF.graph(Enum.map(history, &Grax.to_rdf!(&1)))
+                |> Graph.add_prefixes(RDF.standard_prefixes())
+                |> Graph.add_prefixes(og: Og, rtc: RTC)}
     end
   end
 
-  describe "Ontogen.dataset_history/1" do
+  describe "log/1" do
     test "on a clean repo without commits" do
-      assert Ontogen.dataset_history() ==
+      assert Ontogen.log() ==
                {:error, EmptyRepositoryError.exception(repository: Ontogen.repository!())}
     end
 
-    test "full native history" do
+    test "full log" do
       history = init_history()
 
-      assert Ontogen.dataset_history() == {:ok, history}
+      assert Ontogen.log() == {:ok, history}
     end
 
-    test "native history with a specified base commit" do
+    test "with a specified base commit" do
+      [_fourth, _third, _second, first] = history = init_history()
+
+      assert Ontogen.log(base: first) == {:ok, Enum.slice(history, 0..2)}
+    end
+
+    test "with a specified target commit" do
       [fourth, _third, _second, first] = history = init_history()
 
-      assert Ontogen.dataset_history(base: first) == {:ok, Enum.slice(history, 0..2)}
-      assert Ontogen.dataset_history(base: fourth) == {:ok, []}
+      assert Ontogen.log(target: fourth.__id__) == {:ok, history}
+      assert Ontogen.log(target: first) == {:ok, Enum.slice(history, 3..3)}
     end
 
-    test "native history with a specified target commit" do
-      [fourth, _third, _second, first] = history = init_history()
-
-      assert Ontogen.dataset_history(target: fourth.__id__) == {:ok, history}
-      assert Ontogen.dataset_history(target: first) == {:ok, Enum.slice(history, 3..3)}
-    end
-
-    test "native history with a specified base and target commit" do
+    test "with a specified base and target commit" do
       [_fourth, third, second, _first] = history = init_history()
 
-      assert Ontogen.dataset_history(base: second, target: third) ==
-               {:ok, Enum.slice(history, 1..1)}
-
-      assert Ontogen.dataset_history(range: {second, third}) ==
-               {:ok, Enum.slice(history, 1..1)}
+      assert Ontogen.log(base: second, target: third) == {:ok, Enum.slice(history, 1..1)}
+      assert Ontogen.log(range: {second, third}) == {:ok, Enum.slice(history, 1..1)}
     end
 
-    test "native history with relative base commit" do
+    test "with relative base commit" do
       [_fourth, third, second, _first] = history = init_history()
 
-      assert Ontogen.dataset_history(base: 1) ==
-               {:ok, Enum.slice(history, 0..0)}
+      assert Ontogen.log(base: 1) == {:ok, Enum.slice(history, 0..0)}
+      assert Ontogen.log(base: 4) == {:ok, history}
+      assert Ontogen.log(target: third, base: 1) == {:ok, Enum.slice(history, 1..1)}
+      assert Ontogen.log(target: second, base: 2) == {:ok, Enum.slice(history, 2..3)}
+    end
 
-      assert Ontogen.dataset_history(base: 4) ==
-               {:ok, history}
+    test "empty range" do
+      [fourth, _third, _second, _first] = init_history()
 
-      assert Ontogen.dataset_history(target: third, base: 1) ==
-               {:ok, Enum.slice(history, 1..1)}
-
-      assert Ontogen.dataset_history(target: second, base: 2) ==
-               {:ok, Enum.slice(history, 2..3)}
+      assert Ontogen.log(base: fourth) == {:ok, []}
     end
 
     test "commits are ordered according to parent chain" do
@@ -80,13 +109,13 @@ defmodule Ontogen.Operations.HistoryQueryTest do
           ]
         ])
 
-      assert Ontogen.dataset_history() == {:ok, history}
+      assert Ontogen.log() == {:ok, history}
     end
 
     test "when the specified target commit comes later than the base commit" do
       [fourth, _third, _second, first] = init_history()
 
-      assert Ontogen.dataset_history(base: fourth, target: first) ==
+      assert Ontogen.log(base: fourth, target: first) ==
                {:error, %InvalidCommitRangeError{reason: :out_of_range}}
     end
 
@@ -96,30 +125,20 @@ defmodule Ontogen.Operations.HistoryQueryTest do
 
       assert independent_commit not in history
 
-      assert Ontogen.dataset_history(target: independent_commit) ==
+      assert Ontogen.log(target: independent_commit) ==
                {:error, %InvalidCommitRangeError{reason: :out_of_range}}
 
-      assert Ontogen.dataset_history(base: independent_commit) ==
+      assert Ontogen.log(base: independent_commit) ==
                {:error, %InvalidCommitRangeError{reason: :out_of_range}}
 
-      assert Ontogen.dataset_history(base: 99) ==
+      assert Ontogen.log(base: 99) ==
                {:error, %InvalidCommitRangeError{reason: :out_of_range}}
-    end
-
-    test "raw history" do
-      history = init_history()
-
-      assert Ontogen.dataset_history(type: :raw) ==
-               {:ok,
-                RDF.graph(Enum.map(history, &Grax.to_rdf!(&1)))
-                |> Graph.add_prefixes(RDF.standard_prefixes())
-                |> Graph.add_prefixes(og: Og, rtc: RTC)}
     end
 
     test "formatted history" do
       [fourth, third, second, first] = init_history()
 
-      assert Ontogen.dataset_history(format: :oneline, color: false) ==
+      assert Ontogen.log(format: :oneline, color: false) ==
                {:ok,
                 """
                 #{hash_from_iri(fourth.__id__)} #{first_line(fourth.message)}
@@ -163,71 +182,62 @@ defmodule Ontogen.Operations.HistoryQueryTest do
     end
   end
 
-  describe "Ontogen.resource_history/1" do
+  describe "log/1 with :resource" do
     test "on a clean repo without commits" do
-      assert Ontogen.resource_history(EX.S1) ==
+      assert Ontogen.log(resource: EX.S1) ==
                {:error, EmptyRepositoryError.exception(repository: Ontogen.repository!())}
     end
 
-    test "full native history" do
+    test "full log" do
       history = init_resource_history()
 
-      assert Ontogen.resource_history(EX.S1) == {:ok, history}
+      assert Ontogen.log(resource: EX.S1) == {:ok, history}
     end
 
-    test "native history with a specified base commit" do
+    test "with a specified base commit" do
       [_fourth, _third, second, _first] = history = init_resource_history()
 
-      assert Ontogen.resource_history(EX.S1, base: second.__id__) ==
+      assert Ontogen.log(resource: EX.S1, base: second.__id__) ==
                {:ok, Enum.slice(history, 0..1)}
     end
 
-    test "native history with a specified target commit" do
+    test "with a specified target commit" do
       [fourth, _third, second, _first] = history = init_resource_history()
 
-      assert Ontogen.resource_history(EX.S1, target: fourth.__id__) == {:ok, history}
+      assert Ontogen.log(resource: EX.S1, target: fourth.__id__) == {:ok, history}
 
-      assert Ontogen.resource_history(EX.S1, target: second.__id__) ==
+      assert Ontogen.log(resource: EX.S1, target: second.__id__) ==
                {:ok, Enum.slice(history, 2..3)}
     end
 
-    test "native history with relative base commit" do
+    test "with relative base commit" do
       [_fourth, _third, second, _first] = history = init_resource_history()
 
-      assert Ontogen.resource_history(EX.S1, base: 1) ==
+      assert Ontogen.log(resource: EX.S1, base: 1) ==
                {:ok, Enum.slice(history, 0..0)}
 
       # the other commits are out of range because irrelevant commits are in between
-      assert Ontogen.resource_history(EX.S1, base: 4) ==
+      assert Ontogen.log(resource: EX.S1, base: 4) ==
                {:ok, Enum.slice(history, 0..1)}
 
-      assert Ontogen.resource_history(EX.S1, target: second, base: 2) ==
+      assert Ontogen.log(resource: EX.S1, target: second, base: 2) ==
                {:ok, Enum.slice(history, 2..2)}
     end
 
-    test "native history with a specified base and target commit" do
+    test "with a specified base and target commit" do
       [fourth, _third, _second, first] = history = init_resource_history()
 
-      assert Ontogen.resource_history(EX.S1, base: first.__id__, target: fourth.__id__) ==
+      assert Ontogen.log(resource: EX.S1, base: first.__id__, target: fourth.__id__) ==
                {:ok, Enum.slice(history, 0..2)}
     end
 
     test "when the specified target commit comes later than the base commit" do
       [_fourth, third, second, _first] = init_resource_history()
 
-      assert Ontogen.resource_history(EX.S1, base: third.__id__, target: second.__id__) ==
+      assert Ontogen.log(resource: EX.S1, base: third.__id__, target: second.__id__) ==
                {:error, %InvalidCommitRangeError{reason: :out_of_range}}
     end
 
-    test "raw history" do
-      history = init_resource_history()
-
-      assert Ontogen.resource_history(EX.S1, type: :raw) ==
-               {:ok,
-                RDF.graph(Enum.map(history, &Grax.to_rdf!(&1)))
-                |> Graph.add_prefixes(RDF.standard_prefixes())
-                |> Graph.add_prefixes(og: Og, rtc: RTC)}
-    end
 
     defp init_resource_history do
       [fourth, _, _, third, second, _, first] =
@@ -272,39 +282,40 @@ defmodule Ontogen.Operations.HistoryQueryTest do
     end
   end
 
-  describe "Ontogen.statement_history/1 with triple" do
+  describe "log/1 with :statement" do
     test "on a clean repo without commits" do
-      assert Ontogen.statement_history(statement_of_interest()) ==
+      assert Ontogen.log(statement: statement_of_interest()) ==
                {:error, EmptyRepositoryError.exception(repository: Ontogen.repository!())}
     end
 
-    test "full native history" do
+    test "full log" do
       history = init_statement_history()
 
-      assert Ontogen.statement_history(statement_of_interest()) == {:ok, history}
+      assert Ontogen.log(statement: statement_of_interest()) == {:ok, history}
     end
 
-    test "native history with a specified base commit" do
+    test "with a specified base commit" do
       [_third, _second, first] = history = init_statement_history()
 
-      assert Ontogen.statement_history(statement_of_interest(), base: first.__id__) ==
+      assert Ontogen.log(statement: statement_of_interest(), base: first.__id__) ==
                {:ok, Enum.slice(history, 0..1)}
     end
 
-    test "native history with a specified target commit" do
+    test "with a specified target commit" do
       [third, _second, first] = history = init_statement_history()
 
-      assert Ontogen.statement_history(statement_of_interest(), target: third.__id__) ==
+      assert Ontogen.log(statement: statement_of_interest(), target: third.__id__) ==
                {:ok, history}
 
-      assert Ontogen.statement_history(statement_of_interest(), target: first.__id__) ==
+      assert Ontogen.log(statement: statement_of_interest(), target: first.__id__) ==
                {:ok, Enum.slice(history, 2..2)}
     end
 
-    test "native history with a specified base and target commit" do
+    test "with a specified base and target commit" do
       [_third, second, first] = history = init_statement_history()
 
-      assert Ontogen.statement_history(statement_of_interest(),
+      assert Ontogen.log(
+               statement: statement_of_interest(),
                base: first.__id__,
                target: second.__id__
              ) ==
@@ -314,21 +325,12 @@ defmodule Ontogen.Operations.HistoryQueryTest do
     test "when the specified target commit comes later than the base commit" do
       [_third, second, first] = init_statement_history()
 
-      assert Ontogen.statement_history(statement_of_interest(),
+      assert Ontogen.log(
+               statement: statement_of_interest(),
                base: second.__id__,
                target: first.__id__
              ) ==
                {:error, %InvalidCommitRangeError{reason: :out_of_range}}
-    end
-
-    test "raw history" do
-      history = init_statement_history()
-
-      assert Ontogen.statement_history(statement_of_interest(), type: :raw) ==
-               {:ok,
-                RDF.graph(Enum.map(history, &Grax.to_rdf!(&1)))
-                |> Graph.add_prefixes(RDF.standard_prefixes())
-                |> Graph.add_prefixes(og: Og, rtc: RTC)}
     end
 
     defp statement_of_interest, do: {EX.S1, EX.p1(), EX.O1}
@@ -372,39 +374,40 @@ defmodule Ontogen.Operations.HistoryQueryTest do
     end
   end
 
-  describe "Ontogen.statement_history/1 with subject-predicate-pair" do
+  describe "log/1 with subject-predicate-pair on :statement" do
     test "on a clean repo without commits" do
-      assert Ontogen.statement_history(predication_of_interest()) ==
+      assert Ontogen.log(statement: predication_of_interest()) ==
                {:error, EmptyRepositoryError.exception(repository: Ontogen.repository!())}
     end
 
-    test "full native history" do
+    test "full log" do
       history = init_predication_history()
 
-      assert Ontogen.statement_history(predication_of_interest()) == {:ok, history}
+      assert Ontogen.log(statement: predication_of_interest()) == {:ok, history}
     end
 
-    test "native history with a specified base commit" do
+    test "with a specified base commit" do
       [_fourth, _third, second, _first] = history = init_predication_history()
 
-      assert Ontogen.statement_history(predication_of_interest(), base: second.__id__) ==
+      assert Ontogen.log(statement: predication_of_interest(), base: second.__id__) ==
                {:ok, Enum.slice(history, 0..1)}
     end
 
-    test "native history with a specified target commit" do
+    test "with a specified target commit" do
       [fourth, _third, _second, first] = history = init_predication_history()
 
-      assert Ontogen.statement_history(predication_of_interest(), target: fourth.__id__) ==
+      assert Ontogen.log(statement: predication_of_interest(), target: fourth.__id__) ==
                {:ok, history}
 
-      assert Ontogen.statement_history(predication_of_interest(), target: first.__id__) ==
+      assert Ontogen.log(statement: predication_of_interest(), target: first.__id__) ==
                {:ok, Enum.slice(history, 3..3)}
     end
 
-    test "native history with a specified base and target commit" do
+    test "with a specified base and target commit" do
       [fourth, _third, _second, first] = history = init_predication_history()
 
-      assert Ontogen.statement_history(predication_of_interest(),
+      assert Ontogen.log(
+               statement: predication_of_interest(),
                base: first.__id__,
                target: fourth.__id__
              ) ==
@@ -414,21 +417,12 @@ defmodule Ontogen.Operations.HistoryQueryTest do
     test "when the specified target commit comes later than the base commit" do
       [_fourth, third, second, _first] = init_predication_history()
 
-      assert Ontogen.statement_history(predication_of_interest(),
+      assert Ontogen.log(
+               statement: predication_of_interest(),
                base: third.__id__,
                target: second.__id__
              ) ==
                {:error, %InvalidCommitRangeError{reason: :out_of_range}}
-    end
-
-    test "raw history" do
-      history = init_predication_history()
-
-      assert Ontogen.statement_history(predication_of_interest(), type: :raw) ==
-               {:ok,
-                RDF.graph(Enum.map(history, &Grax.to_rdf!(&1)))
-                |> Graph.add_prefixes(RDF.standard_prefixes())
-                |> Graph.add_prefixes(og: Og, rtc: RTC)}
     end
 
     defp predication_of_interest, do: {EX.S1, EX.p1()}

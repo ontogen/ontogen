@@ -18,24 +18,8 @@ defmodule Ontogen.Operations.HistoryQuery do
   @full_history_range Commit.Range.new!(:root, :head)
 
   api do
-    def history do
-      dataset_history(type: :raw)
-    end
-
-    def history!, do: bang!(&history/0, [])
-
-    def dataset_history(args \\ []), do: do_history(:dataset, args)
-    def resource_history(resource, args \\ []), do: do_history({:resource, resource}, args)
-    def statement_history(statement, args \\ []), do: do_history({:statement, statement}, args)
-
-    def dataset_history!(args \\ []), do: bang!(&dataset_history/1, [args])
-    def resource_history!(resource, args \\ []), do: bang!(&resource_history/2, [resource, args])
-
-    def statement_history!(statement, args \\ []),
-      do: bang!(&statement_history/2, [statement, args])
-
-    defp do_history(subject, args) do
-      case HistoryQuery.new(subject, args) do
+    def history(args \\ []) do
+      case HistoryQuery.new(args) do
         # We're not performing the store access inside of the GenServer (by using __do_call__/1)
         # when direct_execution is set (when we're querying the full history of a dataset),
         # because we don't want to block it for this potentially large read access.
@@ -47,10 +31,22 @@ defmodule Ontogen.Operations.HistoryQuery do
           HistoryQuery.__do_call__(query)
       end
     end
+
+    def history!(args \\ []), do: bang!(&history/1, [args])
+
+    def log(args \\ []) do
+      if Keyword.has_key?(args, :format) do
+        history(args)
+      else
+        args |> Keyword.put(:type, :log) |> history()
+      end
+    end
+
+    def log!(args \\ []), do: bang!(&log/1, [args])
   end
 
-  def new(subject, args \\ []) do
-    with {:ok, subject_type, subject} <- normalize_subject(subject),
+  def new(args \\ []) do
+    with {:ok, subject_type, subject, args} <- extract_subject(args),
          {:ok, range, args} <- Commit.Range.extract(args) do
       {:ok,
        %__MODULE__{
@@ -63,17 +59,17 @@ defmodule Ontogen.Operations.HistoryQuery do
     end
   end
 
-  defp normalize_subject(:dataset),
-    do: {:ok, :dataset, nil}
+  defp extract_subject(args) do
+    {resource, args} = Keyword.pop(args, :resource)
+    {statement, args} = Keyword.pop(args, :statement)
 
-  defp normalize_subject({:resource, resource}),
-    do: {:ok, :resource, normalize_resource(resource)}
-
-  defp normalize_subject({:statement, statement}),
-    do: {:ok, :statement, normalize_statement(statement)}
-
-  defp normalize_subject(invalid),
-    do: {:error, "invalid history subject: #{inspect(invalid)}"}
+    cond do
+      resource && statement -> {:error, ":resource and :statement can't be used together"}
+      resource -> {:ok, :resource, normalize_resource(resource), args}
+      statement -> {:ok, :statement, normalize_statement(statement), args}
+      true -> {:ok, :dataset, nil, args}
+    end
+  end
 
   defp normalize_resource(resource) when is_rdf_resource(resource), do: resource
   defp normalize_resource(resource), do: RDF.iri(resource)
@@ -116,7 +112,7 @@ defmodule Ontogen.Operations.HistoryQuery do
 
   # empty range, return an empty history
   def call(%__MODULE__{range: %Commit.Range{commit_ids: []}} = operation, _) do
-    HistoryType.history(RDF.graph(), operation.subject_type, operation.subject)
+    as_history_type(RDF.graph(), operation)
   end
 
   def call(%__MODULE__{} = operation, service) do

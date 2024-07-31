@@ -8,7 +8,7 @@ defmodule Ontogen.HistoryType do
   @callback history(history_graph :: Graph.t(), subject_type, subject, opts :: keyword) ::
               {:ok, list} | {:error, any}
 
-  @default_history_type HistoryType.Native
+  @default_history_type HistoryType.Raw
 
   def history(history_graph, subject_type, subject, opts \\ []) do
     with {:ok, history_type, opts} <- history_type(opts) do
@@ -22,6 +22,7 @@ defmodule Ontogen.HistoryType do
     case Keyword.pop(opts, :type) do
       {nil, opts} when has_format? -> {:ok, HistoryType.Formatter, opts}
       {nil, opts} -> {:ok, @default_history_type, opts}
+      {:log, opts} -> {:ok, HistoryType.Native, opts}
       {:native, opts} -> {:ok, HistoryType.Native, opts}
       {:raw, opts} -> {:ok, HistoryType.Raw, opts}
       {:formatted, opts} -> {:ok, HistoryType.Formatter, opts}

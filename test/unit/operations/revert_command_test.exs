@@ -73,7 +73,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
                 ])}
 
       # inserts the provenance
-      assert Ontogen.dataset_history() ==
+      assert Ontogen.log() ==
                {:ok, [revert1 | history]}
 
       ############# another revert (with defaults) ################
@@ -107,7 +107,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
                 ])}
 
       # inserts the provenance
-      assert Ontogen.dataset_history() ==
+      assert Ontogen.log() ==
                {:ok, [revert2, revert1 | history]}
 
       ############# another revert: reverting other reverts ################
@@ -132,7 +132,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
       assert Ontogen.dataset!() == original_dataset
 
       # inserts the provenance
-      assert Ontogen.dataset_history() ==
+      assert Ontogen.log() ==
                {:ok, [revert3, revert2, revert1 | history]}
 
       ############# another revert: revert all ################
@@ -149,7 +149,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
       assert Ontogen.dataset() == {:ok, RDF.graph()}
 
       # inserts the provenance
-      assert Ontogen.dataset_history() ==
+      assert Ontogen.log() ==
                {:ok, [revert4, revert3, revert2, revert1 | history]}
     end
 
@@ -192,7 +192,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
                 ])}
 
       # inserts the provenance
-      assert Ontogen.dataset_history() ==
+      assert Ontogen.log() ==
                {:ok, [revert1 | history]}
     end
 
@@ -245,7 +245,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
                - #{hash_from_iri(revert2.__id__)}
                """
 
-      assert Ontogen.dataset_history() ==
+      assert Ontogen.log() ==
                {:ok, [revert3, revert2, revert1 | history]}
     end
 

@@ -8,32 +8,28 @@ defmodule Ontogen.Operations.ChangesetQuery do
   alias Ontogen.Commit
 
   api do
-    def dataset_changes(args \\ []), do: changeset_query(:dataset, args)
-    def resource_changes(resource, args \\ []), do: changeset_query({:resource, resource}, args)
-
-    def dataset_changes!(args \\ []), do: bang!(&dataset_changes/1, [args])
-    def resource_changes!(resource, args \\ []), do: bang!(&resource_changes/2, [resource, args])
-
-    defp changeset_query(subject, args) do
-      subject
-      |> ChangesetQuery.new(args)
+    def changeset(args \\ []) do
+      args
+      |> ChangesetQuery.new()
       |> ChangesetQuery.__do_call__()
     end
+
+    def changeset!(args \\ []), do: bang!(&changeset/1, [args])
   end
 
-  def new(subject, opts \\ []) do
-    with {:ok, history_query} <- history_query(subject, opts) do
+  def new(opts \\ []) do
+    with {:ok, history_query} <- history_query(opts) do
       {:ok, %__MODULE__{history_query: history_query}}
     end
   end
 
-  def history_query(subject, opts) do
+  def history_query(opts) do
     history_opts =
       opts
       |> Keyword.put(:type, :native)
       |> Keyword.put(:order, :asc)
 
-    with {:ok, history_query} <- HistoryQuery.new(subject, history_opts) do
+    with {:ok, history_query} <- HistoryQuery.new(history_opts) do
       validate_history_query(history_query)
     end
   end
