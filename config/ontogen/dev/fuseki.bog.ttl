@@ -4,6 +4,8 @@
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 
 [ :this oga:Fuseki
-    ; og:storeEndpointDataset "ontogen-dev-dataset"
+    ; og:storeEndpointScheme "http"
+    ; og:storeEndpointHost "localhost"
     ; og:storeEndpointPort 3030
+    ; og:storeEndpointDataset "ontogen-dev-dataset"
 ] .
