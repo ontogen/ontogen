@@ -7,6 +7,8 @@ defmodule Ontogen.Bog.PrecompilerTest do
 
   alias RDF.Description
 
+  alias Uniq.UUID
+
   test "resolving blank node descriptions" do
     prefixes = RDF.turtle_prefixes(ex: EX, bog: Bog, void: "http://rdfs.org/ns/void#")
     ref = "foo"

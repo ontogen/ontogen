@@ -1,6 +1,8 @@
 defmodule Ontogen.IdSpec do
   use Grax.Id.Spec
 
+  alias Uniq.UUID
+
   import Grax.Id.UUID
 
   @ontogen_uuid_namespace "d6a16b91-f160-530e-b932-9e25e098581f" =

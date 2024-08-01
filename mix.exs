@@ -52,7 +52,7 @@ defmodule Ontogen.MixProject do
       rdf_ex_dep(:dcat, "~> 0.1"),
       rdf_ex_dep(:foaf, "~> 0.1"),
       {:hkdf, "~> 0.2"},
-      {:elixir_uuid, "~> 1.2"},
+      {:uniq, "~> 0.6"},
       # we are using YuriTemplate, because we have it already as a dependency of Grax
       {:yuri_template, "~> 1.1"},
       {:hackney, "~> 1.17"},

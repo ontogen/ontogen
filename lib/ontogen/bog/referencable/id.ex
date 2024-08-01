@@ -2,6 +2,8 @@ defmodule Ontogen.Bog.Referencable.Id do
   alias Ontogen.Bog
   alias Ontogen.Bog.{Referencable, NotMinted, AlreadyMinted}
 
+  alias Uniq.UUID
+
   import Ontogen.Utils, only: [bang!: 2]
 
   @hash_algorithm :sha256
