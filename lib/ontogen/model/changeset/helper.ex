@@ -102,20 +102,27 @@ defmodule Ontogen.Changeset.Helper do
     )
   end
 
-  def to_rdf(%_type{overwrite: overwrite} = changeset) do
+  def to_rdf(changeset, opts \\ [])
+
+  def to_rdf(%_type{overwrite: overwrite} = changeset, opts) do
     changeset
     |> Map.delete(:overwrite)
-    |> to_rdf()
+    |> to_rdf(opts)
     |> dataset_add(overwrite, graph: Og.Overwrite)
   end
 
-  def to_rdf(%_type{} = changeset) do
+  def to_rdf(%_type{} = changeset, opts) do
     Dataset.new()
     |> dataset_add(changeset.add, graph: Og.Addition)
     |> dataset_add(changeset.remove, graph: Og.Removal)
     |> dataset_add(changeset.update, graph: Og.Update)
     |> dataset_add(changeset.replace, graph: Og.Replacement)
+    |> dataset_add(opts |> Keyword.get(:prefixes) |> to_rdf_default_graph(), [])
   end
+
+  defp to_rdf_default_graph(prefixes \\ nil)
+  defp to_rdf_default_graph(nil), do: Graph.new(prefixes: [og: Og])
+  defp to_rdf_default_graph(prefixes), do: Graph.add_prefixes(to_rdf_default_graph(), prefixes)
 
   def from_rdf(%Dataset{} = dataset, type, opts \\ []) do
     type.new!(

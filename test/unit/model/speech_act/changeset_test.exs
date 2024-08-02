@@ -165,11 +165,21 @@ defmodule Ontogen.SpeechAct.ChangesetTest do
              |> RDF.Dataset.add(statement(2), graph: Og.Update)
              |> RDF.Dataset.add(statement(3), graph: Og.Replacement)
              |> RDF.Dataset.add(statement(4), graph: Og.Removal)
+             |> RDF.Dataset.add(Graph.new(prefixes: [og: Og]))
 
     assert Changeset.new!(add: statement(1))
            |> Changeset.to_rdf() ==
              RDF.Dataset.new()
              |> RDF.Dataset.add(statement(1), graph: Og.Addition)
+             |> RDF.Dataset.add(Graph.new(prefixes: [og: Og]))
+  end
+
+  test "to_rdf/2" do
+    assert Changeset.new!(add: statement(1))
+           |> Changeset.to_rdf(prefixes: [ex: EX]) ==
+             RDF.Dataset.new()
+             |> RDF.Dataset.add(statement(1), graph: Og.Addition)
+             |> RDF.Dataset.add(Graph.new(prefixes: [og: Og, ex: EX]))
   end
 
   test "from_rdf/1" do
