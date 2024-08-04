@@ -16,7 +16,7 @@ defmodule Ontogen.HistoryType do
     end
   end
 
-  defp history_type(opts) do
+  def history_type(opts) do
     has_format? = Keyword.has_key?(opts, :format)
 
     case Keyword.pop(opts, :type) do

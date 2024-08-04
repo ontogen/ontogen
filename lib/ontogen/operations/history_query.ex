@@ -4,6 +4,7 @@ defmodule Ontogen.Operations.HistoryQuery do
       subject_type: nil,
       subject: nil,
       range: nil,
+      history_type: nil,
       history_type_opts: nil,
       direct_execution: false
     ]
@@ -47,17 +48,21 @@ defmodule Ontogen.Operations.HistoryQuery do
 
   def new(args \\ []) do
     with {:ok, subject_type, subject, args} <- extract_subject(args),
-         {:ok, range, args} <- Commit.Range.extract(args) do
+         {:ok, range, args} <- Commit.Range.extract(args),
+         {:ok, history_type, _} <- HistoryType.history_type(args) do
       {:ok,
        %__MODULE__{
          subject_type: subject_type,
          subject: subject,
          range: range,
+         history_type: history_type,
          history_type_opts: args
        }
        |> set_execution_mode()}
     end
   end
+
+  def new!(args \\ []), do: bang!(&new/1, [args])
 
   defp extract_subject(args) do
     {resource, args} = Keyword.pop(args, :resource)
@@ -89,7 +94,7 @@ defmodule Ontogen.Operations.HistoryQuery do
   def call(%__MODULE__{subject_type: :dataset, range: @full_history_range} = operation, service) do
     with {:ok, graph} <- Service.handle_sparql(graph_query(), service, :history),
          {:ok, operation} <-
-           (if operation.history_type_opts[:type] == :raw do
+           (if operation.history_type == HistoryType.Raw do
               {:ok, operation}
             else
               fetch_range(operation, service)

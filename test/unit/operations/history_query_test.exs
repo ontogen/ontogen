@@ -6,6 +6,10 @@ defmodule Ontogen.Operations.HistoryQueryTest do
   alias Ontogen.{InvalidCommitRangeError, EmptyRepositoryError}
 
   describe "history/1" do
+    test "on empty repo" do
+      assert {:ok, %Graph{}} = Ontogen.history()
+    end
+
     test "with defaults, it returns the full history graph" do
       history = init_history()
 
