@@ -69,8 +69,12 @@ defmodule Ontogen.IdUtils do
   def to_hash(%{__id__: id}), do: to_hash(id)
   def to_hash(%IRI{} = iri), do: hash_from_iri(iri) || raise("#{iri} is not a hash id")
 
-  def to_timestamp(datetime) do
+  def to_timestamp(%DateTime{} = datetime) do
     "#{DateTime.to_unix(datetime)} #{Calendar.strftime(datetime, "%z")}"
+  end
+
+  def to_timestamp(%NaiveDateTime{} = datetime) do
+    datetime |> DateTime.from_naive!("Etc/UTC") |> to_timestamp()
   end
 
   def error(reason, schema \\ nil) do

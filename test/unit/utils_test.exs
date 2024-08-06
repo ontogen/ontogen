@@ -22,6 +22,34 @@ defmodule Ontogen.UtilsTest do
     assert 65_225_636 |> seconds_ago() |> Utils.human_relative_time() == "2 years ago"
   end
 
+  test "parse_time/1" do
+    test_cases = [
+      {"2023-04-15T14:30:00Z", ~U[2023-04-15 14:30:00Z]},
+      {"20230415T143000Z", ~U[2023-04-15 14:30:00Z]},
+      {"2023-04-15T14:30:00+00:00", ~U[2023-04-15 14:30:00Z]},
+      {"2023-04-15", ~N[2023-04-15 00:00:00]},
+      {"2023-4-5", ~N[2023-04-05 00:00:00]},
+      {"2023-04-05", ~N[2023-04-05 00:00:00]},
+      {"2023-04-15 14:30:00", ~N[2023-04-15 14:30:00]},
+      {"15.04.2023", ~N[2023-04-15 00:00:00]},
+      {"04/15/2023", ~N[2023-04-15 00:00:00]},
+      {"2023/04/15", ~N[2023-04-15 00:00:00]},
+      {"15 April 2023", ~N[2023-04-15 00:00:00]},
+      {"15 Apr 2023", ~N[2023-04-15 00:00:00]},
+      {"April 15, 2023", ~N[2023-04-15 00:00:00]},
+      {"Saturday, 15 April 2023", ~N[2023-04-15 00:00:00]},
+      {"14:30:00 15/04/2023", ~N[2023-04-15 14:30:00]},
+      {"PM 02:30 15/04/2023", ~N[2023-04-15 14:30:00]}
+    ]
+
+    for {input, expected} <- test_cases do
+      assert {:ok, result} = Utils.parse_time(input)
+      assert result == expected, "Failed to parse: #{input}"
+    end
+
+    assert Utils.parse_time("invalid date") == {:error, "failed to parse invalid date"}
+  end
+
   defp seconds_ago(seconds) do
     DateTime.add(DateTime.utc_now(), -seconds, :second)
   end
