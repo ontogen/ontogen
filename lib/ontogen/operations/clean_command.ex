@@ -19,6 +19,12 @@ defmodule Ontogen.Operations.CleanCommand do
   def new!(graphs), do: bang!(&new/1, [graphs])
 
   @impl true
+  def call(command, service)
+
+  def call(%Service{} = service, graphs) do
+    new!(graphs) |> call(service)
+  end
+
   def call(%__MODULE__{}, service) do
     with :ok <- delete_all(service) do
       {:ok, Service.set_status(service, :not_setup)}
