@@ -55,6 +55,7 @@ defmodule Ontogen.MixProject do
       {:uniq, "~> 0.6"},
       # we are using YuriTemplate, because we have it already as a dependency of Grax
       {:yuri_template, "~> 1.1"},
+      {:timex, "~> 3.7"},
       {:hackney, "~> 1.17"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
