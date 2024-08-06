@@ -59,8 +59,6 @@ defmodule Ontogen.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.34", only: [:dev, :test], runtime: false},
-      {:magma, path: "../../../Magma/src/magma", only: [:dev, :test], runtime: true},
-      {:openai, "~> 0.6", only: [:dev, :test]},
       {:excoveralls, "~> 0.16", only: :test}
     ]
   end

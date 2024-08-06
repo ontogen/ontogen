@@ -32,10 +32,6 @@ ontogen-*.tar
 /priv/plts/*.plt
 /priv/plts/*.plt.hash
 
-# Magma
-/docs.magma/.obsidian/workspace.json
-/docs.magma/.obsidian/plugins/recent-files-obsidian/data.json
-
 .envrc
 
 .tool-versions*
