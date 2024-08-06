@@ -21,8 +21,8 @@ defmodule Ontogen do
 
   @allow_configless_mode Application.compile_env(:ontogen, :allow_configless_mode, false)
 
-  @env Mix.env()
-  def env, do: Application.get_env(:ontogen, :env, @env)
+  @env Application.compile_env(:ontogen, :env, Mix.env())
+  def env, do: @env
 
   def start_link(args) do
     GenServer.start_link(__MODULE__, args, name: __MODULE__)
