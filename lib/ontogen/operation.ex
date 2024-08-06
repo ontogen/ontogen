@@ -1,7 +1,9 @@
 defmodule Ontogen.Operation do
   @type t :: struct
 
-  @default_timeout 10_000
+  # We don't want an operation to fail because of a timeout, when the query on
+  # the store is still running and maybe finishing successfully.
+  @default_timeout :infinity
 
   defmacro __using__(opts) do
     params = Keyword.fetch!(opts, :params)
