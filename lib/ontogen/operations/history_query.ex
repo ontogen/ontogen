@@ -1,5 +1,5 @@
 defmodule Ontogen.Operations.HistoryQuery do
-  use Ontogen.Query,
+  use Ontogen.Operation.Query,
     params: [
       subject_type: nil,
       subject: nil,

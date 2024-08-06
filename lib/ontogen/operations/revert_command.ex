@@ -1,5 +1,5 @@
 defmodule Ontogen.Operations.RevertCommand do
-  use Ontogen.Command,
+  use Ontogen.Operation.Command,
     params: [
       range: nil,
       commit_attrs: nil

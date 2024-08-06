@@ -1,5 +1,5 @@
 defmodule Ontogen.Operations.CleanCommand do
-  use Ontogen.Command, params: [:graphs]
+  use Ontogen.Operation.Command, params: [:graphs]
 
   alias Ontogen.Service
 

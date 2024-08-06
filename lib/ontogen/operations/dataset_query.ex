@@ -1,5 +1,5 @@
 defmodule Ontogen.Operations.DatasetQuery do
-  use Ontogen.Query
+  use Ontogen.Operation.Query
 
   alias Ontogen.Service
 

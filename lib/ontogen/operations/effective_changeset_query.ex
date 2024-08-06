@@ -1,5 +1,5 @@
 defmodule Ontogen.Operations.EffectiveChangesetQuery do
-  use Ontogen.Query,
+  use Ontogen.Operation.Query,
     params: [
       changeset: nil
     ]

@@ -1,5 +1,5 @@
 defmodule Ontogen.Operations.RepositoryQuery do
-  use Ontogen.Query, params: [format: nil, stored: nil]
+  use Ontogen.Operation.Query, params: [format: nil, stored: nil]
 
   alias Ontogen.{Service, Repository}
   alias Ontogen.Store.SPARQL.Operation

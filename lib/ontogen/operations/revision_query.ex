@@ -5,7 +5,7 @@ defmodule Ontogen.Operations.RevisionQuery do
   Note: In this early version this command only allows to fetch the latest revision.
   """
 
-  use Ontogen.Query,
+  use Ontogen.Operation.Query,
     params: [
       :resources
     ]

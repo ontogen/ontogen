@@ -1,4 +1,4 @@
-defmodule Ontogen.Command do
+defmodule Ontogen.Operation.Command do
   alias Ontogen.Service
 
   @type t :: struct
@@ -11,7 +11,7 @@ defmodule Ontogen.Command do
 
     quote do
       use Ontogen.Operation, unquote(opts)
-      @behaviour Ontogen.Command
+      @behaviour Ontogen.Operation.Command
     end
   end
 end

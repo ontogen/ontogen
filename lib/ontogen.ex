@@ -1,7 +1,8 @@
 defmodule Ontogen do
   use GenServer
 
-  alias Ontogen.{Query, Command, Service, Repository, ConfigError}
+  alias Ontogen.{Service, Repository, ConfigError}
+  alias Ontogen.Operation.{Query, Command}
 
   import Ontogen.Operation, only: [include_api: 1]
 

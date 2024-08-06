@@ -1,5 +1,5 @@
 defmodule Ontogen.Operations.CommitCommand do
-  use Ontogen.Command,
+  use Ontogen.Operation.Command,
     params: [
       changes: nil,
       additional_prov_metadata: nil,

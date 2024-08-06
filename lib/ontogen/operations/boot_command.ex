@@ -1,5 +1,5 @@
 defmodule Ontogen.Operations.BootCommand do
-  use Ontogen.Command, params: [:service_config, :log]
+  use Ontogen.Operation.Command, params: [:service_config, :log]
   require Logger
 
   alias Ontogen.{Service, Repository}

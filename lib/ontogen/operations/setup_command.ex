@@ -1,5 +1,5 @@
 defmodule Ontogen.Operations.SetupCommand do
-  use Ontogen.Command
+  use Ontogen.Operation.Command
   alias Ontogen.{Service, Store}
   alias Ontogen.Operations.{RepositoryQuery, BootCommand}
   alias Ontogen.Repository.SetupError

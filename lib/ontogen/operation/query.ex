@@ -1,4 +1,4 @@
-defmodule Ontogen.Query do
+defmodule Ontogen.Operation.Query do
   alias Ontogen.Service
 
   @type t :: struct
@@ -10,7 +10,7 @@ defmodule Ontogen.Query do
 
     quote do
       use Ontogen.Operation, unquote(opts)
-      @behaviour Ontogen.Query
+      @behaviour Ontogen.Operation.Query
     end
   end
 end

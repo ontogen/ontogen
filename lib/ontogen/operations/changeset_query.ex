@@ -1,5 +1,5 @@
 defmodule Ontogen.Operations.ChangesetQuery do
-  use Ontogen.Query,
+  use Ontogen.Operation.Query,
     params: [
       history_query: nil
     ]
