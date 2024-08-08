@@ -1,5 +1,5 @@
 defmodule Ontogen.Store.AdapterTest do
-  use OntogenCase
+  use Ontogen.BogCase
 
   doctest Ontogen.Store.Adapter
 end

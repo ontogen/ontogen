@@ -1,5 +1,5 @@
 defmodule Ontogen.DatasetTest do
-  use OntogenCase
+  use Ontogen.BogCase
 
   doctest Ontogen.Dataset
 end

@@ -1,5 +1,5 @@
 defmodule Ontogen.SpeechAct.FormatterTest do
-  use OntogenCase
+  use Ontogen.BogCase
 
   doctest Ontogen.SpeechAct.Formatter
 

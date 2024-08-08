@@ -1,5 +1,5 @@
 defmodule Ontogen.Commit.FormatterTest do
-  use OntogenCase
+  use Ontogen.BogCase
 
   doctest Ontogen.Commit.Formatter
 
