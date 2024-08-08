@@ -102,6 +102,7 @@ defmodule Ontogen.Commit.Changeset do
 
   def from_rdf(%RDF.Dataset{} = dataset, opts \\ []),
     do: Helper.from_rdf(dataset, __MODULE__, opts)
+
   @merge_limitations_warning """
   > #### Warning {: .warning}
   >

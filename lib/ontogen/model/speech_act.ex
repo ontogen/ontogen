@@ -20,6 +20,7 @@ defmodule Ontogen.SpeechAct do
     link remove: Og.remove(), type: Proposition, depth: +1
 
     property time: PROV.endedAtTime(), type: :date_time, required: true
+
     link speaker: Og.speaker(),
          type: Ontogen.Agent,
          depth: +1,

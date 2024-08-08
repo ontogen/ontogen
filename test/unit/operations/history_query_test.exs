@@ -242,7 +242,6 @@ defmodule Ontogen.Operations.HistoryQueryTest do
                {:error, %InvalidCommitRangeError{reason: :out_of_range}}
     end
 
-
     defp init_resource_history do
       [fourth, _, _, third, second, _, first] =
         init_commit_history([

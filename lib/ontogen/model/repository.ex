@@ -6,6 +6,7 @@ defmodule Ontogen.Repository do
   alias Ontogen.{Dataset, History, Commit}
 
   import Ontogen.Utils, only: [bang!: 2]
+
   schema Og.Repository do
     link dataset: Og.repositoryDataset(), type: Dataset, required: true
     link history: Og.repositoryHistory(), type: History, required: true
