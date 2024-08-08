@@ -44,7 +44,7 @@ Key features of Ontogen include:
 
 Ontogen takes a holistic approach to RDF data versioning by considering not just the syntactical and semantical levels, but also the pragmatic layer of the semiotic spectrum.
 
-> **Note for end users:** If you're looking to use Ontogen as a command-line tool, please check out the [Ontogen CLI](https://github.com/ontogen/ontogen_cli) repository. The CLI provides a user-friendly interface for Ontogen functionality.
+> **Note for end users:** If you're looking to use Ontogen as a command-line tool, please check out the [Ontogen CLI](https://github.com/ontogen/cli) repository. The CLI provides a user-friendly interface for Ontogen functionality.
 
 
 ## Getting Started
