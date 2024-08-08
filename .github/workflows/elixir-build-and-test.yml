@@ -19,6 +19,8 @@ jobs:
           - 3030:3030
         env:
           FUSEKI_DATASET_1: /ontogen-test-dataset
+        volumes:
+          - ./.github/ci_config/shiro.ini:/fuseki/shiro.ini
         options: --name fuseki
     env:
       MIX_ENV: test
