@@ -91,7 +91,7 @@ defmodule Ontogen.MixProject do
       main: "Ontogen",
       source_url: @scm_url,
       source_ref: "v#{@version}",
-      logo: "logo-transparent.png",
+      logo: "logo.png",
       skip_undefined_reference_warnings_on: ["CHANGELOG.md"],
       extras: [
         {:"README.md", [title: "About"]},
