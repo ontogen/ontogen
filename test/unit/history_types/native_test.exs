@@ -1,5 +1,5 @@
 defmodule Ontogen.HistoryType.NativeTest do
-  use OntogenCase
+  use Ontogen.BogCase
 
   doctest Ontogen.HistoryType.Native
 

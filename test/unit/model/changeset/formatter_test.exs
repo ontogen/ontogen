@@ -1,5 +1,5 @@
 defmodule Ontogen.Changeset.FormatterTest do
-  use OntogenCase
+  use Ontogen.BogCase
 
   doctest Ontogen.Changeset.Formatter
 

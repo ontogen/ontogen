@@ -1,5 +1,5 @@
 defmodule Ontogen.RepositoryTest do
-  use OntogenCase
+  use Ontogen.BogCase
 
   doctest Ontogen.Repository
 end

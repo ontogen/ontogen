@@ -1,5 +1,5 @@
 defmodule Ontogen.Config.LoaderTest do
-  use OntogenCase
+  use Ontogen.BogCase
 
   doctest Ontogen.Config.Loader
 
