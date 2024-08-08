@@ -13,44 +13,57 @@
 
 og:Proposition a rdfs:Class
     ; rdfs:subClassOf rtc:Compound
-    ; rdfs:label "Ontogen proposition"
-    ; rdfs:comment "Represents abstract sets of utterance-independent statements in a canonical form and with content-hashed identifiers."
+    ; rdfs:label "Proposition"
+    ; rdfs:comment "Represents an immutable, abstract set of RDF statements in canonical form with a content-hashed identifier"
 .
 
 
 og:SpeechAct a rdfs:Class
     ; rdfs:subClassOf prov:Activity
-    ; rdfs:label "SpeechAct", "Sprechakt"@de
-    ; rdfs:comment "The utterance of a set of RDF statements, i.e. a RDF graph or dataset."
+    ; rdfs:label "SpeechAct"
+    ; rdfs:comment "The utterance of a potentially complex act of propositions with different change semantics."
 .
 
     og:speaker a rdf:Property, owl:FunctionalProperty
         ; rdfs:subPropertyOf prov:wasAssociatedWith, dct:creator
         ; rdfs:domain og:SpeechAct
         ; rdfs:range  prov:Agent
+        ; rdfs:comment "Identifies the agent who made the speech act. This could be a person, organization, or software agent responsible for asserting the statements in the speech act."
     .
 
     og:dataSource a rdf:Property
+        ; rdfs:subPropertyOf prov:used
         ; rdfs:domain og:SpeechAct
         ; rdfs:range  dcat:Dataset
+        ; rdfs:comment "Specifies the dataset from which the statements in this speech act originated. This property is particularly useful for tracking the provenance of imported or derived data."
     .
 
-    og:add a rdf:Property, owl:FunctionalProperty
+    og:add a rdf:Property
+        ; rdfs:subPropertyOf prov:used
         ; rdfs:domain og:SpeechAct
         ; rdfs:range  og:Proposition
+        ; rdfs:label "add"
+        ; rdfs:comment "The proposition of a speech act that is to be interpreted as a pure insert without any overwrites."
     .
 
-    og:update a rdf:Property, owl:FunctionalProperty
+    og:update a rdf:Property
+        ; rdfs:subPropertyOf prov:used
         ; rdfs:domain og:SpeechAct
         ; rdfs:range  og:Proposition
+        ; rdfs:label "update"
+        ; rdfs:comment "The proposition of a speech act, that is to be interpreted as a insert action overwriting, i.e. deleting all statements with the same subject and predicate."
     .
 
-    og:replace a rdf:Property, owl:FunctionalProperty
+    og:replace a rdf:Property
+        ; rdfs:subPropertyOf prov:used
         ; rdfs:domain og:SpeechAct
         ; rdfs:range  og:Proposition
+        ; rdfs:label "replace"
+        ; rdfs:comment "The proposition of a speech act, that is to be interpreted as a insert action overwriting, i.e. deleting all statements with the same subject."
     .
 
-    og:remove a rdf:Property, owl:FunctionalProperty
+    og:remove a rdf:Property
+        ; rdfs:subPropertyOf prov:used
         ; rdfs:domain og:SpeechAct
         ; rdfs:range  og:Proposition
     .
@@ -58,28 +71,29 @@ og:SpeechAct a rdfs:Class
 
 og:Commit a rdfs:Class
     ; rdfs:subClassOf prov:Activity
-    ; rdfs:label "Ontogen commit"
+    ; rdfs:label "Commit"
+    ; rdfs:comment "Represents set of changes made to a repository. A commit encapsulates the effective changes resulting from applying a SpeechAct to the current state of the repository."
 .
 
-    og:speechAct a rdf:Property, owl:FunctionalProperty
+    og:speechAct a rdf:Property
         ; rdfs:subPropertyOf prov:used
         ; rdfs:domain og:Commit
         ; rdfs:range  og:SpeechAct
     .
 
-    og:committedAdd a rdf:Property, owl:FunctionalProperty
+    og:committedAdd a rdf:Property
         ; rdfs:subPropertyOf prov:used
         ; rdfs:domain og:Commit
         ; rdfs:range  og:Proposition
     .
 
-    og:committedUpdate a rdf:Property, owl:FunctionalProperty
+    og:committedUpdate a rdf:Property
         ; rdfs:subPropertyOf prov:used
         ; rdfs:domain og:Commit
         ; rdfs:range  og:Proposition
     .
 
-    og:committedReplace a rdf:Property, owl:FunctionalProperty
+    og:committedReplace a rdf:Property
         ; rdfs:subPropertyOf prov:used
         ; rdfs:domain og:Commit
         ; rdfs:range  og:Proposition
@@ -91,7 +105,7 @@ og:Commit a rdfs:Class
         ; rdfs:range  og:Proposition
     .
 
-    og:committedOverwrite a rdf:Property, owl:FunctionalProperty
+    og:committedOverwrite a rdf:Property
         ; rdfs:subPropertyOf prov:used
         ; rdfs:domain og:Commit
         ; rdfs:range  og:Proposition
@@ -101,6 +115,7 @@ og:Commit a rdfs:Class
         ; rdfs:domain og:Commit
         ; rdfs:range  og:Commit
         ; owl:inverseOf og:childCommit
+        ; rdfs:comment "Identifies the immediate predecessor commit in the version history. This property is used to construct the commit graph and trace the evolution of the repository."
     .
 
     og:childCommit a rdf:Property
@@ -113,6 +128,7 @@ og:Commit a rdfs:Class
         ; rdfs:subPropertyOf prov:wasAssociatedWith
         ; rdfs:domain og:Commit
         ; rdfs:range  og:Agent
+        ; rdfs:comment "Identifies the agent responsible for creating the commit. This may be different from the speaker of the associated SpeechAct."
     .
 
     og:commitMessage a rdf:Property
@@ -135,40 +151,45 @@ og:CommitRoot a og:Commit, owl:NamedIndividual
 
 og:Revert a rdfs:Class
     ; rdfs:subClassOf og:Commit
-    ; rdfs:label "Ontogen revert commit"
+    ; rdfs:label "Revert commit"
     .
 
     og:revertedBaseCommit a rdf:Property
-		; rdfs:domain rdfs:Revert
-		; rdfs:range rdfs:Commit
+		; rdfs:domain og:Revert
+		; rdfs:range og:Commit
     .
 
     og:revertedTargetCommit a rdf:Property
-		; rdfs:domain rdfs:Revert
-		; rdfs:range rdfs:Commit
+		; rdfs:domain og:Revert
+		; rdfs:range og:Commit
     .
-
 
 og:Agent a rdfs:Class
     ; rdfs:subClassOf prov:Agent, foaf:Agent
     ; rdfs:label "Agent"
+    ; rdfs:comment "A user agent operating a og:Service, i.e. running operations like og:Commits on a og:Repository."
 .
 
     og:email a rdf:Property
         ; rdfs:subPropertyOf foaf:mbox
         ; rdfs:domain og:Agent
+        ; rdfs:comment "A unique email address of an og:Agent, that is used within Ontogen as the agents current email address, for example in the display of commit histories or in authentication or authorization processes."
     .
 
 og:Repository a rdfs:Class
-    ; rdfs:label "Ontogen repository"
+    ; rdfs:subClassOf dcat:Catalog
+    ; rdfs:label "Repository"
+    ; rdfs:comment "Represents an Ontogen repository, which is a DCAT catalog containing three components: 1) the version-controlled dataset, 2) the history graph, and 3) an implicit metadata graph. The metadata graph contains the DCAT catalog description of the repository itself, including descriptions of the dataset and history graphs."
 .
 
     og:repositoryDataset a rdf:Property
+        ; rdfs:subPropertyOf dcat:dataset
         ; rdfs:domain og:Repository
         ; rdfs:range  og:Dataset
     .
 
     og:repositoryHistory a rdf:Property
+        ; rdfs:subPropertyOf dcat:dataset
         ; rdfs:domain og:Repository
         ; rdfs:range  og:History
     .
@@ -181,13 +202,14 @@ og:Repository a rdfs:Class
 og:Dataset a rdfs:Class
     ; rdfs:subClassOf dcat:Dataset, prov:Entity
     ; rdfs:label "Dataset"
-    ; rdfs:comment "A DCAT dataset that version-controlled with Ontogen"
+    ; rdfs:comment "Represents the version-controlled RDF dataset within an Ontogen repository. It contains the actual data being managed and versioned by Ontogen."
 .
 
 
 og:History a rdfs:Class
     ; rdfs:subClassOf prov:Bundle
     ; rdfs:label "History"
+    ; rdfs:comment "Represents the provenance history graph of an Ontogen repository. It contains all SpeechActs and Commits that have led to the current state of the dataset."
 .
 
 
@@ -243,9 +265,11 @@ og:Store a rdfs:Class
 og:Service a rdfs:Class
     ; rdfs:subClassOf dcat:DataService
     ; rdfs:label "Service"
+    ; rdfs:comment "Represents an operational instance of Ontogen. An og:Service is a composition of an og:Repository and an og:Store, providing versioning and access capabilities for RDF datasets."
 .
 
     og:serviceRepository a rdf:Property
+        ; rdfs:subPropertyOf dcat:servesDataset
         ; rdfs:domain og:Service
         ; rdfs:range  og:Repository
     .
