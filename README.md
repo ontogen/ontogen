@@ -104,7 +104,7 @@ ec8108e3f4 - Initial commit (just now) <John Doe john.doe@example.com>
  +     <http://www.example.org/jobTitle> "Assistant Designer" .
 ```
 
-_For more examples, please refer to the [User Guide](https://ontogen.io/user-guide/)_
+_For more examples, please refer to the [User Guide](https://ontogen.io/docs/user-guide/)_
 
 
 
