@@ -39,7 +39,7 @@ defmodule Ontogen.Config.Loader do
     if value = System.get_env(env_var) do
       env = String.to_atom(value)
 
-      if value in ~w[test dev prod]a do
+      if env in ~w[test dev prod]a do
         env
       else
         raise "Invalid environment in #{env_var}: #{inspect(env)}"
