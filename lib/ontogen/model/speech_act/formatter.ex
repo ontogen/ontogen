@@ -1,4 +1,6 @@
 defmodule Ontogen.SpeechAct.Formatter do
+  @moduledoc false
+
   alias Ontogen.SpeechAct
   alias IO.ANSI
 

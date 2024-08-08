@@ -1,4 +1,6 @@
 defmodule Ontogen.SpeechAct.Changeset do
+  @moduledoc false
+
   alias Ontogen.SpeechAct
   alias Ontogen.Changeset.{Action, Validation, Helper}
   alias RDF.Graph

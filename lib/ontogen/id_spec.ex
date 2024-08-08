@@ -1,4 +1,6 @@
 defmodule Ontogen.IdSpec do
+  @moduledoc false
+
   use Grax.Id.Spec
 
   alias Uniq.UUID

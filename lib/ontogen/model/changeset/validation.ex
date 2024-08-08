@@ -1,4 +1,6 @@
 defmodule Ontogen.Changeset.Validation do
+  @moduledoc false
+
   alias RDF.{Graph, Description}
   alias Ontogen.InvalidChangesetError
 

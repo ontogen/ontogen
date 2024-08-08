@@ -1,4 +1,6 @@
 defmodule Ontogen.Changeset.Action do
+  @moduledoc false
+
   # during a Changeset.merge these actions will be applied in the reverse order defined here
   @fields [:add, :update, :replace, :remove, :overwrite]
 

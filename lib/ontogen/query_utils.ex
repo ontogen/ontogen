@@ -1,4 +1,6 @@
 defmodule Ontogen.QueryUtils do
+  @moduledoc false
+
   alias RDF.NTriples
 
   def graph_query do

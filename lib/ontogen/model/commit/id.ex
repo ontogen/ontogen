@@ -1,4 +1,6 @@
 defmodule Ontogen.Commit.Id do
+  @moduledoc false
+
   import Ontogen.IdUtils
 
   alias Ontogen.Commit

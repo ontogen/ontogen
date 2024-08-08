@@ -1,4 +1,6 @@
 defmodule Ontogen.Commit.Formatter do
+  @moduledoc false
+
   alias Ontogen.{Commit, SpeechAct}
   alias IO.ANSI
 

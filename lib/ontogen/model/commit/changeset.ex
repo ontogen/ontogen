@@ -1,4 +1,6 @@
 defmodule Ontogen.Commit.Changeset do
+  @moduledoc false
+
   alias Ontogen.Commit
   alias Ontogen.Changeset.{Action, Validation, Helper}
   alias RDF.Graph

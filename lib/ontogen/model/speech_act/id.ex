@@ -1,4 +1,6 @@
 defmodule Ontogen.SpeechAct.Id do
+  @moduledoc false
+
   import Ontogen.IdUtils
 
   alias Ontogen.SpeechAct

@@ -1,4 +1,6 @@
 defmodule Ontogen.Bog.Referencable.Id do
+  @moduledoc false
+
   alias Ontogen.Bog
   alias Ontogen.Bog.{Referencable, NotMinted, AlreadyMinted}
 

@@ -1,4 +1,6 @@
 defmodule Ontogen.Changeset.Formatter do
+  @moduledoc false
+
   alias Ontogen.{Changeset, Commit, SpeechAct}
   alias RDF.{Graph, Description, Turtle}
   alias IO.ANSI
