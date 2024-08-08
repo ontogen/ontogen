@@ -9,7 +9,7 @@ defmodule Ontogen.MixProject do
     [
       app: :ontogen,
       version: @version,
-      elixir: "~> 1.14",
+      elixir: "~> 1.16",
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
       deps: deps(),
