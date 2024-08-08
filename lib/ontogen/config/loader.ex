@@ -32,11 +32,19 @@ defmodule Ontogen.Config.Loader do
   def default_load_paths, do: @default_load_paths
 
   def env(opts \\ []) do
-    Keyword.get(
-      opts,
-      :env,
-      System.get_env("OG_ENV") || System.get_env("MIX_ENV") || Ontogen.env()
-    )
+    Keyword.get(opts, :env, env_atom("OG_ENV") || env_atom("MIX_ENV") || Ontogen.env())
+  end
+
+  defp env_atom(env_var) do
+    if value = System.get_env(env_var) do
+      env = String.to_atom(value)
+
+      if value in ~w[test dev prod]a do
+        env
+      else
+        raise "Invalid environment in #{env_var}: #{inspect(env)}"
+      end
+    end
   end
 
   defp named_path(name), do: @named_paths[name]
