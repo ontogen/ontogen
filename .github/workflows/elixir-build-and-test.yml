@@ -19,8 +19,6 @@ jobs:
           - 3030:3030
         env:
           FUSEKI_DATASET_1: /ontogen-test-dataset
-        volumes:
-          - ./.github/ci_config/shiro.ini:/fuseki/shiro.ini
         options: --name fuseki
     env:
       MIX_ENV: test
@@ -47,6 +45,26 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Create and copy shiro.ini
+        run: |
+          echo "
+          ## Minimal configuration without auth from https://jena.apache.org/documentation/fuseki2/fuseki-security.html
+          [main]
+          localhost=org.apache.jena.fuseki.authz.LocalhostFilter
+
+          [urls]
+          ## Control functions open to anyone
+          /$/server = anon
+          /$/ping   = anon
+          ## and the rest are restricted to localhost.
+          ## See above for 'localhost'
+          /$/** = localhost
+          /**=anon
+          " > shiro.ini
+          docker cp shiro.ini fuseki:/fuseki/shiro.ini
+          docker exec fuseki chown root:root /fuseki/shiro.ini
+          docker exec fuseki chmod 644 /fuseki/shiro.ini
 
       - name: Setup Elixir Project
         uses: ./.github/actions/elixir-setup
