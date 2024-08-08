@@ -1,6 +1,8 @@
 defmodule Ontogen.MixProject do
   use Mix.Project
 
+  @scm_url "https://github.com/ontogen/ontogen"
+
   @version File.read!("VERSION") |> String.trim()
 
   def project do
@@ -22,7 +24,11 @@ defmodule Ontogen.MixProject do
       test_coverage: [tool: ExCoveralls],
 
       # Dialyzer
-      dialyzer: dialyzer()
+      dialyzer: dialyzer(),
+
+      # Docs
+      name: "Ontogen",
+      docs: docs()
     ]
   end
 
@@ -76,6 +82,82 @@ defmodule Ontogen.MixProject do
       "LOCAL" -> {dep, path: "../../../RDF.ex/src/#{dep}"}
       _ -> {dep, version}
     end
+  end
+
+  defp docs do
+    [
+      main: "Ontogen",
+      source_url: @scm_url,
+      source_ref: "v#{@version}",
+      logo: "logo-transparent.png",
+      skip_undefined_reference_warnings_on: ["CHANGELOG.md"],
+      extras: [
+        {:"README.md", [title: "About"]},
+        {:"CHANGELOG.md", [title: "CHANGELOG"]},
+        {:"LICENSE.md", [title: "License"]}
+      ],
+      groups_for_modules: [
+        Models: [
+          Ontogen.Proposition,
+          Ontogen.SpeechAct,
+          Ontogen.Agent,
+          Ontogen.Commit,
+          Ontogen.Commit.Ref,
+          Ontogen.Commit.Range,
+          Ontogen.Repository,
+          Ontogen.Dataset,
+          Ontogen.History,
+          Ontogen.Service,
+          Ontogen.Store,
+          Ontogen.Store.Adapter,
+          Ontogen.Store.GenSPARQL,
+          Ontogen.Store.SPARQL.Operation,
+          Ontogen.Operation,
+          Ontogen.Operation.Command,
+          Ontogen.Operation.Query
+        ],
+        "Store Adapter": [
+          Ontogen.Store.Adapters.Fuseki,
+          Ontogen.Store.Adapters.Oxigraph,
+          Ontogen.Store.Adapters.GraphDB
+        ],
+        Operations: [
+          Ontogen.Operations.BootCommand,
+          Ontogen.Operations.SetupCommand,
+          Ontogen.Operations.CommitCommand,
+          Ontogen.Operations.RevertCommand,
+          Ontogen.Operations.CleanCommand,
+          Ontogen.Operations.RepositoryQuery,
+          Ontogen.Operations.DatasetQuery,
+          Ontogen.Operations.EffectiveChangesetQuery,
+          Ontogen.Operations.ChangesetQuery,
+          Ontogen.Operations.RevisionQuery,
+          Ontogen.Operations.HistoryQuery,
+          Ontogen.Operations.DiffQuery
+        ],
+        "History Types": [
+          Ontogen.HistoryType,
+          Ontogen.HistoryType.Native,
+          Ontogen.HistoryType.Raw,
+          Ontogen.HistoryType.Formatter
+        ],
+        Config: [
+          Ontogen.Config,
+          Ontogen.Config.Generator
+        ],
+        Bog: [
+          Ontogen.Bog,
+          Ontogen.Bog.Precompiler,
+          Ontogen.Bog.Referencable
+        ],
+        Namespaces: [
+          Ontogen.NS,
+          Ontogen.NS.Og,
+          Ontogen.NS.OgA,
+          Ontogen.NS.Bog
+        ]
+      ]
+    ]
   end
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
