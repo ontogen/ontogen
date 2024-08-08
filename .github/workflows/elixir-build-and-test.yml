@@ -27,18 +27,6 @@ jobs:
       matrix:
         include:
           - pair:
-              elixir: 1.16.2
-              otp: 24.3
-            build-flags: --warnings-as-errors
-          - pair:
-              elixir: 1.16.2
-              otp: 25.3
-            build-flags: --warnings-as-errors
-          - pair:
-              elixir: 1.16.2
-              otp: 26.2
-            build-flags: --warnings-as-errors
-          - pair:
               elixir: 1.17.2
               otp: 27.0
             build-flags: --warnings-as-errors
