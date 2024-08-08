@@ -21,7 +21,9 @@ jobs:
           FUSEKI_DATASET_1: /ontogen-test-dataset
         volumes:
           - ./.github/ci_config/shiro.ini:/fuseki/shiro.ini
-        options: --name fuseki
+        options: >-
+          --name fuseki
+          --user root
     env:
       MIX_ENV: test
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
