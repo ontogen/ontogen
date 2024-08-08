@@ -26,9 +26,32 @@ defmodule Ontogen.MixProject do
       # Dialyzer
       dialyzer: dialyzer(),
 
+      # Hex
+      package: package(),
+      description: description(),
+
       # Docs
       name: "Ontogen",
       docs: docs()
+    ]
+  end
+
+  defp description do
+    """
+    A version control system for RDF datasets.
+    """
+  end
+
+  defp package do
+    [
+      maintainers: ["Marcel Otto"],
+      licenses: ["MIT"],
+      links: %{
+        "Homepage" => "https://ontogen.io",
+        "GitHub" => @scm_url,
+        "Changelog" => @scm_url <> "/blob/main/CHANGELOG.md"
+      },
+      files: ~w[lib priv mix.exs .formatter.exs VERSION *.md]
     ]
   end
 
