@@ -44,10 +44,10 @@ Key features of Ontogen include:
 
 Ontogen takes a holistic approach to RDF data versioning by considering not just the syntactical and semantical levels, but also the pragmatic layer of the semiotic spectrum.
 
-> **Note for end users:** If you're looking to use Ontogen as a command-line tool, please check out the [Ontogen CLI](https://github.com/ontogen/cli) repository. The CLI provides a user-friendly interface for Ontogen functionality.
-
 
 ## Getting Started
+
+> **Note for end users:** This is the core library, which can be used to integrate Ontogen into your Elixir apps. If you're looking to use Ontogen as a command-line tool, please check out the [Ontogen CLI](https://github.com/ontogen/cli) repository. The CLI provides a user-friendly interface for Ontogen functionality.
 
 ### Prerequisites
 
