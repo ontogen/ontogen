@@ -38,7 +38,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Create shiro.ini
+      - name: Create and copy shiro.ini, then restart Fuseki
         run: |
           echo "
           ## Minimal configuration without auth from https://jena.apache.org/documentation/fuseki2/fuseki-security.html
@@ -54,11 +54,10 @@ jobs:
           /$/** = localhost
           /**=anon
           " > shiro.ini
-
-      - name: Copy shiro.ini to Fuseki container
-        run: |
           docker cp shiro.ini fuseki:/fuseki/shiro.ini
           docker exec fuseki ls -l /fuseki/shiro.ini
+          docker restart fuseki
+          timeout 30s bash -c 'until curl -s -f -o /dev/null http://localhost:3030/$/ping; do echo "Waiting for Fuseki..."; sleep 2; done'
 
       - name: Setup Elixir Project
         uses: ./.github/actions/elixir-setup
