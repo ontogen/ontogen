@@ -24,6 +24,10 @@ defmodule Ontogen do
   @env Application.compile_env(:ontogen, :env, Mix.env())
   def env, do: @env
 
+  def ansi_enabled? do
+    Application.get_env(:ontogen, :ansi_enabled, true)
+  end
+
   def start_link(args) do
     GenServer.start_link(__MODULE__, args, name: __MODULE__)
   end

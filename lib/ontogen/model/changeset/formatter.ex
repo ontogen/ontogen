@@ -84,7 +84,7 @@ defmodule Ontogen.Changeset.Formatter do
   end
 
   defp do_format(changeset, :stat, opts) do
-    colorize = Keyword.get(opts, :color, ANSI.enabled?())
+    colorize = Keyword.get(opts, :color, Ontogen.ansi_enabled?())
     insertions = Changeset.Helper.inserts(changeset)
     deletions = Changeset.Helper.deletes(changeset)
     overwrites = Changeset.Helper.overwrites(changeset)
@@ -142,7 +142,7 @@ defmodule Ontogen.Changeset.Formatter do
   end
 
   defp do_format(changeset, :changes, opts) do
-    colorize = Keyword.get(opts, :color, ANSI.enabled?())
+    colorize = Keyword.get(opts, :color, Ontogen.ansi_enabled?())
 
     changeset
     |> Changeset.Helper.merged_graph()
@@ -151,7 +151,7 @@ defmodule Ontogen.Changeset.Formatter do
   end
 
   defp do_format(commit, :combined_changes, opts) do
-    colorize = Keyword.get(opts, :color, ANSI.enabled?())
+    colorize = Keyword.get(opts, :color, Ontogen.ansi_enabled?())
     committed_changes = Commit.Changeset.new!(commit)
     speech_act_changes = SpeechAct.Changeset.new!(commit.speech_act)
 

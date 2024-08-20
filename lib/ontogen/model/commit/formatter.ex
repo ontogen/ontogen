@@ -45,7 +45,7 @@ defmodule Ontogen.Commit.Formatter do
   end
 
   defp do_format(commit, :default, opts) do
-    colorize = Keyword.get(opts, :color, ANSI.enabled?())
+    colorize = Keyword.get(opts, :color, Ontogen.ansi_enabled?())
     hash_format = Keyword.get(opts, :hash_format, :short)
 
     [
@@ -63,7 +63,7 @@ defmodule Ontogen.Commit.Formatter do
   end
 
   defp do_format(commit, :oneline, opts) do
-    colorize = Keyword.get(opts, :color, ANSI.enabled?())
+    colorize = Keyword.get(opts, :color, Ontogen.ansi_enabled?())
     hash_format = Keyword.get(opts, :hash_format, :full)
 
     [
@@ -77,7 +77,7 @@ defmodule Ontogen.Commit.Formatter do
   end
 
   defp do_format(commit, :short, opts) do
-    colorize = Keyword.get(opts, :color, ANSI.enabled?())
+    colorize = Keyword.get(opts, :color, Ontogen.ansi_enabled?())
     hash_format = Keyword.get(opts, :hash_format, :full)
 
     [
@@ -93,7 +93,7 @@ defmodule Ontogen.Commit.Formatter do
   end
 
   defp do_format(commit, :medium, opts) do
-    colorize = Keyword.get(opts, :color, ANSI.enabled?())
+    colorize = Keyword.get(opts, :color, Ontogen.ansi_enabled?())
     hash_format = Keyword.get(opts, :hash_format, :full)
 
     [
@@ -123,7 +123,7 @@ defmodule Ontogen.Commit.Formatter do
   end
 
   defp do_format(commit, :full, opts) do
-    colorize = Keyword.get(opts, :color, ANSI.enabled?())
+    colorize = Keyword.get(opts, :color, Ontogen.ansi_enabled?())
     hash_format = Keyword.get(opts, :hash_format, :full)
     padding = if Commit.revert?(commit), do: 14, else: 12
 
@@ -158,7 +158,7 @@ defmodule Ontogen.Commit.Formatter do
   end
 
   defp do_format(commit, :raw, opts) do
-    colorize = Keyword.get(opts, :color, ANSI.enabled?())
+    colorize = Keyword.get(opts, :color, Ontogen.ansi_enabled?())
 
     [
       ANSI.format([:yellow, "commit ", hash(commit, :full)], colorize),

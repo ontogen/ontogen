@@ -24,7 +24,7 @@ defmodule Ontogen.SpeechAct.Formatter do
   end
 
   defp do_format(speech_act, :full, opts) do
-    colorize = Keyword.get(opts, :color, ANSI.enabled?())
+    colorize = Keyword.get(opts, :color, Ontogen.ansi_enabled?())
     hash_format = Keyword.get(opts, :hash_format, :full)
 
     [
@@ -48,7 +48,7 @@ defmodule Ontogen.SpeechAct.Formatter do
   end
 
   defp do_format(speech_act, :raw, opts) do
-    colorize = Keyword.get(opts, :color, ANSI.enabled?())
+    colorize = Keyword.get(opts, :color, Ontogen.ansi_enabled?())
 
     [
       ANSI.format([:yellow, "speech_act ", hash(speech_act, :full)], colorize),
