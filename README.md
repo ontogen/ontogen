@@ -34,15 +34,15 @@
 
 ## About the Project
 
-Ontogen is a Data-Control-Management (DCM) solution specifically designed for RDF dataset in SPARQL triple stores. It provides version control capabilities similar to Git, but tailored for RDF datasets. Ontogen stores the version history of statements in a dedicated named graph within the RDF dataset completely separated from the actual data, much like the `.git` directory in a Git repository.
+Ontogen is a Data-Control-Management (DCM) solution specifically designed for RDF datasets in SPARQL triple stores. It provides version control capabilities similar to Git, but tailored for RDF datasets. Ontogen stores the version history of statements in a dedicated named graph within the RDF dataset completely separated from the actual data, much like the `.git` directory in a Git repository.
 
 Key features of Ontogen include:
 
 - Provenance metadata generation for changes in the triple store
-- Incorporation of speech act utterances for RDF statements
+- Incorporation of speech act utterances of RDF statements
 - Integration with PROV and DCAT models
 
-Ontogen takes a holistic approach to RDF data versioning by considering not just the syntactical and semantical levels, but also the pragmatic layer of the semiotic spectrum.
+Ontogen takes a holistic approach to RDF data versioning by considering not just the syntactical and semantical levels, but also the pragmatic layer.
 
 
 ## Getting Started
