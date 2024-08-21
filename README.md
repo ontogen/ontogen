@@ -48,6 +48,7 @@ Key features of Ontogen include:
 
 
 [1] Currently, only datasets with one graph are supported
+
 [2] Currently, only cryptic names are used for this; this will be addressed in Ontogen v0.2
 
 
