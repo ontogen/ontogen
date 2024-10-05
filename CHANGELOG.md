@@ -5,6 +5,18 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 [Keep a CHANGELOG](http://keepachangelog.com).
 
 
+## Unreleased
+
+### Fixed
+
+- Remove timeouts that were caused by the internally used HTTP client used
+  for SPARQL access
+
+
+[Compare v0.1.1...HEAD](https://github.com/ontogen/ontogen/compare/v0.1.1...HEAD)
+
+
+
 ## v0.1.1 - 2024-08-20
 
 ### Fixed

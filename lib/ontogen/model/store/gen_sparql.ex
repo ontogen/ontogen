@@ -60,6 +60,7 @@ defmodule Ontogen.Store.GenSPARQL do
   defp general_opts(opts) do
     opts
     |> Keyword.put_new(:raw_mode, true)
+    |> Keyword.put_new(:request_opts, adapter: [recv_timeout: :infinity])
   end
 
   defp add_graph_opt(opts, _, nil), do: opts
