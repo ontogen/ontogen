@@ -85,7 +85,7 @@ defmodule Ontogen do
   end
 
   def handle_call(:status, _from, {:error, error}),
-    do: {:reply, ConfigError.exception(reason: error), {:error, error}}
+    do: {:reply, {:error, ConfigError.exception(reason: error)}, {:error, error}}
 
   def handle_call(:status, _from, nil), do: {:reply, :unconfigured, nil}
   def handle_call(:status, _from, service), do: {:reply, service.status, service}

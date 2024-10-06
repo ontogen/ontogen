@@ -11,6 +11,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 - Remove timeouts that were caused by the internally used HTTP client used
   for SPARQL access
+- Failure to connect to the configured SPARQL server resulted in a 
+  "no function clause matching" error. 
 
 
 [Compare v0.1.1...HEAD](https://github.com/ontogen/ontogen/compare/v0.1.1...HEAD)

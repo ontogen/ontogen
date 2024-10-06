@@ -91,6 +91,9 @@ defmodule Ontogen.Operations.HistoryQuery do
   defp set_execution_mode(query), do: query
 
   @impl true
+  # For the direct execution case, where the Ontogen.handle_call catching of errors does not apply, we need to handle them here.
+  def call(%__MODULE__{}, {:error, _} = error), do: error
+
   def call(%__MODULE__{subject_type: :dataset, range: @full_history_range} = operation, service) do
     with {:ok, graph} <- Service.handle_sparql(graph_query(), service, :history),
          {:ok, operation} <-
