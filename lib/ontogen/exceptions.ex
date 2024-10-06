@@ -8,6 +8,10 @@ defmodule Ontogen.ConfigError do
     "No config found"
   end
 
+  def message(%{file: nil, reason: :econnrefused}) do
+    "Unable to connect to configured store"
+  end
+
   def message(%{file: nil, reason: reason}) do
     "Invalid config: #{inspect(reason)}"
   end
