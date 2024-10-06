@@ -41,7 +41,7 @@ defmodule Ontogen.NS do
               rtc: RTC,
               prov: PROV,
               dcat: DCAT,
-              SKOS: SKOS,
+              skos: SKOS,
               foaf: FOAF
             )
 
