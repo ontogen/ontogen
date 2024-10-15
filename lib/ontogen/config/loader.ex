@@ -103,6 +103,7 @@ defmodule Ontogen.Config.Loader do
   defp do_load_config_graph(path, env) when is_atom(path) do
     case path |> named_path() |> do_load_config_graph(env) do
       {:ok, _} = ok -> ok
+      {:error, :enoent} -> {:error, ConfigError.exception(reason: :enoent)}
       {:error, %ConfigError{reason: :missing}} when path in [:system, :global] -> {:ok, nil}
       {:error, _} = error -> error
     end
