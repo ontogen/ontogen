@@ -12,11 +12,11 @@
     #################################################
     # store selection
 
-# Select to adapter of your choice and feel free to remove the unused
-# (incl. their respective config files)
-<%= unless @adapter == nil, do: "#" %>    ; og:serviceStore [ :this og:Store ]
-<%= unless @adapter == Ontogen.Store.Adapters.Oxigraph, do: "#" %>    ; og:serviceStore [ :this oga:Oxigraph ]
-<%= unless @adapter == Ontogen.Store.Adapters.Fuseki, do: "#" %>    ; og:serviceStore [ :this oga:Fuseki ]
+		# Select to adapter of your choice and feel free to remove the unused
+		# (incl. their respective config files)
+		<%= unless @adapter == nil, do: "#" %>; og:serviceStore [ :this og:Store ]
+		<%= unless @adapter == Ontogen.Store.Adapters.Oxigraph, do: "#" %>; og:serviceStore [ :this oga:Oxigraph ]
+		<%= unless @adapter == Ontogen.Store.Adapters.Fuseki, do: "#" %>; og:serviceStore [ :this oga:Fuseki ]
 
     #################################################
     # metadata

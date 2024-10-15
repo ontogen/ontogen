@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
   for SPARQL access
 - Failure to connect to the configured SPARQL server resulted in a 
   "no function clause matching" error. 
+- Fix indentation in service config template used on init
 
 
 [Compare v0.1.1...HEAD](https://github.com/ontogen/ontogen/compare/v0.1.1...HEAD)
