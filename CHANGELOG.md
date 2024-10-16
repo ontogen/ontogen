@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 [Keep a CHANGELOG](http://keepachangelog.com).
 
 
-## Unreleased
+## v0.1.2 - 2024-10-16
 
 ### Fixed
 
@@ -16,7 +16,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 - Fix indentation in service config template used on init
 
 
-[Compare v0.1.1...HEAD](https://github.com/ontogen/ontogen/compare/v0.1.1...HEAD)
+[Compare v0.1.1...v0.1.2](https://github.com/ontogen/ontogen/compare/v0.1.1...v0.1.2)
 
 
 
