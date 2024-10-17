@@ -195,7 +195,6 @@ defmodule Ontogen.MixProject do
         "deps.unlock --check-unused",
         "compile --warnings-as-errors",
         "format --check-formatted",
-        "deps.unlock --check-unused",
         "test --warnings-as-errors",
         "credo"
       ]
