@@ -1,5 +1,5 @@
 defmodule Ontogen.SpeechAct.ChangesetTest do
-  use Ontogen.BogCase
+  use Ontogen.MudCase
 
   doctest Ontogen.SpeechAct.Changeset
 

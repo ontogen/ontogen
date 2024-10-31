@@ -24,20 +24,10 @@ defmodule Ontogen.NS do
     terms: [],
     strict: false
 
-  @vocabdoc """
-  The vocabulary for the precompiled Bog Turtle language.
-
-  See <https://w3id.org/ontogen/spec>
-  """
-  defvocab Bog,
-    base_iri: "https://w3id.org/bog#",
-    file: "bog.ttl",
-    case_violations: :fail
-
   @prefixes RDF.prefix_map(
               og: Ontogen.NS.Og,
               oga: Ontogen.NS.OgA,
-              bog: Ontogen.NS.Bog,
+              mud: Mud,
               rtc: RTC,
               prov: PROV,
               dcat: DCAT,

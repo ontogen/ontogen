@@ -1,5 +1,5 @@
 defmodule Ontogen.Commit.ChangesetTest do
-  use Ontogen.BogCase
+  use Ontogen.MudCase
 
   doctest Ontogen.Commit.Changeset
 

@@ -18,8 +18,8 @@ defmodule Ontogen.Config do
   |> Enum.each(fn {name, schema} ->
     bang_name = String.to_atom("#{name}!")
 
-    def unquote(:"#{name}_id")(ref \\ :this) do
-      unquote(schema).deref_id!(ref)
+    def unquote(:"#{name}_id")(ref \\ {:this, unquote(schema)}) do
+      Mud.deref_id!(ref)
     end
 
     def unquote(name)(ref \\ :this, opts \\ []) do

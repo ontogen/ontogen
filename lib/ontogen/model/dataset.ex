@@ -4,7 +4,7 @@ defmodule Ontogen.Dataset do
   """
 
   use Grax.Schema
-  use Ontogen.Bog.Referencable
+  use Mud.Referencable
 
   alias Ontogen.NS.Og
 

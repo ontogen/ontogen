@@ -5,6 +5,24 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 [Keep a CHANGELOG](http://keepachangelog.com).
 
 
+## Unreleased
+
+### Changed
+
+- Migration to the extracted Mud processor (previously called Bog)
+  - All Ontogen configuration files now use the `.og.ttl` extension instead of 
+    `.bog.ttl`.
+  - Due to changes in the UUIDv5 URI generation algorithm, salts from previous 
+    versions of Ontogen will now generate different URIs. 
+- The paths of the global configuration files have changed:
+  - the system-wide config is now searched for at `/etc/og.ttl`
+  - the user config is now searched for at `~/.og.ttl`
+
+
+[Compare v0.1.2...HEAD](https://github.com/ontogen/ontogen/compare/v0.1.2...HEAD)
+
+
+
 ## v0.1.2 - 2024-10-16
 
 ### Fixed

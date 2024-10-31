@@ -80,8 +80,7 @@ defmodule Ontogen.MixProject do
       rdf_ex_dep(:prov, "~> 0.1"),
       rdf_ex_dep(:dcat, "~> 0.1"),
       rdf_ex_dep(:foaf, "~> 0.1"),
-      {:hkdf, "~> 0.2"},
-      {:uniq, "~> 0.6"},
+      ontogen_dep(:mud, "~> 0.1"),
       # we are using YuriTemplate, because we have it already as a dependency of Grax
       {:yuri_template, "~> 1.1"},
       {:timex, "~> 3.7"},
@@ -93,6 +92,13 @@ defmodule Ontogen.MixProject do
       # This dependency is needed for ExCoveralls when OTP < 25
       {:castore, "~> 1.0", only: :test}
     ]
+  end
+
+  defp ontogen_dep(dep, version) do
+    case System.get_env("ONTOGEN_PACKAGES_SRC") do
+      "LOCAL" -> {dep, path: "../#{dep}"}
+      _ -> {dep, version}
+    end
   end
 
   defp rdf_ex_dep(:rtc, version) do
@@ -170,16 +176,10 @@ defmodule Ontogen.MixProject do
           Ontogen.Config,
           Ontogen.Config.Generator
         ],
-        Bog: [
-          Ontogen.Bog,
-          Ontogen.Bog.Precompiler,
-          Ontogen.Bog.Referencable
-        ],
         Namespaces: [
           Ontogen.NS,
           Ontogen.NS.Og,
-          Ontogen.NS.OgA,
-          Ontogen.NS.Bog
+          Ontogen.NS.OgA
         ]
       ]
     ]

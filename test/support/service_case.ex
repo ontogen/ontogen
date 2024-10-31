@@ -3,7 +3,7 @@ defmodule Ontogen.ServiceCase do
 
   using do
     quote do
-      use Ontogen.BogCase, async: false
+      use Ontogen.MudCase, async: false
 
       alias Ontogen.{Service, Store, Repository, Dataset}
 

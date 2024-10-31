@@ -4,7 +4,7 @@ defmodule Ontogen.Store do
   """
 
   use Grax.Schema
-  use Ontogen.Bog.Referencable
+  use Mud.Referencable
 
   @behaviour Ontogen.Store.Adapter
 

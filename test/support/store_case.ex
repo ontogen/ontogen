@@ -6,7 +6,7 @@ defmodule Ontogen.StoreCase do
 
   using do
     quote do
-      use Ontogen.BogCase, async: false
+      use Ontogen.MudCase, async: false
 
       alias Ontogen.Store
 

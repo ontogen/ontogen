@@ -1,6 +1,6 @@
 defmodule Ontogen.Service do
   use Grax.Schema
-  use Ontogen.Bog.Referencable
+  use Mud.Referencable
   alias Ontogen.{Repository, Store, Agent}
 
   alias Ontogen.NS.Og

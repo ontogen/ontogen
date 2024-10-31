@@ -1,30 +1,30 @@
 defmodule Ontogen.Config.LoaderTest do
-  use Ontogen.BogCase
+  use Ontogen.MudCase
 
   doctest Ontogen.Config.Loader
 
-  alias Ontogen.{Bog, Config}
+  alias Ontogen.{Config, ConfigError}
   alias Ontogen.Config.Loader
 
   test "no config" do
     assert Loader.load_graph(load_path: nil) == {:ok, service_structure_graph()}
     assert Loader.load_graph(load_path: []) == {:ok, service_structure_graph()}
 
-    assert Loader.load_graph(load_path: TestData.config("empty.bog.ttl")) ==
+    assert Loader.load_graph(load_path: TestData.config("empty.og.ttl")) ==
              {:ok, service_structure_graph()}
   end
 
   test "single config file" do
-    assert Loader.load_graph(load_path: TestData.config("single_config.bog.ttl")) ==
+    assert Loader.load_graph(load_path: TestData.config("single_config.og.ttl")) ==
              {:ok,
               service_structure_graph()
               |> Graph.add_prefixes(oga: OgA)
               |> Graph.add(
                 Graph.new([
                   {Config.service_id(), Og.serviceStore(), RDF.bnode("store")},
-                  {RDF.bnode("store"), Bog.this(), OgA.Fuseki}
+                  {RDF.bnode("store"), Mud.this(), OgA.Fuseki}
                 ])
-                |> Bog.precompile!()
+                |> Mud.process!()
               )}
   end
 
@@ -36,11 +36,11 @@ defmodule Ontogen.Config.LoaderTest do
               |> Graph.add(
                 Graph.new([
                   {Config.service_id(), Og.serviceStore(), RDF.bnode("store")},
-                  {RDF.bnode("store"), Bog.this(), OgA.Fuseki},
+                  {RDF.bnode("store"), Mud.this(), OgA.Fuseki},
                   {Config.dataset_id(), ~I<http://purl.org/dc/terms/title>, "test dataset"},
                   {Config.agent_id(), FOAF.name(), "Max Mustermann"}
                 ])
-                |> Bog.precompile!()
+                |> Mud.process!()
               )}
   end
 
@@ -52,13 +52,13 @@ defmodule Ontogen.Config.LoaderTest do
               |> Graph.add(
                 Graph.new([
                   {Config.service_id(), Og.serviceStore(), RDF.bnode("store")},
-                  {RDF.bnode("store"), Bog.this(), OgA.Fuseki},
+                  {RDF.bnode("store"), Mud.this(), OgA.Fuseki},
                   {Config.dataset_id(), ~I<http://purl.org/dc/terms/title>, "test dataset"},
                   {Config.repository_id(), ~I<http://purl.org/dc/terms/creator>,
                    Config.agent_id()},
                   {Config.agent_id(), FOAF.name(), "Max Mustermann"}
                 ])
-                |> Bog.precompile!()
+                |> Mud.process!()
               )}
   end
 
@@ -70,7 +70,7 @@ defmodule Ontogen.Config.LoaderTest do
               |> Graph.add(
                 Graph.new([
                   {Config.service_id(), Og.serviceStore(), RDF.bnode("store")},
-                  {RDF.bnode("store"), Bog.this(), OgA.Fuseki},
+                  {RDF.bnode("store"), Mud.this(), OgA.Fuseki},
                   {RDF.bnode("store"), Og.storeEndpointPort(), 3030},
                   {Config.service_id(), ~I<http://purl.org/dc/terms/title>, "Example service"},
                   {Config.dataset_id(), ~I<http://purl.org/dc/terms/title>, "test dataset"},
@@ -80,7 +80,7 @@ defmodule Ontogen.Config.LoaderTest do
                   {Config.agent_id(), FOAF.name(), "Max Mustermann"},
                   {Config.agent_id(), Og.email(), ~I<mailto:max.mustermann.test@example.com>}
                 ])
-                |> Bog.precompile!()
+                |> Mud.process!()
               )}
 
     assert Loader.load_graph(load_path: TestData.config("env_specific"), env: :test) ==
@@ -93,7 +93,7 @@ defmodule Ontogen.Config.LoaderTest do
               |> Graph.add(
                 Graph.new([
                   {Config.service_id(), Og.serviceStore(), RDF.bnode("store")},
-                  {RDF.bnode("store"), Bog.this(), OgA.Oxigraph},
+                  {RDF.bnode("store"), Mud.this(), OgA.Oxigraph},
                   {Config.service_id(), ~I<http://purl.org/dc/terms/title>, "Example service"},
                   {Config.dataset_id(), ~I<http://purl.org/dc/terms/title>, "dev dataset"},
                   {Config.repository_id(), ~I<http://purl.org/dc/terms/title>, "dev repository"},
@@ -102,8 +102,13 @@ defmodule Ontogen.Config.LoaderTest do
                   {Config.agent_id(), FOAF.name(), "Max Mustermann"},
                   {Config.agent_id(), Og.email(), ~I<mailto:max.mustermann@example.com>}
                 ])
-                |> Bog.precompile!()
+                |> Mud.process!()
               )}
+  end
+
+  test "empty path" do
+    assert {:error, %ConfigError{reason: :missing}} =
+             Loader.load_graph(load_path: TestData.config("empty"))
   end
 
   test "config path name" do

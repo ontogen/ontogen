@@ -1,5 +1,5 @@
 defmodule Ontogen.ConfigTest do
-  use Ontogen.BogCase
+  use Ontogen.MudCase
 
   doctest Ontogen.Config
 

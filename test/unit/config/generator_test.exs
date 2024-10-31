@@ -21,7 +21,7 @@ defmodule Ontogen.Config.GeneratorTest do
     assert_files_generated(tmp_dir)
 
     assert_selected_adapter(
-      Path.join(tmp_dir, "service.bog.ttl"),
+      Path.join(tmp_dir, "service.og.ttl"),
       Store,
       @all_adapters -- [Store]
     )
@@ -33,7 +33,7 @@ defmodule Ontogen.Config.GeneratorTest do
     assert_files_generated(tmp_dir)
 
     assert_selected_adapter(
-      Path.join(tmp_dir, "service.bog.ttl"),
+      Path.join(tmp_dir, "service.og.ttl"),
       Fuseki,
       @all_adapters -- [Fuseki]
     )
@@ -45,7 +45,7 @@ defmodule Ontogen.Config.GeneratorTest do
     assert_files_generated(tmp_dir)
 
     assert_selected_adapter(
-      Path.join(tmp_dir, "service.bog.ttl"),
+      Path.join(tmp_dir, "service.og.ttl"),
       Oxigraph,
       @all_adapters -- [Oxigraph]
     )
@@ -58,7 +58,7 @@ defmodule Ontogen.Config.GeneratorTest do
   end
 
   test "force flag", %{tmp_dir: tmp_dir} do
-    existing_file = Path.join(tmp_dir, "dataset.bog.ttl")
+    existing_file = Path.join(tmp_dir, "dataset.og.ttl")
     File.write!(existing_file, "Original content")
 
     assert_raise RuntimeError, "File already exists: #{existing_file}", fn ->
@@ -73,13 +73,13 @@ defmodule Ontogen.Config.GeneratorTest do
   end
 
   defp assert_files_generated(tmp_dir) do
-    assert File.exists?(Path.join(tmp_dir, "agent.bog.ttl"))
-    assert File.exists?(Path.join(tmp_dir, "service.bog.ttl"))
-    assert File.exists?(Path.join(tmp_dir, "repository.bog.ttl"))
-    assert File.exists?(Path.join(tmp_dir, "dataset.bog.ttl"))
-    assert File.exists?(Path.join(tmp_dir, "store.bog.ttl"))
-    assert File.exists?(Path.join(tmp_dir, "fuseki.bog.ttl"))
-    assert File.exists?(Path.join(tmp_dir, "oxigraph.bog.ttl"))
+    assert File.exists?(Path.join(tmp_dir, "agent.og.ttl"))
+    assert File.exists?(Path.join(tmp_dir, "service.og.ttl"))
+    assert File.exists?(Path.join(tmp_dir, "repository.og.ttl"))
+    assert File.exists?(Path.join(tmp_dir, "dataset.og.ttl"))
+    assert File.exists?(Path.join(tmp_dir, "store.og.ttl"))
+    assert File.exists?(Path.join(tmp_dir, "fuseki.og.ttl"))
+    assert File.exists?(Path.join(tmp_dir, "oxigraph.og.ttl"))
   end
 
   defp assert_selected_adapter(file, selected_adapter, disabled_adapters) do

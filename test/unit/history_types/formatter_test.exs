@@ -1,5 +1,5 @@
 defmodule Ontogen.HistoryType.FormatterTest do
-  use Ontogen.BogCase
+  use Ontogen.MudCase
 
   doctest Ontogen.HistoryType.Formatter
 

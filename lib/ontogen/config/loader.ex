@@ -1,11 +1,11 @@
 defmodule Ontogen.Config.Loader do
   @moduledoc false
 
-  alias Ontogen.{Bog, ConfigError}
+  alias Ontogen.ConfigError
   alias RDF.{Graph, Turtle}
 
-  @system_path Application.compile_env(:ontogen, :system_config_path, "/etc/ontogen.conf.bog.ttl")
-  @global_path Application.compile_env(:ontogen, :global_config_path, "~/.ontogen.conf.bog.ttl")
+  @system_path Application.compile_env(:ontogen, :system_config_path, "/etc/og.ttl")
+  @global_path Application.compile_env(:ontogen, :global_config_path, "~/.og.ttl")
 
   @default_local_config_path Path.join([
                                Path.dirname(Mix.Project.project_file()),
@@ -21,6 +21,11 @@ defmodule Ontogen.Config.Loader do
   ]
 
   @default_load_paths Keyword.keys(@named_paths)
+
+  @environments ~w[prod dev test]a
+  @conf_file_pattern "**/*.og.ttl"
+  @local_env_file_patterns Map.new(@environments, &{&1, "**/*.#{&1}.og.ttl"})
+  @local_env_directory_pattern Map.new(@environments, &{&1, "#{&1}/**/*.og.ttl"})
 
   def local_path, do: @local_path
 
@@ -59,7 +64,7 @@ defmodule Ontogen.Config.Loader do
 
   # the og:serviceStore must be set manually to a Store adapter or the generic [ :this og:Store ]
   @service_structure """
-                     #{RDF.turtle_prefixes(og: Ontogen.NS.Og, "": Ontogen.NS.Bog)}
+                     #{RDF.turtle_prefixes(og: Ontogen.NS.Og, "": Mud)}
 
                      [ :this og:Service
                          ; og:serviceRepository [ :this og:Repository
@@ -77,7 +82,7 @@ defmodule Ontogen.Config.Loader do
     load_paths = opts |> load_paths() |> List.wrap()
     env = env(opts)
 
-    with {:ok, service_structure} <- Bog.precompile(@service_structure) do
+    with {:ok, service_structure} <- Mud.process(@service_structure) do
       case do_load_config_graphs(load_paths, env, nil) do
         nil -> {:ok, service_structure}
         %Graph{} = graph -> {:ok, Graph.add(graph, service_structure)}
@@ -118,7 +123,7 @@ defmodule Ontogen.Config.Loader do
 
       File.exists?(path) ->
         case RDF.read_file(path) do
-          {:ok, graph} -> Bog.precompile(graph)
+          {:ok, graph} -> Mud.process(graph)
           {:error, error} -> {:error, ConfigError.exception(file: path, reason: error)}
         end
 
@@ -126,11 +131,6 @@ defmodule Ontogen.Config.Loader do
         {:error, ConfigError.exception(reason: :missing, file: path)}
     end
   end
-
-  @environments ~w[prod dev test]a
-  @conf_file_pattern "**/*.bog.ttl"
-  @local_env_file_patterns Map.new(@environments, &{&1, "**/*.#{&1}.bog.ttl"})
-  @local_env_directory_pattern Map.new(@environments, &{&1, "#{&1}/**/*.bog.ttl"})
 
   defp do_load_config_directory(path, env) do
     {general_files, environment_specific_files} = directory_files(path, env)
@@ -148,6 +148,9 @@ defmodule Ontogen.Config.Loader do
 
         environment_specific_graph ->
           environment_specific_graph
+
+        true ->
+          {:error, ConfigError.exception(reason: :missing, file: path)}
       end
 
     {:ok, graph}

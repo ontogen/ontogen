@@ -1,14 +1,14 @@
 defmodule Ontogen.ConfigHelper do
-  alias Ontogen.{Bog, Config}
+  alias Ontogen.Config
   alias Ontogen.NS.Og
   alias RDF.Graph
 
   def configured_store_adapter do
-    "config/ontogen/test/service.bog.ttl"
+    "config/ontogen/test/service.og.ttl"
     |> RDF.read_file!()
     |> Graph.query([
       {:_service, Og.serviceStore(), :_store},
-      {:_store, Bog.this(), :store_adapter_class?}
+      {:_store, Mud.this(), :store_adapter_class?}
     ])
     |> case do
       [%{store_adapter_class: store_adapter_class}] ->
@@ -18,6 +18,6 @@ defmodule Ontogen.ConfigHelper do
 
   def service_structure_graph do
     Config.Loader.service_structure()
-    |> Bog.precompile!()
+    |> Mud.process!()
   end
 end

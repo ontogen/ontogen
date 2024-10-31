@@ -35,7 +35,7 @@ defmodule Ontogen.Store.Adapter do
     quote do
       @behaviour Ontogen.Store.Adapter
 
-      use Ontogen.Bog.Referencable
+      use Mud.Referencable
 
       alias Ontogen.NS.{Og, OgA}
 
