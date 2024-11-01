@@ -7,6 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ## Unreleased
 
+### Added
+
+- Mix task `og.setup` for setting up the repository on the configured store
+
 ### Changed
 
 - Migration to the extracted Mud processor (previously called Bog)
