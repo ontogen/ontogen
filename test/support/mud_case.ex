@@ -12,13 +12,11 @@ defmodule Ontogen.MudCase do
   end
 
   def clean_salts!(_context) do
-    salt_base_path =
-      "tmp/test/data/" <> _ =
-      Mud.salt_base_path()
+    salt_path = "tmp/test/data/" <> _ = Mud.salt_path()
 
-    File.rm_rf!(salt_base_path)
+    File.rm_rf!(salt_path)
 
-    Mud.create_salt_base_path()
+    Mud.create_salt_path()
 
     :ok
   end

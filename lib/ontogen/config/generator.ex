@@ -58,7 +58,7 @@ defmodule Ontogen.Config.Generator do
       )
     end)
 
-    Mud.create_salt_base_path()
+    Mud.create_salt_path()
 
     :ok
   end
