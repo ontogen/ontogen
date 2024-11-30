@@ -10,7 +10,7 @@ defmodule Mix.Tasks.Og.Setup do
 
   def run(_args) do
     with :ok <- start_deps() do
-      Mud.create_salt_path()
+      Mud.setup()
 
       case SetupCommand.call(Ontogen.Config.service!()) do
         {:ok, _service} -> Mix.Shell.IO.info("Set up Ontogen repository")

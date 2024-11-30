@@ -7,16 +7,21 @@ defmodule Ontogen.MudCase do
 
       import unquote(__MODULE__)
 
-      setup :clean_salts!
+      setup :clean_index!
+      setup :clean_seeds!
     end
   end
 
-  def clean_salts!(_context) do
-    salt_path = "tmp/test/data/" <> _ = Mud.salt_path()
+  def clean_index!(_context) do
+    :ok = Mud.Identity.Index.clear()
+  end
 
-    File.rm_rf!(salt_path)
+  def clean_seeds!(_context) do
+    seed_path = "tmp/test/data/" <> _ = Mud.Seed.Directory.path()
 
-    Mud.create_salt_path()
+    File.rm_rf!(seed_path)
+
+    Mud.Seed.Directory.setup()
 
     :ok
   end

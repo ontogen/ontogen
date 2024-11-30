@@ -4,4 +4,5 @@ config :ontogen,
   config_load_paths: [:local]
 
 config :mud,
-  salt_path: "tmp/test/data/ref_salts"
+  index_directory: "tmp/test/data/mud/index",
+  seed_path: "tmp/test/data/mud/seeds"
