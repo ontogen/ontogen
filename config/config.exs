@@ -1,8 +1,7 @@
 import Config
 
 config :mud,
-  i_class: Ontogen.NS.Og.Agent,
-  grax_id_spec: Mud.IdSpec
+  i_class: Ontogen.NS.Og.Agent
 
 config :tesla, adapter: Tesla.Adapter.Hackney
 
