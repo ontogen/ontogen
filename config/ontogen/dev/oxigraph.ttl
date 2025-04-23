@@ -1,0 +1,17 @@
+@prefix : <https://w3id.org/mud#> .
+@prefix og: <https://w3id.org/ontogen#> .
+@prefix gno: <https://w3id.org/gno#> .
+@prefix gnoa: <https://w3id.org/gno/store/adapter/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+[ :this gnoa:Oxigraph
+    # all of these can be omitted since predefined defaults of the adapter
+    ; gno:storeEndpointScheme "http"
+    ; gno:storeEndpointHost "localhost"
+    ; gno:storeEndpointPort 7878
+
+    # all of these can be omitted since auto-generated from the storeEndpoint props
+    # ; gno:storeQueryEndpoint <http://localhost:7878/query>
+    # ; gno:storeUpdateEndpoint <http://localhost:7878/update>
+    # ; gno:storeGraphStoreEndpoint <http://localhost:7878/store>
+] .

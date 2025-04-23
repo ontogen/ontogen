@@ -43,7 +43,7 @@ defmodule Ontogen.Operations.RevisionQuery do
       ?s ?p ?o .
     }
     """
-    |> Ontogen.Store.SPARQL.Operation.construct!()
+    |> Gno.Store.SPARQL.Operation.construct!()
     |> Service.handle_sparql(service, :dataset)
   end
 end

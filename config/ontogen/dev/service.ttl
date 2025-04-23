@@ -1,0 +1,24 @@
+@prefix : <https://w3id.org/mud#> .
+@prefix og: <https://w3id.org/ontogen#> .
+@prefix gno: <https://w3id.org/gno#> .
+@prefix gnoa: <https://w3id.org/gno/store/adapter/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+[ :this og:Service
+
+    #################################################
+    # store selection
+
+#    ; gno:serviceStore [ :this gno:Store ]
+#    ; gno:serviceStore [ :this gnoa:Oxigraph ]
+    ; gno:serviceStore [ :this gnoa:Fuseki ]
+
+    #################################################
+    # metadata
+
+    ; dcterms:title "dev service"
+    ; dcterms:creator :I
+    ; dcterms:publisher :I
+
+] .

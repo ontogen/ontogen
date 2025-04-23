@@ -9,7 +9,26 @@
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix dct: <http://purl.org/dc/terms/> .
 @prefix rtc: <https://w3id.org/rtc#> .
+@prefix gno: <https://w3id.org/gno#> .
+@prefix gnoa: <https://w3id.org/gno/store/adapter/> .
 
+
+og:Manifest a rdfs:Class
+    ; rdfs:subClassOf gno:Manifest
+    ; rdfs:label "Manifest"
+.
+
+    og:manifestService a rdf:Property
+        ; rdfs:subPropertyOf gno:manifestService
+        ; rdfs:domain og:Manifest
+        ; rdfs:range  og:Service
+    .
+
+    og:manifestAgent a rdf:Property
+        ; rdfs:subPropertyOf gno:manifestAgent
+        ; rdfs:domain og:Manifest
+        ; rdfs:range  og:Agent
+    .
 
 og:Proposition a rdfs:Class
     ; rdfs:subClassOf rtc:Compound
@@ -177,13 +196,13 @@ og:Agent a rdfs:Class
     .
 
 og:Repository a rdfs:Class
-    ; rdfs:subClassOf dcat:Catalog
+    ; rdfs:subClassOf dcat:Catalog, gno:Repository
     ; rdfs:label "Repository"
     ; rdfs:comment "Represents an Ontogen repository, which is a DCAT catalog containing three components: 1) the version-controlled dataset, 2) the history graph, and 3) an implicit metadata graph. The metadata graph contains the DCAT catalog description of the repository itself, including descriptions of the dataset and history graphs."
 .
 
     og:repositoryDataset a rdf:Property
-        ; rdfs:subPropertyOf dcat:dataset
+        ; rdfs:subPropertyOf dcat:dataset, gno:repositoryDataset
         ; rdfs:domain og:Repository
         ; rdfs:range  og:Dataset
     .
@@ -200,7 +219,7 @@ og:Repository a rdfs:Class
     .
 
 og:Dataset a rdfs:Class
-    ; rdfs:subClassOf dcat:Dataset, prov:Entity
+    ; rdfs:subClassOf dcat:Dataset, prov:Entity, gno:Dataset
     ; rdfs:label "Dataset"
     ; rdfs:comment "Represents the version-controlled RDF dataset within an Ontogen repository. It contains the actual data being managed and versioned by Ontogen."
 .
@@ -220,63 +239,18 @@ og:Replacement rdfs:comment "Graph name for replacements in a RDF encoded change
 og:Overwrite rdfs:comment "Graph name for overwrites in a RDF encoded changeset".
 
 
-og:Store a rdfs:Class
-    ; rdfs:label "Store"
-.
-
-    og:storeQueryEndpoint a rdf:Property
-        ; rdfs:domain og:Store
-    .
-
-    og:storeUpdateEndpoint a rdf:Property
-        ; rdfs:domain og:Store
-    .
-
-    og:storeGraphStoreEndpoint a rdf:Property
-        ; rdfs:domain og:Store
-    .
-
-    og:storeEndpointScheme a rdf:Property
-        ; rdfs:domain og:Store
-        ; rdfs:range xsd:string
-    .
-
-    og:storeEndpointHost a rdf:Property
-        ; rdfs:domain og:Store
-        ; rdfs:range xsd:string
-    .
-
-    og:storeEndpointPort a rdf:Property
-        ; rdfs:domain og:Store
-        ; rdfs:range xsd:positiveInteger
-    .
-
-    og:storeEndpointUserInfo a rdf:Property
-        ; rdfs:domain og:Store
-        ; rdfs:range xsd:string
-    .
-
-    og:storeEndpointDataset a rdf:Property
-        ; rdfs:domain og:Store
-        ; rdfs:range xsd:string
-    .
 
 
 og:Service a rdfs:Class
-    ; rdfs:subClassOf dcat:DataService
+    ; rdfs:subClassOf dcat:DataService, gno:Service
     ; rdfs:label "Service"
     ; rdfs:comment "Represents an operational instance of Ontogen. An og:Service is a composition of an og:Repository and an og:Store, providing versioning and access capabilities for RDF datasets."
 .
 
     og:serviceRepository a rdf:Property
-        ; rdfs:subPropertyOf dcat:servesDataset
+        ; rdfs:subPropertyOf dcat:servesDataset, gno:serviceRepository
         ; rdfs:domain og:Service
         ; rdfs:range  og:Repository
-    .
-
-    og:serviceStore a rdf:Property
-        ; rdfs:domain og:Service
-        ; rdfs:range  og:Store
     .
 
     og:serviceOperator a rdf:Property

@@ -2,7 +2,7 @@ defmodule Ontogen.Operations.RepositoryQuery do
   use Ontogen.Operation.Query, params: [format: nil, stored: nil]
 
   alias Ontogen.{Service, Repository}
-  alias Ontogen.Store.SPARQL.Operation
+  alias Gno.Store.SPARQL.Operation
   alias Ontogen.Repository.NotSetupError
   alias Ontogen.NS.Og
   alias RDF.PrefixMap

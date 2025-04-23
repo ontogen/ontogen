@@ -1,6 +1,6 @@
 defmodule Ontogen.Operations.SetupCommand do
   use Ontogen.Operation.Command
-  alias Ontogen.{Service, Store}
+  alias Ontogen.Service
   alias Ontogen.Operations.{RepositoryQuery, BootCommand}
   alias Ontogen.Repository.SetupError
 
@@ -42,7 +42,7 @@ defmodule Ontogen.Operations.SetupCommand do
   defp init_repo_graph(service) do
     service.repository
     |> Grax.to_rdf!()
-    |> Store.SPARQL.Operation.insert_data!()
+    |> Gno.Store.SPARQL.Operation.insert_data!()
     |> Service.handle_sparql(service, :repo)
   end
 end

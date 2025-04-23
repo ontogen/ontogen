@@ -138,7 +138,7 @@ defmodule Ontogen.Operations.EffectiveChangesetQuery do
       ?s ?p ?o .
     }
     """
-    |> Ontogen.Store.SPARQL.Operation.construct!()
+    |> Gno.Store.SPARQL.Operation.construct!()
   end
 
   defp triples(nil), do: ""
@@ -161,7 +161,7 @@ defmodule Ontogen.Operations.EffectiveChangesetQuery do
       ?s ?p ?o .
     }
     """
-    |> Ontogen.Store.SPARQL.Operation.construct!()
+    |> Gno.Store.SPARQL.Operation.construct!()
   end
 
   defp subject_predicate_pairs(update) do
@@ -187,7 +187,7 @@ defmodule Ontogen.Operations.EffectiveChangesetQuery do
       ?s ?p ?o .
     }
     """
-    |> Ontogen.Store.SPARQL.Operation.construct!()
+    |> Gno.Store.SPARQL.Operation.construct!()
   end
 
   defp subjects(replace) do

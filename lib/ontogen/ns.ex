@@ -15,18 +15,10 @@ defmodule Ontogen.NS do
     file: "ontogen.ttl",
     case_violations: :fail
 
-  @vocabdoc """
-  The Ontogen store adapter vocabulary.
-  """
-  defvocab OgA,
-    base_iri: "https://w3id.org/ontogen/store/adapter/",
-    file: "ontogen_store_adapter.ttl",
-    terms: [],
-    strict: false
-
   @prefixes RDF.prefix_map(
               og: Ontogen.NS.Og,
-              oga: Ontogen.NS.OgA,
+              gno: Gno,
+              gnoa: Gno.NS.GnoA,
               mud: Mud,
               rtc: RTC,
               prov: PROV,

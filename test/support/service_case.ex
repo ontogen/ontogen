@@ -5,8 +5,6 @@ defmodule Ontogen.ServiceCase do
     quote do
       use Ontogen.MudCase, async: false
 
-      alias Ontogen.{Service, Store, Repository, Dataset}
-
       import unquote(__MODULE__)
       import Ontogen.TestFixtures
 
@@ -29,7 +27,7 @@ defmodule Ontogen.ServiceCase do
       # separate process after the test process has terminated. This means the
       # Ontogen GenServer started above with `start_supervised` is no longer.
       on_exit(fn ->
-        with {:ok, service} <- Ontogen.Config.service() do
+        with {:ok, service} <- Ontogen.Manifest.service() do
           case CleanCommand.call(service, :all) do
             {:ok, _service} -> :ok
             {:error, _} = error -> raise error

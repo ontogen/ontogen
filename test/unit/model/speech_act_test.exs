@@ -3,7 +3,7 @@ defmodule Ontogen.SpeechActTest do
 
   doctest Ontogen.SpeechAct
 
-  alias Ontogen.{SpeechAct, Config, InvalidChangesetError}
+  alias Ontogen.{SpeechAct, Manifest, InvalidChangesetError}
 
   test "id stability" do
     assert {:ok,
@@ -76,7 +76,7 @@ defmodule Ontogen.SpeechActTest do
 
       assert speech_act.add == proposition()
       assert DateTime.diff(DateTime.utc_now(), speech_act.time, :second) <= 1
-      assert speech_act.speaker == Config.user!()
+      assert speech_act.speaker == Manifest.user!()
     end
 
     test "without statements" do

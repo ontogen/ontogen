@@ -17,8 +17,8 @@ defmodule OntogenTest do
     test "when the service is setup" do
       assert Ontogen.status() == :ready
       assert Ontogen.repository(stored: true) == {:ok, ready_service().repository}
-      assert Ontogen.dataset_info() == Ontogen.Config.dataset!()
-      assert Ontogen.history_info() == Ontogen.Config.history!()
+      assert Ontogen.dataset_info() == Ontogen.Manifest.dataset!()
+      assert Ontogen.history_info() == Ontogen.Manifest.history!()
     end
   end
 
@@ -33,8 +33,8 @@ defmodule OntogenTest do
 
       assert Ontogen.status() == :ready
       assert Ontogen.repository(stored: true) == {:ok, ready_service.repository}
-      assert Ontogen.dataset_info() == Ontogen.Config.dataset!()
-      assert Ontogen.history_info() == Ontogen.Config.history!()
+      assert Ontogen.dataset_info() == Ontogen.Manifest.dataset!()
+      assert Ontogen.history_info() == Ontogen.Manifest.history!()
     end
 
     test "when the service is already setup" do

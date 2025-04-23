@@ -1,7 +1,7 @@
 defmodule Ontogen do
   use GenServer
 
-  alias Ontogen.{Service, Repository, ConfigError}
+  alias Ontogen.{Service, Repository, ManifestError}
   alias Ontogen.Operation.{Query, Command}
 
   import Ontogen.Operation, only: [include_api: 1]
@@ -75,7 +75,7 @@ defmodule Ontogen do
     do: handle_call(operation, from, nil)
 
   def handle_call(%BootCommand{} = operation, from, nil),
-    do: handle_call(operation, from, Ontogen.Config.service!())
+    do: handle_call(operation, from, Ontogen.Manifest.service!())
 
   def handle_call(%BootCommand{} = operation, _from, service) do
     case BootCommand.call(operation, service) do
@@ -85,17 +85,17 @@ defmodule Ontogen do
   end
 
   def handle_call(:status, _from, {:error, error}),
-    do: {:reply, {:error, ConfigError.exception(reason: error)}, {:error, error}}
+    do: {:reply, {:error, ManifestError.exception(reason: error)}, {:error, error}}
 
   def handle_call(:status, _from, nil), do: {:reply, :unconfigured, nil}
   def handle_call(:status, _from, service), do: {:reply, service.status, service}
 
   def handle_call(_operation, _from, nil) do
-    {:reply, {:error, ConfigError.exception(reason: :missing)}, nil}
+    {:reply, {:error, ManifestError.exception(reason: :missing)}, nil}
   end
 
   def handle_call(_operation, _from, {:error, error}) do
-    {:reply, {:error, ConfigError.exception(reason: error)}, {:error, error}}
+    {:reply, {:error, ManifestError.exception(reason: error)}, {:error, error}}
   end
 
   def handle_call(:service, _from, service), do: {:reply, service, service}

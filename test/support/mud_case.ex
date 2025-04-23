@@ -12,6 +12,8 @@ defmodule Ontogen.MudCase do
     end
   end
 
+  alias RDF.Graph
+
   def clean_index!(_context) do
     :ok = Mud.Identity.Index.clear()
   end
@@ -24,5 +26,18 @@ defmodule Ontogen.MudCase do
     Mud.Seed.Directory.setup()
 
     :ok
+  end
+
+  def configured_store_adapter do
+    "config/ontogen/test/service.ttl"
+    |> RDF.read_file!()
+    |> Graph.query([
+      {:_service, Gno.serviceStore(), :_store},
+      {:_store, Mud.this(), :store_adapter_class?}
+    ])
+    |> case do
+      [%{store_adapter_class: store_adapter_class}] ->
+        Grax.schema(store_adapter_class)
+    end
   end
 end

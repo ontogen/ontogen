@@ -1,8 +1,8 @@
 defmodule Ontogen.StoreCase do
   use ExUnit.CaseTemplate
 
-  alias Ontogen.Store
-  alias Ontogen.Store.SPARQL.Operation
+  alias Gno.Store
+  alias Gno.Store.SPARQL.Operation
 
   using do
     quote do
@@ -18,6 +18,6 @@ defmodule Ontogen.StoreCase do
   end
 
   def clean_store!(_) do
-    :ok = Store.handle_sparql(Operation.drop!(), Ontogen.Config.store!(), :all)
+    :ok = Store.handle_sparql(Operation.drop!(), Ontogen.Manifest.store!(), :all)
   end
 end

@@ -3,7 +3,7 @@ defmodule Ontogen.CommitTest do
 
   doctest Ontogen.Commit
 
-  alias Ontogen.{Commit, Proposition, Config, InvalidChangesetError}
+  alias Ontogen.{Commit, Proposition, Manifest, InvalidChangesetError}
 
   test "id stability" do
     assert {:ok,
@@ -90,7 +90,7 @@ defmodule Ontogen.CommitTest do
 
       assert commit.add == proposition()
       assert DateTime.diff(DateTime.utc_now(), commit.time, :second) <= 1
-      assert commit.committer == Config.user!()
+      assert commit.committer == Manifest.user!()
     end
 
     test "implicit proposition creation" do

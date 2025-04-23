@@ -32,7 +32,7 @@ defmodule Ontogen.Operations.CleanCommand do
   end
 
   defp delete_all(service) do
-    Ontogen.Store.SPARQL.Operation.drop!()
+    Gno.Store.SPARQL.Operation.drop!()
     |> Service.handle_sparql(service, :all)
   end
 end

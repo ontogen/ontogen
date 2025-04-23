@@ -7,7 +7,7 @@ defmodule Ontogen.Repository do
 
   import Ontogen.Utils, only: [bang!: 2]
 
-  schema Og.Repository do
+  schema Og.Repository < Gno.Repository do
     link dataset: Og.repositoryDataset(), type: Dataset, required: true
     link history: Og.repositoryHistory(), type: History, required: true
 
@@ -34,7 +34,11 @@ defmodule Ontogen.Repository do
 
   def set_head!(repository, commit), do: bang!(&set_head/2, [repository, commit])
 
-  def graph_id(%__MODULE__{} = repository), do: repository.__id__
-  def dataset_graph_id(%__MODULE__{dataset: dataset}), do: dataset.__id__
-  def history_graph_id(%__MODULE__{history: history}), do: history.__id__
+  def history_graph_id(%{history: history}), do: history.__id__
+
+  defdelegate dataset_graph_id(repository), to: Gno.Repository
+  defdelegate graph_id(repository), to: Gno.Repository
+
+  def graph_id(repository, :history), do: history_graph_id(repository)
+  def graph_id(repository, name), do: Gno.Repository.graph_id(repository, name)
 end

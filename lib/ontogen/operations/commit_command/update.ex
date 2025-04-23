@@ -22,7 +22,7 @@ defmodule Ontogen.Operations.CommitCommand.Update do
       #{provenance(repo, additional_prov_metadata)}
     }
     """
-    |> Ontogen.Store.SPARQL.Operation.update()
+    |> Gno.Store.SPARQL.Operation.update()
   end
 
   defp head(_, nil), do: ""

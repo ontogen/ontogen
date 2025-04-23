@@ -8,7 +8,7 @@ defmodule Ontogen.Operations.HistoryQuery.Query do
   def build(operation) do
     operation.subject
     |> query(operation.range)
-    |> Ontogen.Store.SPARQL.Operation.construct()
+    |> Gno.Store.SPARQL.Operation.construct()
   end
 
   defp query(subject, range) do

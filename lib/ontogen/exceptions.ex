@@ -1,46 +1,19 @@
-defmodule Ontogen.ConfigError do
+defmodule Ontogen.ManifestError do
   @moduledoc """
-  Raised on errors with `Ontogen.Config`.
+  Raised on errors with `Ontogen.Manifest`.
   """
-  defexception [:file, :reason]
+  defexception [:reason]
 
-  def message(%{file: nil, reason: :missing}) do
-    "No config found"
+  def message(%{reason: :missing}) do
+    "No manifest found"
   end
 
-  def message(%{file: nil, reason: :econnrefused}) do
+  def message(%{reason: :econnrefused}) do
     "Unable to connect to configured store"
   end
 
-  def message(%{file: nil, reason: reason}) do
-    "Invalid config: #{inspect(reason)}"
-  end
-
-  def message(%{file: file, reason: reason}) do
-    "Invalid config file #{file}: #{inspect(reason)}"
-  end
-end
-
-defmodule Ontogen.InvalidSPARQLOperationError do
-  @moduledoc """
-  Raised when creating an invalid `Ontogen.Store.SPARQL.Operation`.
-  """
-
-  defexception [:message]
-
-  def exception(value) do
-    %__MODULE__{message: "Invalid SPARQL operation: #{value}"}
-  end
-end
-
-defmodule Ontogen.InvalidStoreEndpointError do
-  @moduledoc """
-  Raised on invalid `Ontogen.Store.Endpoint`s.
-  """
-  defexception [:message]
-
-  def exception(value) do
-    %__MODULE__{message: "Invalid store endpoint: #{value}"}
+  def message(%{reason: reason}) do
+    "Invalid manifest: #{inspect(reason)}"
   end
 end
 

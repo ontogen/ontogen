@@ -5,7 +5,6 @@ defmodule Ontogen.Operations.CommitCommandTest do
 
   alias Ontogen.{
     Commit,
-    Config,
     History,
     SpeechAct,
     Proposition,
@@ -163,11 +162,11 @@ defmodule Ontogen.Operations.CommitCommandTest do
       assert {:ok, commit} = Ontogen.commit(add: graph())
 
       assert commit.add == expected_add
-      assert commit.committer == Config.user!()
+      assert commit.committer == Manifest.user!()
       assert DateTime.diff(DateTime.utc_now(), commit.time, :second) <= 1
 
       assert commit.speech_act.add == expected_add
-      assert commit.speech_act.speaker == Config.user!()
+      assert commit.speech_act.speaker == Manifest.user!()
       assert DateTime.diff(DateTime.utc_now(), commit.speech_act.time, :second) <= 1
 
       # inserts the provenance
@@ -176,7 +175,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
                  [
                    commit,
                    expected_add,
-                   Config.user!()
+                   Manifest.user!()
                  ]
                  |> Enum.map(&Grax.to_rdf!/1),
                  prefixes: History.prefixes()
@@ -250,7 +249,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
         Proposition.new!(graph()),
         Proposition.new!(add),
         Proposition.new!(remove),
-        Config.user!(),
+        Manifest.user!(),
         agent(:agent_jane)
       ]
       |> Enum.map(&Grax.to_rdf!/1)
@@ -298,7 +297,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
         expected_update_proposition,
         expected_remove_proposition,
         original_update,
-        Config.user!(),
+        Manifest.user!(),
         agent(:agent_jane)
       ]
       |> Enum.map(&Grax.to_rdf!/1)
@@ -357,7 +356,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
         replace_proposition,
         overwrite_proposition,
         speech_act,
-        Config.user!(),
+        Manifest.user!(),
         agent(:agent_jane)
       ]
       |> Enum.map(&Grax.to_rdf!/1)
@@ -421,7 +420,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
           Proposition.new!(graph()),
           expected_add_proposition,
           expected_remove_proposition,
-          Config.user!(),
+          Manifest.user!(),
           agent(:agent_jane)
         ]
         |> Enum.map(&Grax.to_rdf!/1)
@@ -488,7 +487,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
             remove: remove,
             time: datetime()
           ),
-          Config.user!(),
+          Manifest.user!(),
           agent(:agent_jane)
         ]
         |> Enum.map(&Grax.to_rdf!/1)

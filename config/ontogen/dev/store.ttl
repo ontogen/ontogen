@@ -1,0 +1,10 @@
+@prefix : <https://w3id.org/ontogen#> .
+@prefix mud: <https://w3id.org/mud#> .
+@prefix gno: <https://w3id.org/gno#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+[ mud:this gno:Store
+    ; gno:storeQueryEndpoint <http://localhost:7878/query>
+    ; gno:storeUpdateEndpoint <http://localhost:7878/update>
+    ; gno:storeGraphStoreEndpoint <http://localhost:7878/store>
+] .

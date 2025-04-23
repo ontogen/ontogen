@@ -1,9 +1,0 @@
-@prefix : <https://w3id.org/mud#> .
-@prefix og: <https://w3id.org/ontogen#> .
-@prefix oga: <https://w3id.org/ontogen/store/adapter/> .
-@prefix foaf: <http://xmlns.com/foaf/0.1/> .
-
-[ :this oga:Fuseki
-    ; og:storeEndpointDataset "ontogen-test-dataset"
-    ; og:storeEndpointPort 3030
-] .

@@ -8,7 +8,7 @@ defmodule Ontogen.QueryUtils do
     CONSTRUCT { ?s ?p ?o }
     WHERE     { ?s ?p ?o }
     """
-    |> Ontogen.Store.SPARQL.Operation.construct!()
+    |> Gno.Store.SPARQL.Operation.construct!()
   end
 
   def to_term(rdf_value) do

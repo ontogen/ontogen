@@ -14,13 +14,18 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 ### Changed
 
 - Migration to the extracted Mud processor (previously called Bog)
-  - All Ontogen configuration files now use the `.og.ttl` extension instead of 
+  - All Ontogen configuration files now use the standard `.ttl` extension instead of 
     `.bog.ttl`.
-  - Due to changes in the UUIDv5 URI generation algorithm, salts from previous 
+  - Due to changes in the UUIDv5 URI generation algorithm, seeds from previous 
     versions of Ontogen will now generate different URIs. 
-- The paths of the global configuration files have changed:
-  - the system-wide config is now searched for at `/etc/og.ttl`
-  - the user config is now searched for at `~/.og.ttl`
+    This means ...
+- Migration to the extracted Gno library
+- By default, no global configuration files are configured out-of-the-box anymore
+  in the Ontogen library. Global configuration paths must now be explicitly 
+  configured via the `:gno` application's `load_path` configuration. Note, that 
+  the Ontogen CLI still supports the global configuration paths 
+  (see the CHANGELOG of the CLI).
+
 
 
 [Compare v0.1.2...HEAD](https://github.com/ontogen/ontogen/compare/v0.1.2...HEAD)

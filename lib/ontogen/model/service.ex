@@ -1,13 +1,13 @@
 defmodule Ontogen.Service do
   use Grax.Schema
   use Mud.Referencable
-  alias Ontogen.{Repository, Store, Agent}
+  alias Ontogen.{Repository, Agent}
 
   alias Ontogen.NS.Og
 
-  schema Og.Service do
+  schema Og.Service < Gno.Service do
+    # we're inheriting store from Gno.Service
     link repository: Og.serviceRepository(), type: Repository, required: true
-    link store: Og.serviceStore(), type: Store, required: true
     link operator: Og.serviceOperator(), type: Agent, required: true
 
     field :status
@@ -25,14 +25,7 @@ defmodule Ontogen.Service do
     end
   end
 
-  def handle_sparql(operation, %__MODULE__{} = service, graph, opts \\ []) do
-    Store.handle_sparql(operation, service.store, graph_name(service, graph), opts)
+  def handle_sparql(operation, service, graph, opts \\ []) do
+    Gno.Service.handle_sparql(operation, service, graph, opts)
   end
-
-  defp graph_name(_service, nil), do: nil
-  defp graph_name(_service, :all), do: :all
-  defp graph_name(_service, %RDF.IRI{} = graph_name), do: graph_name
-  defp graph_name(service, :repo), do: Repository.graph_id(service.repository)
-  defp graph_name(service, :dataset), do: Repository.dataset_graph_id(service.repository)
-  defp graph_name(service, :history), do: Repository.history_graph_id(service.repository)
 end

@@ -39,7 +39,7 @@ defmodule Ontogen.Commit.Range.Fetcher do
       ?commit og:parentCommit ?parent .
     }
     """
-    |> Ontogen.Store.SPARQL.Operation.construct!()
+    |> Gno.Store.SPARQL.Operation.construct!()
   end
 
   defp chain(history_graph, current, acc \\ [])

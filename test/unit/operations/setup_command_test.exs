@@ -4,11 +4,11 @@ defmodule Ontogen.Operations.SetupCommandTest do
   doctest Ontogen.Operations.SetupCommand
 
   alias Ontogen.Operations.{SetupCommand, RepositoryQuery}
-  alias Ontogen.{Repository, Config}
+  alias Ontogen.{Repository, Manifest}
   alias Ontogen.Repository.{NotSetupError, SetupError}
 
   test "creates graphs for the configured repo" do
-    service = Config.service!()
+    service = Manifest.service!()
     assert {:error, %NotSetupError{}} = RepositoryQuery.call(service)
 
     assert {:ok, %SetupCommand{} = setup_command} = SetupCommand.new()
@@ -21,7 +21,7 @@ defmodule Ontogen.Operations.SetupCommandTest do
   end
 
   test "when the repo already exists" do
-    service = Config.service!()
+    service = Manifest.service!()
     assert {:error, %NotSetupError{}} = RepositoryQuery.call(service)
 
     assert {:ok, %SetupCommand{} = setup_command} = SetupCommand.new()

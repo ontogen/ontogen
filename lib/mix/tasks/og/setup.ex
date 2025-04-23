@@ -12,7 +12,7 @@ defmodule Mix.Tasks.Og.Setup do
     with :ok <- start_deps() do
       Mud.setup()
 
-      case SetupCommand.call(Ontogen.Config.service!()) do
+      case SetupCommand.call(Ontogen.Manifest.service!()) do
         {:ok, _service} -> Mix.Shell.IO.info("Set up Ontogen repository")
         {:error, %SetupError{reason: reason}} -> Mix.raise("setup failed: #{reason}")
         {:error, %{__exception__: true} = e} -> Mix.raise(Exception.message(e))

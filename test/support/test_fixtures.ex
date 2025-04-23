@@ -36,7 +36,7 @@ defmodule Ontogen.TestFixtures do
     |> Enum.reverse()
   end
 
-  def ready_service, do: Ontogen.Config.service!() |> ready_service()
+  def ready_service, do: Ontogen.Manifest.service!() |> ready_service()
 
   def ready_service(service) do
     {:ok, ready_service} =

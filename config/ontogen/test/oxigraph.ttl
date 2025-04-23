@@ -1,0 +1,11 @@
+@prefix : <https://w3id.org/mud#> .
+@prefix og: <https://w3id.org/ontogen#> .
+@prefix gno: <https://w3id.org/gno#> .
+@prefix gnoa: <https://w3id.org/gno/store/adapter/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+[ :this gnoa:Oxigraph
+    ; gno:storeEndpointScheme "http"
+    ; gno:storeEndpointHost "localhost"
+    ; gno:storeEndpointPort 7879
+] .

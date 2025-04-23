@@ -9,6 +9,7 @@ defmodule OntogenCase do
     quote do
       use RDF
 
+      alias Ontogen.{Service, Repository, Dataset, Manifest}
       alias RDF.{IRI, BlankNode, Literal, Graph}
       alias Ontogen.TestData
       alias Ontogen.NS.{Og, OgA}
@@ -19,7 +20,6 @@ defmodule OntogenCase do
       import Ontogen.TestUtils
       import Ontogen.IdUtils
       import Ontogen.Utils
-      import Ontogen.ConfigHelper
 
       alias Ontogen.TestNamespaces.EX
       @compile {:no_warn_undefined, Ontogen.TestNamespaces.EX}

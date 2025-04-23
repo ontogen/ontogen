@@ -1,0 +1,11 @@
+@prefix : <https://w3id.org/ontogen#> .
+@prefix mud: <https://w3id.org/mud#> .
+@prefix oga: <https://w3id.org/ontogen/store/adapter/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+ [ mud:this :Dataset
+    ; dcterms:title "dev dataset"
+    ; dcterms:creator mud:I
+    ; dcterms:publisher mud:I
+] .

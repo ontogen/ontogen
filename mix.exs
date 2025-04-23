@@ -80,6 +80,7 @@ defmodule Ontogen.MixProject do
       rdf_ex_dep(:prov, "~> 0.1"),
       rdf_ex_dep(:dcat, "~> 0.1"),
       rdf_ex_dep(:foaf, "~> 0.1"),
+      rdf_ex_dep(:gno, "~> 0.1"),
       ontogen_dep(:mud, "~> 0.1"),
       # we are using YuriTemplate, because we have it already as a dependency of Grax
       {:yuri_template, "~> 1.1"},
@@ -139,18 +140,9 @@ defmodule Ontogen.MixProject do
           Ontogen.Dataset,
           Ontogen.History,
           Ontogen.Service,
-          Ontogen.Store,
-          Ontogen.Store.Adapter,
-          Ontogen.Store.GenSPARQL,
-          Ontogen.Store.SPARQL.Operation,
           Ontogen.Operation,
           Ontogen.Operation.Command,
           Ontogen.Operation.Query
-        ],
-        "Store Adapter": [
-          Ontogen.Store.Adapters.Fuseki,
-          Ontogen.Store.Adapters.Oxigraph,
-          Ontogen.Store.Adapters.GraphDB
         ],
         Operations: [
           Ontogen.Operations.BootCommand,

@@ -1,0 +1,16 @@
+@prefix : <https://w3id.org/mud#> .
+@prefix og: <https://w3id.org/ontogen#> .
+@prefix gno: <https://w3id.org/gno#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+[ :this gno:Store
+    # Fuseki
+    ; gno:storeQueryEndpoint <http://localhost:3030/ontogen-test-dataset/query>
+    ; gno:storeUpdateEndpoint <http://localhost:3030/ontogen-test-dataset/update>
+    ; gno:storeGraphStoreEndpoint <http://localhost:3030/ontogen-test-dataset/data>
+
+    # Oxigraph
+#    ; gno:storeQueryEndpoint <http://localhost:7879/query>
+#    ; gno:storeUpdateEndpoint <http://localhost:7879/update>
+#    ; gno:storeGraphStoreEndpoint <http://localhost:7879/store>
+] .

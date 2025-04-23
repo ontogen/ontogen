@@ -3,9 +3,8 @@ defmodule Ontogen.ServiceTest do
 
   doctest Ontogen.Service
 
-  alias Ontogen.Config
-  alias Ontogen.Store.SPARQL.Operation
-  alias Ontogen.Service
+  alias Ontogen.{Service, Manifest}
+  alias Gno.Store.SPARQL.Operation
 
   describe "handle/4" do
     test "default graph" do
@@ -13,7 +12,7 @@ defmodule Ontogen.ServiceTest do
              |> EX.p(EX.O)
              |> RDF.graph()
              |> Operation.insert_data!()
-             |> Service.handle_sparql(Config.service!(), nil) ==
+             |> Service.handle_sparql(Manifest.service!(), nil) ==
                :ok
 
       assert {:ok,
@@ -28,7 +27,7 @@ defmodule Ontogen.ServiceTest do
               }} =
                "SELECT * WHERE { ?s ?p ?o . }"
                |> Operation.select!()
-               |> Service.handle_sparql(Config.service!(), nil)
+               |> Service.handle_sparql(Manifest.service!(), nil)
     end
 
     test "named graph" do
@@ -36,7 +35,7 @@ defmodule Ontogen.ServiceTest do
              |> EX.p(EX.O)
              |> RDF.graph()
              |> Operation.insert_data!()
-             |> Service.handle_sparql(Config.service!(), :dataset) ==
+             |> Service.handle_sparql(Manifest.service!(), :dataset) ==
                :ok
 
       assert {:ok,
@@ -51,7 +50,7 @@ defmodule Ontogen.ServiceTest do
               }} =
                "SELECT * WHERE { ?s ?p ?o . }"
                |> Operation.select!()
-               |> Service.handle_sparql(Config.service!(), :dataset)
+               |> Service.handle_sparql(Manifest.service!(), :dataset)
 
       graph =
         EX.S2
@@ -60,12 +59,12 @@ defmodule Ontogen.ServiceTest do
 
       assert graph
              |> Operation.insert_data!()
-             |> Service.handle_sparql(Config.service!(), :repo) ==
+             |> Service.handle_sparql(Manifest.service!(), :repo) ==
                :ok
 
       assert "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o . }"
              |> Operation.construct!()
-             |> Service.handle_sparql(Config.service!(), :repo) ==
+             |> Service.handle_sparql(Manifest.service!(), :repo) ==
                {:ok, graph}
     end
   end

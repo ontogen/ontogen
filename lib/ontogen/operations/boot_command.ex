@@ -28,7 +28,7 @@ defmodule Ontogen.Operations.BootCommand do
   def call(%__MODULE__{service_config: service_config} = command) do
     if command.log, do: Logger.info("Loading service config")
 
-    with {:ok, service} <- Ontogen.Config.service(:this, service_config) do
+    with {:ok, service} <- Ontogen.Manifest.service(service_config) do
       call(command, service)
     end
   end
