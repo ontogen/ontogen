@@ -82,8 +82,6 @@ defmodule Ontogen.MixProject do
       rdf_ex_dep(:foaf, "~> 0.1"),
       rdf_ex_dep(:gno, "~> 0.1"),
       ontogen_dep(:mud, "~> 0.1"),
-      # we are using YuriTemplate, because we have it already as a dependency of Grax
-      {:yuri_template, "~> 1.1"},
       {:timex, "~> 3.7"},
       {:hackney, "~> 1.17"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
