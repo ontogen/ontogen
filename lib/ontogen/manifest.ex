@@ -30,6 +30,22 @@ defmodule Ontogen.Manifest do
   def service_structure, do: @service_structure
 
   @impl true
+  def generator_template do
+    Application.get_env(
+      :ontogen,
+      :manifest_template_dir,
+      :ontogen |> :code.priv_dir() |> Path.join("manifest_template")
+    )
+  end
+
+  @impl true
+  def generate(project_dir, opts \\ []) do
+    with :ok <- super(project_dir, opts) do
+      Mud.setup(project_dir)
+    end
+  end
+
+  @impl true
   def init_graph(_opts), do: Mud.process(@service_structure)
 
   @impl true

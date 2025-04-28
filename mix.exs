@@ -162,10 +162,6 @@ defmodule Ontogen.MixProject do
           Ontogen.HistoryType.Raw,
           Ontogen.HistoryType.Formatter
         ],
-        Config: [
-          Ontogen.Config,
-          Ontogen.Config.Generator
-        ],
         Namespaces: [
           Ontogen.NS,
           Ontogen.NS.Og,

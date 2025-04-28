@@ -5,8 +5,8 @@ config :mud,
 
 config :gno,
   env: Mix.env(),
-  load_path: "config/ontogen",
-  manifest_adapter: Ontogen.Manifest.Adapter
+  manifest_type: Ontogen.Manifest,
+  load_path: "config/ontogen"
 
 config :sparql_client,
   protocol_version: "1.1",
