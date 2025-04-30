@@ -23,6 +23,12 @@ defmodule OntogenCase do
 
       alias Ontogen.TestNamespaces.EX
       @compile {:no_warn_undefined, Ontogen.TestNamespaces.EX}
+
+      setup :clean_manifest_cache
     end
+  end
+
+  def clean_manifest_cache(_) do
+    Gno.Manifest.Cache.clear()
   end
 end
