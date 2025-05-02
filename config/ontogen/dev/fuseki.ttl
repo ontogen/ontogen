@@ -4,7 +4,7 @@
 @prefix gnoa: <https://w3id.org/gno/store/adapter/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 
-[ :this oga:Fuseki
+[ :this gnoa:Fuseki
     ; gno:storeEndpointScheme "http"
     ; gno:storeEndpointHost "localhost"
     ; gno:storeEndpointPort 3030
