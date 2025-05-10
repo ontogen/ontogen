@@ -27,6 +27,19 @@ defmodule Ontogen.Proposition do
 
   def new!(statements \\ []), do: bang!(&new/1, [statements])
 
+  @doc false
+  def changeset_struct(struct, changeset) do
+    with_propositions =
+      changeset
+      |> Map.from_struct()
+      |> Enum.map(fn
+        {action, %Graph{} = graph} -> {action, new!(graph)}
+        {_, nil} = empty -> empty
+      end)
+
+    struct(struct, with_propositions)
+  end
+
   def on_load(%{} = proposition, graph, _opts) do
     {
       :ok,
@@ -53,4 +66,8 @@ defmodule Ontogen.Proposition do
 
   def graph(nil), do: nil
   def graph(%__MODULE__{statements: compound}), do: Compound.graph(compound)
+
+  defimpl Gno.Changeset.Action.Graph do
+    def graph(proposition, _action), do: Ontogen.Proposition.graph(proposition)
+  end
 end

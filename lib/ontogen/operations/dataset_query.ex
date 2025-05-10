@@ -3,7 +3,7 @@ defmodule Ontogen.Operations.DatasetQuery do
 
   alias Ontogen.Service
 
-  import Ontogen.QueryUtils, only: [graph_query: 0]
+  import Gno.QueryUtils, only: [graph_query: 0]
 
   api do
     def dataset do

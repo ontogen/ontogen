@@ -1,13 +1,13 @@
 defmodule Ontogen.SpeechAct do
   use Grax.Schema
 
-  alias Ontogen.{Proposition, Changeset, Manifest, Utils, InvalidSpeechActError}
-  alias Ontogen.Changeset.Action
-  alias Ontogen.SpeechAct.{Id, Changeset}
+  alias Ontogen.{Proposition, Manifest, Utils, InvalidSpeechActError}
+  alias Ontogen.SpeechAct.Id
   alias Ontogen.NS.Og
+  alias Gno.Changeset
+  alias Gno.Changeset.Action
   alias RDF.Graph
 
-  import Ontogen.Changeset.Helper, only: [copy_to_proposition_struct: 2]
   import Ontogen.Utils, only: [bang!: 2]
 
   @args_keys Action.fields() ++ [:speaker, :speech_act_time, :data_source]
@@ -71,7 +71,7 @@ defmodule Ontogen.SpeechAct do
   end
 
   def update_changeset(%__MODULE__{} = speech_act, %Changeset{} = changeset) do
-    speech_act = copy_to_proposition_struct(changeset, speech_act)
+    speech_act = Proposition.changeset_struct(speech_act, changeset)
 
     speech_act
     |> Grax.reset_id(Id.generate(speech_act))

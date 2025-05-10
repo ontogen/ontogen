@@ -5,7 +5,7 @@ defmodule Ontogen.Operations.ChangesetQuery do
     ]
 
   alias Ontogen.Operations.HistoryQuery
-  alias Ontogen.Commit
+  alias Gno.EffectiveChangeset
 
   api do
     def changeset(args \\ []) do
@@ -55,10 +55,10 @@ defmodule Ontogen.Operations.ChangesetQuery do
       history
       |> Enum.map(
         &(&1
-          |> Commit.Changeset.new!()
-          |> Commit.Changeset.limit(subject_type, subject))
+          |> EffectiveChangeset.new!()
+          |> EffectiveChangeset.limit(subject_type, subject))
       )
-      |> Commit.Changeset.merge()
+      |> EffectiveChangeset.merge()
 
     {:ok, changeset}
   end

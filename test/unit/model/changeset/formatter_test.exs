@@ -4,7 +4,8 @@ defmodule Ontogen.Changeset.FormatterTest do
   doctest Ontogen.Changeset.Formatter
 
   alias Ontogen.Changeset.Formatter
-  alias Ontogen.Commit
+  alias Gno.EffectiveChangeset
+  import Gno.Utils
 
   describe "short_stat" do
     test "commit" do
@@ -122,8 +123,6 @@ defmodule Ontogen.Changeset.FormatterTest do
           update: 1..100 |> Enum.map(&{10, &1}) |> graph()
         )
 
-      #      IO.puts("\n" <> Formatter.format(large_commit, :stat))
-
       assert_no_line_wrap(Formatter.format(large_commit, :stat, color: false))
 
       large_resource =
@@ -134,8 +133,6 @@ defmodule Ontogen.Changeset.FormatterTest do
             ]),
           remove: 1..100 |> Enum.map(&{10, &1}) |> graph()
         )
-
-      #      IO.puts("\n" <> Formatter.format(large_resource, :stat))
 
       assert_no_line_wrap(Formatter.format(large_resource, :stat, color: false))
     end
@@ -221,7 +218,7 @@ defmodule Ontogen.Changeset.FormatterTest do
                """
                |> String.trim_trailing()
 
-      assert Commit.Changeset.new!(
+      assert EffectiveChangeset.new!(
                add: graph([1]),
                update: graph([2, {1, 2}], prefixes: [ex: EX]),
                overwrite: graph([{2, 1}])
@@ -241,7 +238,7 @@ defmodule Ontogen.Changeset.FormatterTest do
     end
 
     test ":context_data opt" do
-      assert Commit.Changeset.new!(
+      assert EffectiveChangeset.new!(
                add: graph([1]),
                update: graph([2, {1, 2}], prefixes: [ex: EX]),
                overwrite: graph([{2, 1}])

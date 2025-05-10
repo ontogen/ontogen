@@ -5,10 +5,11 @@ defmodule Ontogen.Operations.RevertCommandTest do
 
   alias Ontogen.{
     Commit,
-    InvalidChangesetError,
     InvalidCommitRangeError,
     EmptyRepositoryError
   }
+
+  alias Gno.InvalidChangesetError
 
   import Ontogen.IdUtils
 

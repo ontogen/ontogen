@@ -12,7 +12,7 @@ defmodule Ontogen.Operations.RevisionQuery do
 
   alias Ontogen.Service
 
-  import Ontogen.QueryUtils, only: [to_term: 1]
+  import Gno.QueryUtils, only: [to_term: 1]
 
   api do
     def revision(resources, args \\ []) do

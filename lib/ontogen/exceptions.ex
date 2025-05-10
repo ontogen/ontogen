@@ -92,21 +92,6 @@ defmodule Ontogen.InvalidCommitRangeError do
   end
 end
 
-defmodule Ontogen.InvalidChangesetError do
-  @moduledoc """
-  Raised on invalid `Ontogen.Changeset` args.
-  """
-  defexception [:reason]
-
-  def message(%{reason: :empty}) do
-    "Invalid changeset: no changes provided"
-  end
-
-  def message(%{reason: reason}) do
-    "Invalid changeset: #{reason}"
-  end
-end
-
 defmodule Ontogen.IdGenerationError do
   @moduledoc """
   Raised on failing id generations.
@@ -146,16 +131,5 @@ defmodule Ontogen.Repository.SetupError do
 
   def message(%{service: service, reason: :already_setup}) do
     "Repository of service #{inspect(service)} already setup on the store"
-  end
-end
-
-defmodule Ontogen.NoEffectiveChanges do
-  @moduledoc """
-  Raised when some changes wouldn't have any effects against the current repository.
-  """
-  defexception []
-
-  def message(%__MODULE__{}) do
-    "No effective changes."
   end
 end

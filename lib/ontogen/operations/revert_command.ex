@@ -13,6 +13,7 @@ defmodule Ontogen.Operations.RevertCommand do
     CommitCommand
   }
 
+  alias Gno.EffectiveChangeset
   alias RDF.IRI
 
   api do
@@ -79,8 +80,9 @@ defmodule Ontogen.Operations.RevertCommand do
   defp changeset(commits) do
     {:ok,
      commits
-     |> Commit.Changeset.merge()
-     |> Commit.Changeset.invert()}
+     |> Enum.map(&EffectiveChangeset.new!/1)
+     |> EffectiveChangeset.merge()
+     |> EffectiveChangeset.invert()}
   end
 
   defp commit_args(%__MODULE__{} = command, changeset, commits) do

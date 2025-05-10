@@ -7,7 +7,7 @@ defmodule Ontogen.Operations.RepositoryQuery do
   alias Ontogen.NS.Og
   alias RDF.PrefixMap
 
-  import Ontogen.QueryUtils, only: [graph_query: 0]
+  import Gno.QueryUtils, only: [graph_query: 0]
 
   @default_preloading_depth 2
 

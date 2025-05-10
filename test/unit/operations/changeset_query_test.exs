@@ -3,7 +3,7 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
 
   doctest Ontogen.Operations.ChangesetQuery
 
-  alias Ontogen.Commit.Changeset
+  alias Gno.EffectiveChangeset
   alias Ontogen.{InvalidCommitRangeError, EmptyRepositoryError}
 
   describe "Ontogen.changeset/1" do
@@ -22,7 +22,7 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
       [fourth, third, second, _first] = init_history()
 
       assert Ontogen.changeset!(base: second) ==
-               Changeset.merge([third, fourth])
+               merged([third, fourth])
 
       assert Ontogen.changeset!(base: fourth) == nil
     end
@@ -31,36 +31,36 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
       [fourth, _third, second, first] = history = init_history()
 
       assert Ontogen.changeset!(target: fourth.__id__) ==
-               history |> Enum.reverse() |> Changeset.merge()
+               history |> Enum.reverse() |> merged()
 
       assert Ontogen.changeset!(target: second.__id__) ==
-               Changeset.merge([first, second])
+               merged([first, second])
     end
 
     test "with a specified base and target commit" do
       [fourth, third, second, first] = init_history()
 
       assert Ontogen.changeset!(base: first.__id__, target: fourth.__id__) ==
-               Changeset.merge([second, third, fourth])
+               merged([second, third, fourth])
 
       assert Ontogen.changeset!(base: second.__id__, target: third.__id__) ==
-               Changeset.new!(third)
+               EffectiveChangeset.new!(third)
     end
 
     test "with relative base commit" do
       [fourth, third, second, first] = history = init_history()
 
       assert Ontogen.changeset(base: 1) ==
-               Changeset.new(fourth)
+               EffectiveChangeset.new(fourth)
 
       assert Ontogen.changeset!(base: 4) ==
-               Changeset.merge(Enum.reverse(history))
+               merged(Enum.reverse(history))
 
       assert Ontogen.changeset(target: third, base: 1) ==
-               Changeset.new(third)
+               EffectiveChangeset.new(third)
 
       assert Ontogen.changeset!(target: second, base: 2) ==
-               Changeset.merge([second, first])
+               merged([second, first])
     end
 
     test "when the specified target commit comes later than the base commit" do
@@ -106,7 +106,7 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
         ])
 
       assert Ontogen.changeset!() ==
-               Changeset.merge([first, second, third, fourth])
+               merged([first, second, third, fourth])
     end
 
     defp init_history do
@@ -153,7 +153,7 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
       changeset = Ontogen.changeset!(resource: EX.S1)
 
       assert changeset == Ontogen.changeset!(resource: EX.S1, target: target_commit)
-      assert changeset == Changeset.new!(replace: [{EX.S1, EX.p2(), EX.O2}])
+      assert changeset == EffectiveChangeset.new!(replace: [{EX.S1, EX.p2(), EX.O2}])
     end
 
     test "with a specified base commit" do
@@ -180,7 +180,7 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
       [fourth, third, second, first] = init_resource_history()
 
       assert Ontogen.changeset(resource: EX.S1, base: second, target: third) ==
-               Changeset.new(third)
+               EffectiveChangeset.new(third)
 
       assert Ontogen.changeset(resource: EX.S1, base: first, target: fourth) ==
                {:ok, resource_limited_merge([second, third, fourth], EX.S1)}
@@ -197,13 +197,14 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
       commits
       |> Enum.map(
         &(&1
-          |> Changeset.new!()
-          |> Changeset.limit(:resource, subject))
+          |> EffectiveChangeset.new!()
+          |> EffectiveChangeset.limit(:resource, subject))
       )
-      |> Changeset.merge()
+      |> merged()
     end
 
     defp init_resource_history do
+      # TODO: add branch, when possible, to test it gets ignored
       [fourth, _, _, third, second, _, first] =
         init_commit_history([
           [
@@ -244,5 +245,11 @@ defmodule Ontogen.Operations.ChangesetQueryTest do
 
       [fourth, third, second, first]
     end
+  end
+
+  defp merged(commits) do
+    commits
+    |> Enum.map(&EffectiveChangeset.new!/1)
+    |> EffectiveChangeset.merge()
   end
 end

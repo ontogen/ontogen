@@ -11,14 +11,14 @@ defmodule Ontogen.Operations.CommitCommand do
     Service,
     Repository,
     Commit,
-    Changeset,
     SpeechAct,
-    InvalidCommitError,
-    NoEffectiveChanges
+    InvalidCommitError
   }
 
   alias Ontogen.Operations.EffectiveChangesetQuery
   alias Ontogen.Operations.CommitCommand.Update
+  alias Gno.Changeset
+  alias Gno.NoEffectiveChanges
 
   import Ontogen.Utils, only: [bang!: 2]
 
@@ -134,7 +134,8 @@ defmodule Ontogen.Operations.CommitCommand do
   end
 
   defp apply_commit(commit, additional_prov_metadata, service) do
-    with {:ok, update} <- Update.build(service.repository, commit, additional_prov_metadata),
+    with {:ok, update} <-
+           Update.build(service.repository, commit, additional_prov_metadata),
          :ok <- Service.handle_sparql(update, service, nil),
          {:ok, new_service} <- Service.set_head(service, commit) do
       {:ok, new_service, commit}

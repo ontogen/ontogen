@@ -18,7 +18,8 @@ defmodule Ontogen.TestFactories do
     SpeechAct
   }
 
-  alias Ontogen.Changeset.Action
+  alias Gno.{Changeset, EffectiveChangeset}
+  alias Gno.Changeset.Action
 
   alias Ontogen.TestNamespaces.EX
   @compile {:no_warn_undefined, Ontogen.TestNamespaces.EX}
@@ -218,13 +219,13 @@ defmodule Ontogen.TestFactories do
   def commit_changeset(attrs \\ []) do
     attrs
     |> changeset_attrs()
-    |> Commit.Changeset.new!()
+    |> EffectiveChangeset.new!()
   end
 
   def speech_act_changeset(attrs \\ []) do
     attrs
     |> changeset_attrs()
-    |> SpeechAct.Changeset.new!()
+    |> Changeset.new!()
   end
 
   def speech_act(attrs \\ []) do
@@ -321,8 +322,8 @@ defmodule Ontogen.TestFactories do
       else
         commits
         |> Enum.reverse()
-        |> Commit.Changeset.merge()
-        |> Commit.Changeset.invert()
+        |> EffectiveChangeset.merge()
+        |> EffectiveChangeset.invert()
       end
 
     attrs

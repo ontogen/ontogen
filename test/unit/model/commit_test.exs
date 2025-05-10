@@ -3,7 +3,8 @@ defmodule Ontogen.CommitTest do
 
   doctest Ontogen.Commit
 
-  alias Ontogen.{Commit, Proposition, Manifest, InvalidChangesetError}
+  alias Ontogen.{Commit, Proposition, Manifest}
+  alias Gno.InvalidChangesetError
 
   test "id stability" do
     assert {:ok,

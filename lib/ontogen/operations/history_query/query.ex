@@ -3,7 +3,7 @@ defmodule Ontogen.Operations.HistoryQuery.Query do
 
   alias RDF.PrefixMap
 
-  import Ontogen.QueryUtils
+  import Gno.QueryUtils
 
   def build(operation) do
     operation.subject

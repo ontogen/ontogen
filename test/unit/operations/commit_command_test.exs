@@ -8,9 +8,10 @@ defmodule Ontogen.Operations.CommitCommandTest do
     History,
     SpeechAct,
     Proposition,
-    InvalidCommitError,
-    NoEffectiveChanges
+    InvalidCommitError
   }
+
+  alias Gno.NoEffectiveChanges
 
   test "initial commit with implicit speech_act" do
     assert Ontogen.head() == Commit.root()

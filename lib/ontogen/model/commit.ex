@@ -2,12 +2,12 @@ defmodule Ontogen.Commit do
   use Grax.Schema
 
   alias Ontogen.{Proposition, SpeechAct, Manifest}
-  alias Ontogen.Commit.{Id, Changeset}
+  alias Ontogen.Commit.Id
   alias Ontogen.Commit.Formatter
   alias Ontogen.NS.Og
+  alias Gno.EffectiveChangeset
   alias RDF.Graph
 
-  import Ontogen.Changeset.Helper, only: [copy_to_proposition_struct: 2]
   import Ontogen.Utils, only: [bang!: 2]
 
   schema Og.Commit do
@@ -40,7 +40,7 @@ defmodule Ontogen.Commit do
   @root RDF.iri(Og.CommitRoot)
   def root, do: @root
 
-  def new(%Changeset{} = changeset, args) do
+  def new(%EffectiveChangeset{} = changeset, args) do
     args =
       args
       |> Keyword.put_new(:parent, @root)
@@ -55,7 +55,7 @@ defmodule Ontogen.Commit do
   end
 
   def new(args) do
-    with {:ok, changeset, args} <- Changeset.extract(args) do
+    with {:ok, changeset, args} <- EffectiveChangeset.extract(args) do
       new(changeset, args)
     end
   end
@@ -63,7 +63,7 @@ defmodule Ontogen.Commit do
   def new!(args \\ []), do: bang!(&new/1, [args])
 
   defp init(commit, changeset) do
-    commit = copy_to_proposition_struct(changeset, commit)
+    commit = Proposition.changeset_struct(commit, changeset)
     Grax.reset_id(commit, Id.generate(commit))
   end
 

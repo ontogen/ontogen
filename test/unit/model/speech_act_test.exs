@@ -3,7 +3,8 @@ defmodule Ontogen.SpeechActTest do
 
   doctest Ontogen.SpeechAct
 
-  alias Ontogen.{SpeechAct, Manifest, InvalidChangesetError}
+  alias Ontogen.{SpeechAct, Manifest}
+  alias Gno.InvalidChangesetError
 
   test "id stability" do
     assert {:ok,

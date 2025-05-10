@@ -13,7 +13,7 @@ defmodule Ontogen.Operations.HistoryQuery do
   alias Ontogen.{Commit, HistoryType, Service}
   alias RDF.{Triple, Statement}
 
-  import Ontogen.QueryUtils, only: [graph_query: 0]
+  import Gno.QueryUtils, only: [graph_query: 0]
   import RDF.Guards
 
   @full_history_range Commit.Range.new!(:root, :head)
