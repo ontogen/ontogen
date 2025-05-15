@@ -146,13 +146,13 @@ Marcel Otto - [@marcelotto@mastodon.social](https://mastodon.social/@marcelotto)
 <tr>  
 <td><a href="https://nlnet.nl/"><img src="https://nlnet.nl/logo/banner.svg" alt="NLnet Foundation Logo" height="100"></a></td>  
 <td><a href="https://nlnet.nl/assure" ><img src="https://nlnet.nl/logo/NGI/NGIAssure.purpleblue.hex.svg" alt="NGI Assure Logo" height="150"></a></td>  
-<td><a href="https://www.jetbrains.com/?from=RDF.ex"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" alt="JetBrains Logo" height="150"></a></td>  
+<td><a href="https://jb.gg/OpenSource"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg" alt="JetBrains Logo" width="150"></a></td>
 </tr>  
 </table>  
   
 This project is funded through [NGI Assure](https://nlnet.nl/assure), a fund established by [NLnet](https://nlnet.nl/) with financial support from the European Commission's [Next Generation Internet](https://ngi.eu/) program.
   
-[JetBrains](https://www.jetbrains.com/?from=RDF.ex) supports the project with complimentary access to its development environments.
+[JetBrains](https://jb.gg/OpenSource) supports the project with complimentary access to its development environments.
 
 
 ## License
