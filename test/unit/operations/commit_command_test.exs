@@ -511,6 +511,41 @@ defmodule Ontogen.Operations.CommitCommandTest do
 
       assert_repo_state(last_commit, last_dataset, last_history)
     end
+
+    test "when there are no remaining changes; with on_no_effective_changes: :skip" do
+      [last_commit] = init_commit_history()
+      last_dataset = Ontogen.dataset!()
+      last_history = Ontogen.history!()
+
+      assert Ontogen.commit(
+               add: Proposition.graph(last_commit.add),
+               committer: agent(:agent_jane),
+               message: "Second commit",
+               time: datetime(),
+               on_no_effective_changes: :skip
+             ) ==
+               {:ok, %NoEffectiveChanges{}}
+
+      assert_repo_state(last_commit, last_dataset, last_history)
+    end
+
+    test "when there are no remaining changes; with on_no_effective_changes: :proceed" do
+      [last_commit] = init_commit_history()
+      last_dataset = Ontogen.dataset!()
+      last_history = Ontogen.history!()
+
+      assert_raise ArgumentError, "Invalid :on_no_effective_changes value: :proceed", fn ->
+        Ontogen.commit(
+          add: Proposition.graph(last_commit.add),
+          committer: agent(:agent_jane),
+          message: "Second commit",
+          time: datetime(),
+          on_no_effective_changes: :proceed
+        )
+      end
+
+      assert_repo_state(last_commit, last_dataset, last_history)
+    end
   end
 
   defp assert_repo_state(head, dataset, history) do

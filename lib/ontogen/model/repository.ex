@@ -41,4 +41,9 @@ defmodule Ontogen.Repository do
 
   def graph_id(repository, :history), do: history_graph_id(repository)
   def graph_id(repository, name), do: Gno.Repository.graph_id(repository, name)
+
+  # for now we assume that the graph name is the same as the graph id
+  def graph_name(repository, graph_id) do
+    graph_id(repository, graph_id)
+  end
 end

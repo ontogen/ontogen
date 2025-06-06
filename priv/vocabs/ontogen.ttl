@@ -89,7 +89,7 @@ og:SpeechAct a rdfs:Class
 
 
 og:Commit a rdfs:Class
-    ; rdfs:subClassOf prov:Activity
+    ; rdfs:subClassOf prov:Activity, gno:Commit
     ; rdfs:label "Commit"
     ; rdfs:comment "Represents set of changes made to a repository. A commit encapsulates the effective changes resulting from applying a SpeechAct to the current state of the repository."
 .

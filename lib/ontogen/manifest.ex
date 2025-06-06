@@ -22,7 +22,7 @@ defmodule Ontogen.Manifest do
                              ; og:repositoryDataset [ :this og:Dataset ]
                              ; og:repositoryHistory [ :this og:History ]
                          ]
-
+                         ; gno:serviceCommitOperation [ :this og:CommitOperation ]
                          ; og:serviceOperator :I
                      ] .
                      """

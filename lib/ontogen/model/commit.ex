@@ -10,6 +10,7 @@ defmodule Ontogen.Commit do
 
   import Ontogen.Utils, only: [bang!: 2]
 
+  # we don't make the Gno.Commit super class explicit here, since we don't want to inherit the changeset field
   schema Og.Commit do
     link parent: Og.parentCommit(),
          type: Ontogen.Commit,

@@ -4,7 +4,7 @@ defmodule Ontogen.ManifestTest do
   doctest Ontogen.Manifest
 
   alias Ontogen.Manifest
-  alias Ontogen.{Service, Repository, Dataset, History, Agent}
+  alias Ontogen.{Service, Repository, Dataset, History, Agent, CommitOperation}
   alias Gno.Store.Adapters.{Oxigraph, Fuseki, GraphDB}
 
   import RDF.Sigils
@@ -24,7 +24,11 @@ defmodule Ontogen.ManifestTest do
                 repository: %Repository{
                   dataset: %Dataset{}
                 },
-                store: %@configured_store_adapter{}
+                store: %@configured_store_adapter{},
+                commit_operation: %CommitOperation{
+                  __id__: %RDF.IRI{value: _},
+                  middlewares: [%Ontogen.CommitMiddleware{}]
+                }
               }
             }} =
              Manifest.manifest()
