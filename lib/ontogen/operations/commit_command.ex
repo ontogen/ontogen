@@ -3,7 +3,7 @@ defmodule Ontogen.Operations.CommitCommand do
     params: [
       changes: nil,
       commit_type: nil,
-      additional_prov_metadata: nil,
+      additional_metadata: nil,
       on_no_effective_changes: nil,
       commit_attrs: nil
     ]
@@ -25,14 +25,13 @@ defmodule Ontogen.Operations.CommitCommand do
 
   def new(args) do
     {no_effective_change_handler, args} = extract_no_effective_change_handler(args)
-    {additional_prov_metadata, args} = Keyword.pop(args, :additional_prov_metadata)
+    {additional_metadata, args} = Keyword.pop(args, :additional_metadata)
 
     with {:ok, command} <- do_new(extract_speech_act(args), Keyword.pop(args, :revert)) do
       {:ok,
        %__MODULE__{
          command
-         | additional_prov_metadata:
-             additional_prov_metadata && RDF.graph(additional_prov_metadata),
+         | additional_metadata: additional_metadata && RDF.graph(additional_metadata),
            on_no_effective_changes: no_effective_change_handler
        }}
     end

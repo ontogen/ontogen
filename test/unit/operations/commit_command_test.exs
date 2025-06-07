@@ -127,7 +127,7 @@ defmodule Ontogen.Operations.CommitCommandTest do
                committer: committer,
                time: datetime(),
                message: message,
-               additional_prov_metadata: graph([1, Grax.to_rdf!(data_source)])
+               additional_metadata: graph([1, Grax.to_rdf!(data_source)])
              )
 
     assert commit.parent == Commit.root()

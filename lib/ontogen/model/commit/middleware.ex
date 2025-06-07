@@ -23,7 +23,7 @@ defmodule Ontogen.CommitMiddleware do
       {:ok, commit_command,
        processor
        |> setup_on_no_effective_changes(commit_command)
-       |> setup_additional_prov_metadata(commit_command)
+       |> setup_additional_metadata(commit_command)
        |> Processor.assign(@commit_command_assign, commit_command)}
     end
   end
@@ -40,9 +40,9 @@ defmodule Ontogen.CommitMiddleware do
     }
   end
 
-  defp setup_additional_prov_metadata(processor, %{additional_prov_metadata: nil}), do: processor
+  defp setup_additional_metadata(processor, %{additional_metadata: nil}), do: processor
 
-  defp setup_additional_prov_metadata(processor, %{additional_prov_metadata: metadata}) do
+  defp setup_additional_metadata(processor, %{additional_metadata: metadata}) do
     Processor.add_metadata(processor, metadata)
   end
 
