@@ -5,7 +5,8 @@ defmodule Ontogen.Operations.SetupCommandTest do
 
   alias Ontogen.Operations.{SetupCommand, RepositoryQuery}
   alias Ontogen.{Repository, Manifest}
-  alias Ontogen.Repository.{NotSetupError, SetupError}
+  alias Ontogen.Repository.NotSetupError
+  alias Gno.Service.SetupError
 
   test "creates graphs for the configured repo" do
     service = Manifest.service!()

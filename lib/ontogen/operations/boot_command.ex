@@ -5,6 +5,7 @@ defmodule Ontogen.Operations.BootCommand do
   alias Ontogen.{Service, Repository}
   alias Ontogen.Operations.RepositoryQuery
   alias Ontogen.Repository.NotSetupError
+  alias Ontogen.Service.Setup.Extension
 
   api do
     def boot(opts \\ []) do
@@ -43,7 +44,8 @@ defmodule Ontogen.Operations.BootCommand do
   def call(%__MODULE__{} = command, service) do
     if command.log, do: Logger.info("Booting service #{service.__id__}")
 
-    with {:ok, stored_repo} <- RepositoryQuery.call(service),
+    with :ok <- check_setup(service),
+         {:ok, stored_repo} <- RepositoryQuery.call(service),
          {:ok, synced_repo} <- merge_sync(service, stored_repo) do
       {:ok, Service.set_status(synced_repo, :ready)}
     else
@@ -63,5 +65,21 @@ defmodule Ontogen.Operations.BootCommand do
 
   defp merge_sync(%Repository{} = _configured, %Repository{} = stored) do
     {:ok, stored}
+  end
+
+  def check_setup(service, opts \\ []) do
+    case Gno.Service.Setup.check(service, Keyword.put(opts, :extension, Extension)) do
+      :ok ->
+        :ok
+
+      {:error, %Gno.Store.UnavailableError{}} ->
+        {:ok, Service.set_status(service, :not_setup)}
+
+      {:error, :repository_not_found} ->
+        {:ok, Service.set_status(service, :not_setup)}
+
+      {:error, _} = error ->
+        error
+    end
   end
 end

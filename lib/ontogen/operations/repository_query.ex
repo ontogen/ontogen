@@ -74,11 +74,11 @@ defmodule Ontogen.Operations.RepositoryQuery do
     ASK WHERE { <#{repository.__id__}> a og:Repository . }
     """
     |> Operation.ask!()
-    |> Service.handle_sparql(service, :repo)
+    |> Service.handle_sparql(service, graph: :repo)
   end
 
   defp repository_graph(service) do
-    with {:ok, graph} <- Service.handle_sparql(graph_query(), service, :repo) do
+    with {:ok, graph} <- Service.handle_sparql(graph_query(), service, graph: :repo) do
       if repository_exists?(graph, service.repository) do
         {:ok, graph}
       else

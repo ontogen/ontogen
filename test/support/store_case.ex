@@ -18,6 +18,8 @@ defmodule Ontogen.StoreCase do
   end
 
   def clean_store!(_) do
-    :ok = Store.handle_sparql(Operation.drop!(), Ontogen.Manifest.store!(), :all)
+    store = Ontogen.Manifest.store!()
+    :ok = Gno.Store.setup(store)
+    :ok = Store.handle_sparql(Operation.drop!(), store, :all)
   end
 end

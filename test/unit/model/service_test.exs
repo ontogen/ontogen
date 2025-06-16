@@ -12,7 +12,7 @@ defmodule Ontogen.ServiceTest do
              |> EX.p(EX.O)
              |> RDF.graph()
              |> Operation.insert_data!()
-             |> Service.handle_sparql(Manifest.service!(), nil) ==
+             |> Service.handle_sparql(Manifest.service!(), graph: nil) ==
                :ok
 
       assert {:ok,
@@ -27,7 +27,7 @@ defmodule Ontogen.ServiceTest do
               }} =
                "SELECT * WHERE { ?s ?p ?o . }"
                |> Operation.select!()
-               |> Service.handle_sparql(Manifest.service!(), nil)
+               |> Service.handle_sparql(Manifest.service!(), graph: nil)
     end
 
     test "named graph" do
@@ -35,7 +35,7 @@ defmodule Ontogen.ServiceTest do
              |> EX.p(EX.O)
              |> RDF.graph()
              |> Operation.insert_data!()
-             |> Service.handle_sparql(Manifest.service!(), :dataset) ==
+             |> Service.handle_sparql(Manifest.service!(), graph: :dataset) ==
                :ok
 
       assert {:ok,
@@ -50,7 +50,7 @@ defmodule Ontogen.ServiceTest do
               }} =
                "SELECT * WHERE { ?s ?p ?o . }"
                |> Operation.select!()
-               |> Service.handle_sparql(Manifest.service!(), :dataset)
+               |> Service.handle_sparql(Manifest.service!(), graph: :dataset)
 
       graph =
         EX.S2
@@ -59,12 +59,12 @@ defmodule Ontogen.ServiceTest do
 
       assert graph
              |> Operation.insert_data!()
-             |> Service.handle_sparql(Manifest.service!(), :repo) ==
+             |> Service.handle_sparql(Manifest.service!(), graph: :repo) ==
                :ok
 
       assert "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o . }"
              |> Operation.construct!()
-             |> Service.handle_sparql(Manifest.service!(), :repo) ==
+             |> Service.handle_sparql(Manifest.service!(), graph: :repo) ==
                {:ok, graph}
     end
   end

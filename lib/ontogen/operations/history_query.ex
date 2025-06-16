@@ -95,7 +95,7 @@ defmodule Ontogen.Operations.HistoryQuery do
   def call(%__MODULE__{}, {:error, _} = error), do: error
 
   def call(%__MODULE__{subject_type: :dataset, range: @full_history_range} = operation, service) do
-    with {:ok, graph} <- Service.handle_sparql(graph_query(), service, :history),
+    with {:ok, graph} <- Service.handle_sparql(graph_query(), service, graph: :history),
          {:ok, operation} <-
            (if operation.history_type == HistoryType.Raw do
               {:ok, operation}
@@ -126,7 +126,7 @@ defmodule Ontogen.Operations.HistoryQuery do
   def call(%__MODULE__{} = operation, service) do
     with {:ok, operation} <- with_absolute_range(operation),
          {:ok, query} <- Query.build(operation),
-         {:ok, history_graph} <- Service.handle_sparql(query, service, :history) do
+         {:ok, history_graph} <- Service.handle_sparql(query, service, graph: :history) do
       as_history_type(history_graph, operation)
     end
   end

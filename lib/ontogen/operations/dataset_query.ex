@@ -22,6 +22,6 @@ defmodule Ontogen.Operations.DatasetQuery do
 
   @impl true
   def call(%__MODULE__{}, service) do
-    Service.handle_sparql(graph_query(), service, :dataset)
+    Service.handle_sparql(graph_query(), service, graph: :dataset)
   end
 end

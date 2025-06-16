@@ -30,7 +30,11 @@ defmodule Ontogen.Service do
     end
   end
 
-  def handle_sparql(operation, service, graph, opts \\ []) do
-    Gno.Service.handle_sparql(operation, service, graph, opts)
+  def handle_sparql(operation, service, opts \\ []) do
+    Gno.Service.handle_sparql(operation, service, opts)
+  end
+
+  def graphs(%__MODULE__{repository: %Repository{} = repository}) do
+    Repository.graphs(repository)
   end
 end

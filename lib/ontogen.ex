@@ -8,8 +8,8 @@ defmodule Ontogen do
 
   include_api Ontogen.Operations.BootCommand
   include_api Ontogen.Operations.SetupCommand
+  include_api Ontogen.Operations.TeardownCommand
 
-  include_api Ontogen.Operations.CleanCommand
   include_api Ontogen.Operations.CommitCommand
   include_api Ontogen.Operations.RevertCommand
   include_api Ontogen.Operations.EffectiveChangesetQuery

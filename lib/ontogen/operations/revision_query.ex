@@ -44,6 +44,6 @@ defmodule Ontogen.Operations.RevisionQuery do
     }
     """
     |> Gno.Store.SPARQL.Operation.construct!()
-    |> Service.handle_sparql(service, :dataset)
+    |> Service.handle_sparql(service, graph: :dataset)
   end
 end
