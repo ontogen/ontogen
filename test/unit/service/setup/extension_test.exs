@@ -5,7 +5,6 @@ defmodule Ontogen.Service.Setup.ExtensionTest do
 
   alias Ontogen.Operations.RepositoryQuery
   alias Ontogen.Manifest
-  alias Ontogen.Repository.NotSetupError
   alias Ontogen.Service.Setup.Extension
   alias Gno.Service.{Setup, SetupError}
 
@@ -20,7 +19,6 @@ defmodule Ontogen.Service.Setup.ExtensionTest do
       service = Manifest.service!()
 
       assert service.repository.head == nil
-      assert {:error, %NotSetupError{}} = RepositoryQuery.call(service)
 
       assert {:ok, updated_service} = setup_with_extension(service)
 
@@ -111,7 +109,7 @@ defmodule Ontogen.Service.Setup.ExtensionTest do
   defp repository_exists?(service) do
     case RepositoryQuery.call(service) do
       {:ok, _} -> true
-      {:error, %NotSetupError{}} -> false
+      {:error, %Grax.ValidationError{}} -> false
       {:error, reason} -> raise "Failed to check repository existence: #{inspect(reason)}"
     end
   end

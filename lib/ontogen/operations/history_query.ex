@@ -10,10 +10,10 @@ defmodule Ontogen.Operations.HistoryQuery do
     ]
 
   alias Ontogen.Operations.HistoryQuery.Query
+  alias Ontogen.Operations.GraphQuery
   alias Ontogen.{Commit, HistoryType, Service}
   alias RDF.{Triple, Statement}
 
-  import Gno.QueryUtils, only: [graph_query: 0]
   import RDF.Guards
 
   @full_history_range Commit.Range.new!(:root, :head)
@@ -95,7 +95,7 @@ defmodule Ontogen.Operations.HistoryQuery do
   def call(%__MODULE__{}, {:error, _} = error), do: error
 
   def call(%__MODULE__{subject_type: :dataset, range: @full_history_range} = operation, service) do
-    with {:ok, graph} <- Service.handle_sparql(graph_query(), service, graph: :history),
+    with {:ok, graph} <- GraphQuery.call(service, :history),
          {:ok, operation} <-
            (if operation.history_type == HistoryType.Raw do
               {:ok, operation}
