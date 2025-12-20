@@ -1,10 +1,17 @@
-@prefix : <https://w3id.org/mud#> .
-@prefix og: <https://w3id.org/ontogen#> .
+@prefix : <https://w3id.org/ontogen#> .
+@prefix mud: <https://w3id.org/mud#> .
+@prefix dcatr: <https://w3id.org/dcatr#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 
-[ :this og:Dataset
+[ mud:this dcatr:Dataset
     ; dcterms:title "test dataset"
+    ; dcterms:creator :I
+    ; dcterms:publisher :I
+] .
+
+[ mud:this dcatr:DataGraph
+    ; dcterms:title "test graph"
     ; dcterms:creator :I
     ; dcterms:publisher :I
 ] .

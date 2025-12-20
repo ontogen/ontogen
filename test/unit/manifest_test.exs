@@ -4,7 +4,8 @@ defmodule Ontogen.ManifestTest do
   doctest Ontogen.Manifest
 
   alias Ontogen.Manifest
-  alias Ontogen.{Service, Repository, Dataset, History, Agent, CommitOperation}
+  alias Ontogen.{Service, Repository, History, Agent, CommitOperation}
+  alias DCATR.{DataGraph, RepositoryManifestGraph}
   alias Gno.Store.Adapters.{Oxigraph, Fuseki, GraphDB}
 
   import RDF.Sigils
@@ -14,7 +15,7 @@ defmodule Ontogen.ManifestTest do
   test "manifest/0" do
     assert {:ok,
             %Manifest{
-              graph: %Graph{},
+              dataset: %RDF.Dataset{},
               load_path: _,
               agent: %Agent{
                 name: "Jane Doe",
@@ -22,7 +23,9 @@ defmodule Ontogen.ManifestTest do
               },
               service: %Service{
                 repository: %Repository{
-                  dataset: %Dataset{}
+                  manifest_graph: %RepositoryManifestGraph{},
+                  primary_graph: %DataGraph{},
+                  dataset: %DCATR.Dataset{}
                 },
                 store: %@configured_store_adapter{},
                 commit_operation: %CommitOperation{
@@ -53,7 +56,9 @@ defmodule Ontogen.ManifestTest do
     assert {:ok,
             %Service{
               repository: %Repository{
-                dataset: %Dataset{}
+                manifest_graph: %RepositoryManifestGraph{},
+                primary_graph: %DataGraph{},
+                dataset: %DCATR.Dataset{}
               },
               store: %@configured_store_adapter{}
             }} =
@@ -66,7 +71,12 @@ defmodule Ontogen.ManifestTest do
   end
 
   test "repository/0" do
-    assert {:ok, %Repository{dataset: %Dataset{}}} =
+    assert {:ok,
+            %Repository{
+              manifest_graph: %RepositoryManifestGraph{},
+              primary_graph: %DataGraph{},
+              dataset: %DCATR.Dataset{}
+            }} =
              Manifest.repository()
   end
 
@@ -75,9 +85,14 @@ defmodule Ontogen.ManifestTest do
     assert Manifest.repository(ref: :this) == Manifest.repository()
   end
 
+  test "dataset_id/0,1" do
+    assert %RDF.IRI{} = Manifest.dataset_id()
+    assert Manifest.dataset_id(ref: :this) == Manifest.dataset_id()
+  end
+
   test "dataset/0" do
     assert {:ok,
-            %Dataset{
+            %DCATR.Dataset{
               __additional_statements__: %{
                 ~I<http://purl.org/dc/terms/title> => %{~L"test dataset" => nil}
               }
@@ -148,7 +163,9 @@ defmodule Ontogen.ManifestTest do
                service: %Service{
                  __id__: %RDF.IRI{value: "urn:uuid:" <> _},
                  repository: %Repository{
-                   dataset: %Dataset{}
+                   manifest_graph: %RepositoryManifestGraph{},
+                   primary_graph: %DataGraph{},
+                   dataset: %DCATR.Dataset{}
                  },
                  store: %Gno.Store{}
                },
@@ -176,7 +193,7 @@ defmodule Ontogen.ManifestTest do
     end
 
     test "fails with unknown adapter", %{project_dir: project_dir} do
-      assert {:error, %Gno.Manifest.GeneratorError{}} =
+      assert {:error, %DCATR.Manifest.GeneratorError{}} =
                Manifest.generate(project_dir, adapter: :unknown)
     end
 

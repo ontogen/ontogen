@@ -21,8 +21,9 @@ defmodule Ontogen.NS do
               gnoa: Gno.NS.GnoA,
               mud: Mud,
               rtc: RTC,
-              prov: PROV,
+              dcatr: DCATR,
               dcat: DCAT,
+              prov: PROV,
               skos: SKOS,
               foaf: FOAF
             )

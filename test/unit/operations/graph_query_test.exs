@@ -11,9 +11,9 @@ defmodule Ontogen.Operations.GraphQueryTest do
 
   describe "graph/1" do
     test "returns the specified graph" do
-      assert Ontogen.graph(:dataset) == {:ok, graph()}
+      assert Ontogen.graph(:primary) == {:ok, graph()}
 
-      assert Ontogen.graph(Ontogen.Manifest.dataset_id()) ==
+      assert Ontogen.graph(Ontogen.Manifest.repository!().primary_graph.__id__) ==
                {:ok, graph()}
 
       assert {:ok, %RDF.Graph{}} = Ontogen.graph(:history)

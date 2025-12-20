@@ -3,7 +3,7 @@ import Config
 config :mud,
   i_class: Ontogen.NS.Og.Agent
 
-config :gno,
+config :dcatr,
   env: Mix.env(),
   manifest_type: Ontogen.Manifest,
   load_path: "config/ontogen"

@@ -29,6 +29,6 @@ defmodule OntogenCase do
   end
 
   def clean_manifest_cache(_) do
-    Gno.Manifest.Cache.clear()
+    DCATR.Manifest.Cache.clear()
   end
 end

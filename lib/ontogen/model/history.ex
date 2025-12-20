@@ -7,7 +7,7 @@ defmodule Ontogen.History do
 
   @prefixes RDF.standard_prefixes() |> PrefixMap.merge!(rtc: RTC, og: Og)
 
-  schema Og.History do
+  schema Og.History < DCATR.SystemGraph do
   end
 
   def prefixes, do: @prefixes

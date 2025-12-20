@@ -107,8 +107,8 @@ defmodule Ontogen.Operations.CommitCommandTest do
     expected_add = Proposition.new!(graph())
     message = "Initial commit"
 
-    data_source = dataset() |> Grax.add_additional_statements({EX.p2(), EX.O2})
-    speaker = agent() |> Grax.add_additional_statements({EX.p3(), EX.O3})
+    data_source = Grax.add_additional_statements(dataset(), {EX.p2(), EX.O2})
+    speaker = Grax.add_additional_statements(agent(), {EX.p3(), EX.O3})
 
     speech_act =
       speech_act(

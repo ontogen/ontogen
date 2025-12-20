@@ -2,7 +2,7 @@ defmodule Ontogen.Manifest do
   use Gno.Manifest.Type
   use Grax.Schema
 
-  alias Ontogen.{Agent, Repository, Dataset, History, Service}
+  alias Ontogen.{Agent, Repository, History, Service}
 
   alias Ontogen.NS.Og
 
@@ -15,18 +15,30 @@ defmodule Ontogen.Manifest do
 
   # the og:serviceStore must be set manually to a Store adapter or the generic [ :this og:Store ]
   @service_structure """
-                     #{RDF.turtle_prefixes(og: Og, gno: Gno, "": Mud)}
+                     #{RDF.turtle_prefixes(og: Og, gno: Gno, dcatr: DCATR, "": Mud)}
 
-                     [ :this og:Service
-                         ; og:serviceRepository [ :this og:Repository
-                             ; og:repositoryDataset [ :this og:Dataset ]
+                     _:service-manifest {
+                         [ :this og:Service
+                             ; og:serviceRepository [ :this og:Repository ]
+                             ; gno:serviceCommitOperation [ :this og:CommitOperation ]
+                             ; og:serviceOperator :I
+                         ] .
+                     }
+
+                     _:repository-manifest {
+                         [ :this og:Repository
+                             ; dcatr:repositoryManifestGraph [ :this dcatr:RepositoryManifestGraph ]
+                             ; dcatr:repositoryDataset [ :this dcatr:Dataset ]
+                             ; dcatr:repositoryPrimaryGraph [ :this dcatr:DataGraph ]
                              ; og:repositoryHistory [ :this og:History ]
-                         ]
-                         ; gno:serviceCommitOperation [ :this og:CommitOperation ]
-                         ; og:serviceOperator :I
-                     ] .
+                         ] .
+
+                         [ :this dcatr:Dataset
+                             ; dcatr:dataGraph [ :this dcatr:DataGraph ]
+                         ] .
+                     }
                      """
-                     |> RDF.Turtle.read_string!()
+                     |> RDF.TriG.read_string!()
   def service_structure, do: @service_structure
 
   @impl true
@@ -40,13 +52,22 @@ defmodule Ontogen.Manifest do
 
   @impl true
   def generate(project_dir, opts \\ []) do
-    with :ok <- super(project_dir, opts) do
+    with :ok <- Gno.Manifest.Generator.generate(__MODULE__, project_dir, opts) do
       Mud.setup(project_dir)
     end
   end
 
   @impl true
-  def init_graph(_opts), do: Mud.process(@service_structure)
+  def init_dataset(_opts) do
+    @service_structure
+    |> RDF.Dataset.graphs()
+    |> Enum.reduce_while({:ok, RDF.Dataset.new()}, fn graph, {:ok, dataset} ->
+      case Mud.process(graph) do
+        {:ok, graph} -> {:cont, {:ok, RDF.Dataset.put_graph(dataset, graph)}}
+        {:error, _} = error -> {:halt, error}
+      end
+    end)
+  end
 
   @impl true
   def load_file(file, opts \\ []) do
@@ -56,15 +77,14 @@ defmodule Ontogen.Manifest do
   end
 
   @impl true
-  def load_manifest(
-        %_manifest_type{__id__: _, graph: graph, load_path: _, service: _} = manifest,
-        _opts
-      ) do
-    with {:ok, service} <- service_type().load(graph, service_id(ref: :this), depth: 99),
-         {:ok, agent} <- Agent.load(graph, agent_id(ref: :this), depth: 99) do
-      manifest
-      |> Grax.put!(:agent, agent)
-      |> Grax.put(:service, service)
+  def load_manifest(%_manifest_type{__id__: _, dataset: dataset, load_path: _} = manifest, opts) do
+    opts_with_service_id = Keyword.put(opts, :service_id, service_id(ref: :this))
+
+    with {:ok, manifest} <- super(manifest, opts_with_service_id),
+         {:ok, agent} <-
+           responsible_manifest_graph(:agent, dataset)
+           |> Agent.load(agent_id(ref: :this), depth: 99) do
+      Grax.put(manifest, :agent, agent)
     end
   end
 
@@ -72,7 +92,7 @@ defmodule Ontogen.Manifest do
     agent: Agent,
     service: Service,
     repository: Repository,
-    dataset: Dataset,
+    dataset: DCATR.Dataset,
     history: History
   ]
   |> Enum.each(fn {name, schema} ->
@@ -90,31 +110,17 @@ defmodule Ontogen.Manifest do
           Mud.deref_id!(ref)
       end
     end
-
-    if name not in [:agent, :history] do
-      def unquote(name)(opts \\ []) do
-        case Keyword.pop(opts, :ref) do
-          {nil, opts} ->
-            super(opts)
-
-          {ref, opts} ->
-            with {:ok, %{graph: graph}} <- manifest(opts), do: unquote(schema).deref(ref, graph)
-        end
-      end
-
-      def unquote(bang_name)(opts \\ []) do
-        case unquote(name)(opts) do
-          {:ok, result} -> result
-          {:error, error} -> raise error
-        end
-      end
-    end
   end)
 
   def agent(opts \\ []) do
     case Keyword.pop(opts, :ref) do
-      {nil, opts} -> with {:ok, manifest} <- manifest(opts), do: {:ok, manifest.agent}
-      {ref, opts} -> with {:ok, %{graph: graph}} <- manifest(opts), do: Agent.deref(ref, graph)
+      {nil, opts} ->
+        with {:ok, manifest} <- manifest(opts), do: {:ok, manifest.agent}
+
+      {ref, opts} ->
+        with {:ok, %{dataset: dataset}} <- manifest(opts) do
+          Agent.deref(ref, responsible_manifest_graph(:agent, dataset))
+        end
     end
   end
 
@@ -123,10 +129,52 @@ defmodule Ontogen.Manifest do
   defdelegate user(), to: __MODULE__, as: :agent
   defdelegate user!(), to: __MODULE__, as: :agent!
 
+  def service(opts \\ []) do
+    if Keyword.has_key?(opts, :ref) do
+      with {:ok, %{dataset: manifest_dataset}} <- manifest(opts) do
+        Service.load_from_dataset(manifest_dataset, service_id(opts))
+      end
+    else
+      with {:ok, manifest} <- manifest(opts), do: {:ok, manifest.service}
+    end
+  end
+
+  def service!(opts \\ []), do: bang!(&service/1, [opts])
+
+  def repository(opts \\ []) do
+    case Keyword.pop(opts, :ref) do
+      {nil, opts} ->
+        super(opts)
+
+      {ref, opts} ->
+        with {:ok, %{dataset: manifest_dataset}} <- manifest(opts) do
+          Repository.deref(ref, responsible_manifest_graph(:repository, manifest_dataset))
+        end
+    end
+  end
+
+  def repository!(opts \\ []), do: bang!(&repository/1, [opts])
+
+  def dataset(opts \\ []) do
+    if Keyword.has_key?(opts, :ref) do
+      with {:ok, %{dataset: manifest_dataset}} <- manifest(opts) do
+        responsible_manifest_graph(:dataset, manifest_dataset)
+        |> DCATR.Dataset.load(dataset_id(opts))
+      end
+    else
+      with {:ok, repository} <- repository(opts), do: {:ok, repository.dataset}
+    end
+  end
+
   def history(opts \\ []) do
     case Keyword.pop(opts, :ref) do
-      {nil, opts} -> with {:ok, repository} <- repository(opts), do: {:ok, repository.history}
-      {ref, opts} -> with {:ok, %{graph: graph}} <- manifest(opts), do: History.deref(ref, graph)
+      {nil, opts} ->
+        with {:ok, repository} <- repository(opts), do: {:ok, repository.history}
+
+      {ref, opts} ->
+        with {:ok, %{dataset: manifest_dataset}} <- manifest(opts) do
+          History.deref(ref, responsible_manifest_graph(:history, manifest_dataset))
+        end
     end
   end
 
@@ -140,4 +188,10 @@ defmodule Ontogen.Manifest do
   end
 
   def store!(opts \\ []), do: bang!(&store/1, [opts])
+
+  defp responsible_manifest_graph(resource, dataset)
+       when resource in [:repository, :dataset, :history],
+       do: RDF.Dataset.graph(dataset, DCATR.Manifest.Loader.repository_manifest_graph_name())
+
+  defp responsible_manifest_graph(:agent, dataset), do: RDF.Graph.new(dataset)
 end

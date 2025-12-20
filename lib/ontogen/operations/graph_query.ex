@@ -1,5 +1,5 @@
 defmodule Ontogen.Operations.GraphQuery do
-  use Ontogen.Operation.Query, params: [graph: :dataset]
+  use Ontogen.Operation.Query, params: [graph: :primary]
 
   alias Ontogen.Service
 
@@ -15,7 +15,7 @@ defmodule Ontogen.Operations.GraphQuery do
     def graph!(graph), do: bang!(&graph/1, [graph])
 
     def dataset do
-      graph(:dataset)
+      graph(:primary)
     end
 
     def dataset!, do: bang!(&dataset/0, [])

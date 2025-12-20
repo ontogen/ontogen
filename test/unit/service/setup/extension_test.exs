@@ -99,7 +99,7 @@ defmodule Ontogen.Service.Setup.ExtensionTest do
           {service.repository.__id__, Og.repositoryHistory(), service.repository.history.__id__}
         ),
         service: service,
-        graph: :repo
+        graph: :repository_manifest
       )
 
       assert {:error, _} = Setup.validate(service, extension: Extension)

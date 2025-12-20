@@ -6,6 +6,7 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcatr: <https://w3id.org/dcatr#> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix dct: <http://purl.org/dc/terms/> .
 @prefix rtc: <https://w3id.org/rtc#> .
@@ -87,6 +88,17 @@ og:SpeechAct a rdfs:Class
         ; rdfs:range  og:Proposition
     .
 
+og:CommitOperation a rdfs:Class
+    ; rdfs:subClassOf gno:CommitOperation
+    ; rdfs:label "CommitOperation"
+    ; rdfs:comment "A gno:CommitOperation for Ontogen commits."
+.
+
+og:CommitMiddleware a rdfs:Class
+    ; rdfs:subClassOf gno:CommitMiddleware
+    ; rdfs:label "CommitMiddleware"
+    ; rdfs:comment "A gno:CommitMiddleware for Ontogen commits."
+.
 
 og:Commit a rdfs:Class
     ; rdfs:subClassOf prov:Activity, gno:Commit
@@ -196,19 +208,13 @@ og:Agent a rdfs:Class
     .
 
 og:Repository a rdfs:Class
-    ; rdfs:subClassOf dcat:Catalog, gno:Repository
+    ; rdfs:subClassOf dcat:Catalog, dcatr:Repository
     ; rdfs:label "Repository"
     ; rdfs:comment "Represents an Ontogen repository, which is a DCAT catalog containing three components: 1) the version-controlled dataset, 2) the history graph, and 3) an implicit metadata graph. The metadata graph contains the DCAT catalog description of the repository itself, including descriptions of the dataset and history graphs."
 .
 
-    og:repositoryDataset a rdf:Property
-        ; rdfs:subPropertyOf dcat:dataset, gno:repositoryDataset
-        ; rdfs:domain og:Repository
-        ; rdfs:range  og:Dataset
-    .
-
     og:repositoryHistory a rdf:Property
-        ; rdfs:subPropertyOf dcat:dataset
+        ; rdfs:subPropertyOf dcatr:repositorySystemGraph
         ; rdfs:domain og:Repository
         ; rdfs:range  og:History
     .
@@ -218,15 +224,8 @@ og:Repository a rdfs:Class
         ; rdfs:range  og:Commit
     .
 
-og:Dataset a rdfs:Class
-    ; rdfs:subClassOf dcat:Dataset, prov:Entity, gno:Dataset
-    ; rdfs:label "Dataset"
-    ; rdfs:comment "Represents the version-controlled RDF dataset within an Ontogen repository. It contains the actual data being managed and versioned by Ontogen."
-.
-
-
 og:History a rdfs:Class
-    ; rdfs:subClassOf prov:Bundle
+    ; rdfs:subClassOf dcatr:SystemGraph, prov:Bundle
     ; rdfs:label "History"
     ; rdfs:comment "Represents the provenance history graph of an Ontogen repository. It contains all SpeechActs and Commits that have led to the current state of the dataset."
 .
@@ -240,7 +239,7 @@ og:Service a rdfs:Class
 .
 
     og:serviceRepository a rdf:Property
-        ; rdfs:subPropertyOf dcat:servesDataset, gno:serviceRepository
+        ; rdfs:subPropertyOf dcat:servesDataset, dcatr:serviceRepository
         ; rdfs:domain og:Service
         ; rdfs:range  og:Repository
     .

@@ -67,7 +67,7 @@ defmodule Ontogen.CommitMiddleware do
   def handle_state(:applying_changes, _middleware, processor) do
     with {:ok, processor} <-
            Processor.add_additional_changes(processor, :history, add: processor.metadata) do
-      Processor.add_additional_changes(processor, :repo,
+      Processor.add_additional_changes(processor, :repository_manifest,
         add: processor.service.repository.__id__ |> Og.head(Processor.commit_id(processor)),
         remove: processor.service.repository.__id__ |> Og.head(head_id(processor))
       )

@@ -1,12 +1,13 @@
 defmodule Ontogen.Service do
-  use Grax.Schema
+  use DCATR.Service.Type
   use Mud.Referencable
   alias Ontogen.{Repository, Agent}
   alias Ontogen.NS.Og
 
   schema Og.Service < Gno.Service do
     # we're inheriting store from Gno.Service
-    link repository: Og.serviceRepository(), type: Repository, required: true
+    link repository: Og.serviceRepository(), type: Repository, required: true, depth: false
+
     link operator: Og.serviceOperator(), type: Agent, required: true
 
     link commit_operation: Gno.serviceCommitOperation(),
@@ -32,9 +33,5 @@ defmodule Ontogen.Service do
 
   def handle_sparql(operation, service, opts \\ []) do
     Gno.Service.handle_sparql(operation, service, opts)
-  end
-
-  def graphs(%__MODULE__{repository: %Repository{} = repository}) do
-    Repository.graphs(repository)
   end
 end

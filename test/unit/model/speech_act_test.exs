@@ -60,7 +60,7 @@ defmodule Ontogen.SpeechActTest do
                SpeechAct.new(
                  add: graph(),
                  speaker: agent(),
-                 data_source: id(:dataset),
+                 data_source: id(:primary_graph),
                  time: datetime()
                )
 
@@ -69,7 +69,7 @@ defmodule Ontogen.SpeechActTest do
       assert speech_act.add == proposition()
       assert speech_act.time == datetime()
       assert speech_act.speaker == agent()
-      assert speech_act.data_source == id(:dataset)
+      assert speech_act.data_source == id(:primary_graph)
     end
 
     test "uses proper defaults" do
@@ -83,7 +83,7 @@ defmodule Ontogen.SpeechActTest do
     test "without statements" do
       assert SpeechAct.new(
                speaker: agent(),
-               data_source: id(:dataset),
+               data_source: id(:primary_graph),
                time: datetime()
              ) ==
                {:error, InvalidChangesetError.exception(reason: :empty)}

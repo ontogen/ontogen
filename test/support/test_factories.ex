@@ -9,7 +9,6 @@ defmodule Ontogen.TestFactories do
 
   alias Ontogen.{
     Repository,
-    Dataset,
     History,
     Agent,
     Store,
@@ -32,6 +31,9 @@ defmodule Ontogen.TestFactories do
   def id(:repository), do: ~I<http://example.com/test/repo>
   def id(:repo), do: id(:repository)
   def id(:dataset), do: ~I<http://example.com/test/dataset>
+  def id(:primary_graph), do: ~I<http://example.com/test/primary_graph>
+  def id(:data_graph), do: ~I<http://example.com/test/data_graph>
+  def id(:graph), do: ~I<http://example.com/test/graph>
   def id(:history), do: ~I<http://example.com/test/history>
   def id(:store), do: ~I<http://example.com/Store>
   def id(:proposition), do: proposition().__id__
@@ -161,10 +163,23 @@ defmodule Ontogen.TestFactories do
   def dataset(id \\ :dataset, attrs \\ []) do
     id
     |> id()
-    |> Dataset.build!(dataset_attrs(attrs))
+    |> DCATR.Dataset.build!(dataset_attrs(attrs))
   end
 
   def dataset_attrs(attrs \\ []) do
+    [
+      graphs: Keyword.get(attrs, :graphs, data_graph()) |> List.wrap()
+    ]
+    |> Keyword.merge(attrs)
+  end
+
+  def data_graph(id \\ :primary_graph, attrs \\ []) do
+    id
+    |> id()
+    |> DCATR.DataGraph.build!(data_graph_attrs(attrs))
+  end
+
+  def data_graph_attrs(attrs \\ []) do
     []
     |> Keyword.merge(attrs)
   end

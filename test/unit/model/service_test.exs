@@ -6,6 +6,21 @@ defmodule Ontogen.ServiceTest do
   alias Ontogen.{Service, Manifest}
   alias Gno.Store.SPARQL.Operation
 
+  test "graph/1" do
+    assert Service.graph(Manifest.service!(), :history) == Manifest.history!()
+    assert Service.graph(Manifest.service!(), Manifest.history_id()) == Manifest.history!()
+  end
+
+  test "has_graph?/2" do
+    assert Service.has_graph?(Manifest.service!(), :history)
+    assert Service.has_graph?(Manifest.service!(), Manifest.history_id())
+  end
+
+  test "graph_name/2" do
+    assert Service.graph_name(Manifest.service!(), :history) == Manifest.history_id()
+    assert Service.graph_name(Manifest.service!(), Manifest.history_id()) == Manifest.history_id()
+  end
+
   describe "handle/4" do
     test "default graph" do
       assert EX.S
@@ -35,7 +50,7 @@ defmodule Ontogen.ServiceTest do
              |> EX.p(EX.O)
              |> RDF.graph()
              |> Operation.insert_data!()
-             |> Service.handle_sparql(Manifest.service!(), graph: :dataset) ==
+             |> Service.handle_sparql(Manifest.service!(), graph: :primary) ==
                :ok
 
       assert {:ok,
@@ -50,7 +65,7 @@ defmodule Ontogen.ServiceTest do
               }} =
                "SELECT * WHERE { ?s ?p ?o . }"
                |> Operation.select!()
-               |> Service.handle_sparql(Manifest.service!(), graph: :dataset)
+               |> Service.handle_sparql(Manifest.service!(), graph: :primary)
 
       graph =
         EX.S2
@@ -59,12 +74,12 @@ defmodule Ontogen.ServiceTest do
 
       assert graph
              |> Operation.insert_data!()
-             |> Service.handle_sparql(Manifest.service!(), graph: :repo) ==
+             |> Service.handle_sparql(Manifest.service!(), graph: :repository_manifest) ==
                :ok
 
       assert "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o . }"
              |> Operation.construct!()
-             |> Service.handle_sparql(Manifest.service!(), graph: :repo) ==
+             |> Service.handle_sparql(Manifest.service!(), graph: :repository_manifest) ==
                {:ok, graph}
     end
   end

@@ -20,6 +20,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
     versions of Ontogen will now generate different URIs. 
     This means ...
 - Migration to the extracted Gno library
+- Migration to the extracted DCAT-R library
 - By default, no global configuration files are configured out-of-the-box anymore
   in the Ontogen library. Global configuration paths must now be explicitly 
   configured via the `:gno` application's `load_path` configuration. Note, that 
