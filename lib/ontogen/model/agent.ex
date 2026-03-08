@@ -32,7 +32,7 @@ defmodule Ontogen.Agent do
           nil
       end
 
-    {:ok, %__MODULE__{agent | email: mbox}}
+    {:ok, %{agent | email: mbox}}
   end
 
   def on_load(agent, _, _), do: {:ok, agent}

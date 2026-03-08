@@ -140,9 +140,9 @@ defmodule Ontogen.Commit.Range do
   defp update_commit_ids(_range, []),
     do: {:error, InvalidCommitRangeError.exception(reason: :out_of_range)}
 
-  defp update_commit_ids(range, [target | _] = chain) do
+  defp update_commit_ids(%__MODULE__{} = range, [target | _] = chain) do
     with {:ok, commit_ids, base} <- to_base(chain, range.base) do
-      {:ok, %__MODULE__{range | commit_ids: commit_ids, base: base, target: target}}
+      {:ok, %{range | commit_ids: commit_ids, base: base, target: target}}
     end
   end
 

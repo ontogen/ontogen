@@ -40,7 +40,7 @@ defmodule Ontogen.CommitOperation do
            CommitMiddleware.init_ontogen_command(processor, processor.input),
          {:ok, changeset} <- Gno.Changeset.new(commit_command.changes) do
       {:ok,
-       %Processor{processor | changeset: changeset}
+       %{processor | changeset: changeset}
        |> Processor.set_commit_id(@preliminary_commit_id, false)}
     end
   end

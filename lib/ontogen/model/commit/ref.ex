@@ -84,7 +84,7 @@ defmodule Ontogen.Commit.Ref do
 
   def to_string(%__MODULE__{ref: :head, offset: 0}), do: "HEAD"
   def to_string(%__MODULE__{ref: :head, offset: offset}), do: "HEAD~#{offset}"
-  def to_string(%__MODULE__{ref: %IRI{value: @sha_iri_prefix <> hash}}), do: hash
+  def to_string(%__MODULE__{ref: %IRI{value: @sha_iri_prefix <> hash}, offset: 0}), do: hash
 
   def to_string(%__MODULE__{ref: %IRI{value: @sha_iri_prefix <> hash}, offset: offset}),
     do: "#{hash}~#{offset}"

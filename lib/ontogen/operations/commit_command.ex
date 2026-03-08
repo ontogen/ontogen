@@ -29,7 +29,7 @@ defmodule Ontogen.Operations.CommitCommand do
 
     with {:ok, command} <- do_new(extract_speech_act(args), Keyword.pop(args, :revert)) do
       {:ok,
-       %__MODULE__{
+       %{
          command
          | additional_metadata: additional_metadata && RDF.graph(additional_metadata),
            on_no_effective_changes: no_effective_change_handler
