@@ -21,7 +21,7 @@ defmodule Ontogen.Service.Setup.Extension do
     ASK {
       { <#{service.repository.__id__}> dcatr:repositoryDataset ?dataset . }
       UNION
-      { <#{service.repository.__id__}> dcatr:repositoryPrimaryGraph ?graph . }
+      { <#{service.repository.__id__}> dcatr:repositoryDataGraph ?graph . }
     }
     """
     |> Operation.ask!()
@@ -47,7 +47,7 @@ defmodule Ontogen.Service.Setup.Extension do
       }
       UNION
       {
-        <#{service.repository.__id__}> dcatr:repositoryPrimaryGraph ?graph .
+        <#{service.repository.__id__}> dcatr:repositoryDataGraph ?graph .
         ?graph a dcatr:DataGraph .
       }
     }
