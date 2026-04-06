@@ -77,10 +77,12 @@ defmodule Ontogen.ServiceTest do
              |> Service.handle_sparql(Manifest.service!(), graph: :repository_manifest) ==
                :ok
 
-      assert "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o . }"
-             |> Operation.construct!()
-             |> Service.handle_sparql(Manifest.service!(), graph: :repository_manifest) ==
-               {:ok, graph}
+      assert_graph_equal "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o . }"
+                         |> Operation.construct!()
+                         |> Service.handle_sparql(Manifest.service!(),
+                           graph: :repository_manifest
+                         ),
+                         {:ok, graph}
     end
   end
 end

@@ -11,8 +11,9 @@
     # store selection
 
 #    ; gno:serviceStore [ :this gno:Store ]
-#    ; gno:serviceStore [ :this gnoa:Oxigraph ]
     ; gno:serviceStore [ :this gnoa:Fuseki ]
+#    ; gno:serviceStore [ :this gnoa:Oxigraph ]
+#    ; gno:serviceStore [ :this gnoa:GraphDB ]
 
     #################################################
     # metadata

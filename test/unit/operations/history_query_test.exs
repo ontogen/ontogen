@@ -13,41 +13,41 @@ defmodule Ontogen.Operations.HistoryQueryTest do
     test "with defaults, it returns the full history graph" do
       history = init_history()
 
-      assert Ontogen.history() ==
-               {:ok,
-                RDF.graph(Enum.map(history, &Grax.to_rdf!(&1)))
-                |> Graph.add_prefixes(RDF.standard_prefixes())
-                |> Graph.add_prefixes(og: Og, rtc: RTC)}
+      assert_graph_equal Ontogen.history(),
+                         {:ok,
+                          RDF.graph(Enum.map(history, &Grax.to_rdf!(&1)))
+                          |> Graph.add_prefixes(RDF.standard_prefixes())
+                          |> Graph.add_prefixes(og: Og, rtc: RTC)}
     end
 
     test "with :resource" do
       history = init_resource_history()
 
-      assert Ontogen.history(resource: EX.S1) ==
-               {:ok,
-                RDF.graph(Enum.map(history, &Grax.to_rdf!(&1)))
-                |> Graph.add_prefixes(RDF.standard_prefixes())
-                |> Graph.add_prefixes(og: Og, rtc: RTC)}
+      assert_graph_equal Ontogen.history(resource: EX.S1),
+                         {:ok,
+                          RDF.graph(Enum.map(history, &Grax.to_rdf!(&1)))
+                          |> Graph.add_prefixes(RDF.standard_prefixes())
+                          |> Graph.add_prefixes(og: Og, rtc: RTC)}
     end
 
     test "with :statement" do
       history = init_statement_history()
 
-      assert Ontogen.history(statement: statement_of_interest()) ==
-               {:ok,
-                RDF.graph(Enum.map(history, &Grax.to_rdf!(&1)))
-                |> Graph.add_prefixes(RDF.standard_prefixes())
-                |> Graph.add_prefixes(og: Og, rtc: RTC)}
+      assert_graph_equal Ontogen.history(statement: statement_of_interest()),
+                         {:ok,
+                          RDF.graph(Enum.map(history, &Grax.to_rdf!(&1)))
+                          |> Graph.add_prefixes(RDF.standard_prefixes())
+                          |> Graph.add_prefixes(og: Og, rtc: RTC)}
     end
 
     test "with :statement and subject-predicate-pair on :statement" do
       history = init_predication_history()
 
-      assert Ontogen.history(statement: predication_of_interest()) ==
-               {:ok,
-                RDF.graph(Enum.map(history, &Grax.to_rdf!(&1)))
-                |> Graph.add_prefixes(RDF.standard_prefixes())
-                |> Graph.add_prefixes(og: Og, rtc: RTC)}
+      assert_graph_equal Ontogen.history(statement: predication_of_interest()),
+                         {:ok,
+                          RDF.graph(Enum.map(history, &Grax.to_rdf!(&1)))
+                          |> Graph.add_prefixes(RDF.standard_prefixes())
+                          |> Graph.add_prefixes(og: Og, rtc: RTC)}
     end
   end
 

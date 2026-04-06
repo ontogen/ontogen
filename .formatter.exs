@@ -1,6 +1,7 @@
 locals_without_parens = [
   api: 1,
-  include_api: 1
+  include_api: 1,
+  assert_graph_equal: 2
 ]
 
 [

@@ -11,10 +11,10 @@ defmodule Ontogen.Operations.GraphQueryTest do
 
   describe "graph/1" do
     test "returns the specified graph" do
-      assert Ontogen.graph(:primary) == {:ok, graph()}
+      assert_graph_equal Ontogen.graph(:primary), {:ok, graph()}
 
-      assert Ontogen.graph(Ontogen.Manifest.repository!().primary_graph.__id__) ==
-               {:ok, graph()}
+      assert_graph_equal Ontogen.graph(Ontogen.Manifest.repository!().primary_graph.__id__),
+                         {:ok, graph()}
 
       assert {:ok, %RDF.Graph{}} = Ontogen.graph(:history)
     end
@@ -22,7 +22,7 @@ defmodule Ontogen.Operations.GraphQueryTest do
 
   describe "dataset/0" do
     test "returns the dataset" do
-      assert Ontogen.dataset() == {:ok, graph()}
+      assert_graph_equal Ontogen.dataset(), {:ok, graph()}
     end
   end
 end

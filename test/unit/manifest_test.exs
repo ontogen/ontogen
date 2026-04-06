@@ -190,6 +190,13 @@ defmodule Ontogen.ManifestTest do
 
       assert {:ok, %Manifest{service: %Service{store: %Oxigraph{}}}} =
                Manifest.manifest(load_path: manifest_dir, reload: true)
+
+      File.rm_rf!(manifest_dir)
+
+      assert :ok = Manifest.generate(project_dir, adapter: "GraphDB")
+
+      assert {:ok, %Manifest{service: %Service{store: %GraphDB{}}}} =
+               Manifest.manifest(load_path: manifest_dir, reload: true)
     end
 
     test "fails with unknown adapter", %{project_dir: project_dir} do

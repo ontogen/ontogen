@@ -18,6 +18,7 @@
 		<%= unless @adapter == nil, do: "#" %>; gno:serviceStore [ :this gno:Store ]
 		<%= unless @adapter == Gno.Store.Adapters.Oxigraph, do: "#" %>; gno:serviceStore [ :this gnoa:Oxigraph ]
 		<%= unless @adapter == Gno.Store.Adapters.Fuseki, do: "#" %>; gno:serviceStore [ :this gnoa:Fuseki ]
+		<%= unless @adapter == Gno.Store.Adapters.GraphDB, do: "#" %>; gno:serviceStore [ :this gnoa:GraphDB ]
 
     #################################################
     # metadata

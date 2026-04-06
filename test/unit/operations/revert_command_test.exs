@@ -64,13 +64,13 @@ defmodule Ontogen.Operations.RevertCommandTest do
       assert Ontogen.repository!(stored: true) == Ontogen.repository!() |> flatten_property(:head)
 
       # inserts the uttered statements
-      assert Ontogen.dataset() ==
-               {:ok,
-                RDF.graph([
-                  EX.S2 |> EX.p2(42, "Foo"),
-                  {EX.S3, EX.p3(), "foo"},
-                  {EX.S4, EX.p4(), EX.O4}
-                ])}
+      assert_graph_equal Ontogen.dataset(),
+                         {:ok,
+                          RDF.graph([
+                            EX.S2 |> EX.p2(42, "Foo"),
+                            {EX.S3, EX.p3(), "foo"},
+                            {EX.S4, EX.p4(), EX.O4}
+                          ])}
 
       # inserts the provenance
       assert Ontogen.log() ==
@@ -99,12 +99,12 @@ defmodule Ontogen.Operations.RevertCommandTest do
       assert Ontogen.head() == revert2
 
       # inserts the uttered statements
-      assert Ontogen.dataset() ==
-               {:ok,
-                RDF.graph([
-                  EX.S1 |> EX.p1(EX.O1),
-                  EX.S2 |> EX.p2(42, "Foo")
-                ])}
+      assert_graph_equal Ontogen.dataset(),
+                         {:ok,
+                          RDF.graph([
+                            EX.S1 |> EX.p1(EX.O1),
+                            EX.S2 |> EX.p2(42, "Foo")
+                          ])}
 
       # inserts the provenance
       assert Ontogen.log() ==
@@ -129,7 +129,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
       assert Ontogen.head() == revert3
 
       # inserts the uttered statements
-      assert Ontogen.dataset!() == original_dataset
+      assert_graph_equal Ontogen.dataset!(), original_dataset
 
       # inserts the provenance
       assert Ontogen.log() ==
@@ -146,7 +146,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
       assert Ontogen.head() == revert4
 
       # inserts the uttered statements
-      assert Ontogen.dataset() == {:ok, RDF.graph()}
+      assert_graph_equal Ontogen.dataset(), {:ok, RDF.graph()}
 
       # inserts the provenance
       assert Ontogen.log() ==
@@ -183,13 +183,13 @@ defmodule Ontogen.Operations.RevertCommandTest do
       assert Ontogen.repository!(stored: true) == Ontogen.repository!() |> flatten_property(:head)
 
       # inserts the uttered statements
-      assert Ontogen.dataset() ==
-               {:ok,
-                RDF.graph([
-                  EX.S1 |> EX.p1(EX.O1),
-                  EX.S2 |> EX.p2(42, "Foo"),
-                  {EX.S5, EX.p5(), EX.O5}
-                ])}
+      assert_graph_equal Ontogen.dataset(),
+                         {:ok,
+                          RDF.graph([
+                            EX.S1 |> EX.p1(EX.O1),
+                            EX.S2 |> EX.p2(42, "Foo"),
+                            {EX.S5, EX.p5(), EX.O5}
+                          ])}
 
       # inserts the provenance
       assert Ontogen.log() ==
@@ -263,7 +263,7 @@ defmodule Ontogen.Operations.RevertCommandTest do
       assert revert2.reverted_base_commit == revert1.parent
       assert revert2.reverted_target_commit == revert1.__id__
 
-      assert Ontogen.dataset!() == original_dataset
+      assert_graph_equal Ontogen.dataset!(), original_dataset
     end
 
     test "with commit not part of the history" do

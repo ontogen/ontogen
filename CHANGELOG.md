@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 ### Added
 
 - Mix task `og.setup` for setting up the repository on the configured store
+- Support for GraphDB
 
 ### Changed
 
@@ -26,7 +27,6 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
   configured via the `:gno` application's `load_path` configuration. Note, that 
   the Ontogen CLI still supports the global configuration paths 
   (see the CHANGELOG of the CLI).
-
 
 
 [Compare v0.1.2...HEAD](https://github.com/ontogen/ontogen/compare/v0.1.2...HEAD)

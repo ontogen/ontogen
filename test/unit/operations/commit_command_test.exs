@@ -171,16 +171,16 @@ defmodule Ontogen.Operations.CommitCommandTest do
       assert DateTime.diff(DateTime.utc_now(), commit.speech_act.time, :second) <= 1
 
       # inserts the provenance
-      assert Ontogen.history!() ==
-               RDF.graph(
-                 [
-                   commit,
-                   expected_add,
-                   Manifest.user!()
-                 ]
-                 |> Enum.map(&Grax.to_rdf!/1),
-                 prefixes: History.prefixes()
-               )
+      assert_graph_equal Ontogen.history!(),
+                         RDF.graph(
+                           [
+                             commit,
+                             expected_add,
+                             Manifest.user!()
+                           ]
+                           |> Enum.map(&Grax.to_rdf!/1),
+                           prefixes: History.prefixes()
+                         )
     end
 
     test "with explicit speech_act" do
@@ -556,9 +556,9 @@ defmodule Ontogen.Operations.CommitCommandTest do
     assert Ontogen.repository!(stored: true) == Ontogen.repository!() |> flatten_property(:head)
 
     # inserts the statements
-    assert Ontogen.dataset!() == dataset
+    assert_graph_equal Ontogen.dataset!(), dataset
 
     # inserts the provenance
-    assert Ontogen.history!() == RDF.graph(history, prefixes: History.prefixes())
+    assert_graph_equal Ontogen.history!(), RDF.graph(history, prefixes: History.prefixes())
   end
 end

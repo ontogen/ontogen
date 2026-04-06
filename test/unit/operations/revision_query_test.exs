@@ -4,38 +4,38 @@ defmodule Ontogen.Operations.RevisionQueryTest do
   doctest Ontogen.Operations.RevisionQuery
 
   test "on a clean repo without commits" do
-    assert Ontogen.revision(EX.S1) ==
-             {:ok, RDF.graph()}
+    assert_graph_equal Ontogen.revision(EX.S1),
+                       {:ok, RDF.graph()}
   end
 
   test "a single resource" do
     init_history()
 
-    assert Ontogen.revision!(EX.S1) ==
-             RDF.graph([
-               EX.S1
-               |> EX.p2(EX.O2)
-             ])
+    assert_graph_equal Ontogen.revision!(EX.S1),
+                       RDF.graph([
+                         EX.S1
+                         |> EX.p2(EX.O2)
+                       ])
   end
 
   test "non-existing resource" do
     init_history()
 
-    assert Ontogen.revision!(EX.NonExisting) == RDF.graph()
+    assert_graph_equal Ontogen.revision!(EX.NonExisting), RDF.graph()
   end
 
   test "multiple resources" do
     init_history()
 
-    assert Ontogen.revision!([EX.S1, EX.S2, EX.S3, EX.NonExisting]) ==
-             RDF.graph([
-               EX.S1
-               |> EX.p2(EX.O2),
-               EX.S2
-               |> EX.p2(EX.O2),
-               EX.S3
-               |> EX.p3(["foo", "bar"])
-             ])
+    assert_graph_equal Ontogen.revision!([EX.S1, EX.S2, EX.S3, EX.NonExisting]),
+                       RDF.graph([
+                         EX.S1
+                         |> EX.p2(EX.O2),
+                         EX.S2
+                         |> EX.p2(EX.O2),
+                         EX.S3
+                         |> EX.p3(["foo", "bar"])
+                       ])
   end
 
   defp init_history do
